@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foundation and Goals Assessment - Market Entry Readiness</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .lucide-icon {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        /* Laptop-optimized textarea styles */
+        .laptop-textarea {
+            min-height: 80px;
+            max-height: 120px;
+            transition: max-height 0.3s ease;
+            resize: none;
+        }
+        .laptop-textarea:focus {
+            max-height: 200px;
+        }
+        /* Collapsible import section */
+        .import-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .import-content.expanded {
+            max-height: 500px;
+        }
+        /* Side-by-side responsive layout */
+        @media (max-width: 768px) {
+            .laptop-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Progress Code System - Encoding/Decoding Functions
+        const encodeProgressCode = (workshopData) => {
+            try {
+                const jsonString = JSON.stringify(workshopData);
+                const base64 = btoa(jsonString);
+                return `GSAP2025-${base64}`;
+            } catch (error) {
+                console.error('Error encoding progress code:', error);
+                return null;
+            }
+        };
+
+        const decodeProgressCode = (code) => {
+            try {
+                // First, clean the code of any line breaks and whitespace
+                const cleanedCode = code
+                    .trim()
+                    .split('\n')           // Split by line breaks
+                    .join('')              // Join back together without breaks
+                    .replace(/\s+/g, '');  // Remove any remaining whitespace
+                
+                let base64;
+                if (cleanedCode.startsWith('GSAP2025-')) {
+                    // Standard format with prefix
+                    base64 = cleanedCode.substring(9);
+                } else if (cleanedCode.length > 0) {
+                    // Raw base64 without prefix (legacy test files)
+                    base64 = cleanedCode;
+                } else {
+                    throw new Error('Invalid progress code format');
+                }
+                
+                // Validate base64 characters
+                const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+                if (!base64Regex.test(base64)) {
+                    console.error('Invalid base64 characters detected');
+                    console.error('Base64 sample:', base64.substring(0, 100));
+                    throw new Error('Progress code contains invalid characters');
+                }
+                
+                console.log('Base64 length:', base64.length);
+                console.log('Base64 ends with:', base64.substring(base64.length - 10));
+                
+                const jsonString = atob(base64);
+                console.log('Decoded JSON length:', jsonString.length);
+                console.log('JSON preview:', jsonString.substring(0, 200));
+                
+                const parsed = JSON.parse(jsonString);
+                console.log('Parsed structure:', Object.keys(parsed));
+                
+                return parsed;
+            } catch (error) {
+                console.error('Decode error:', error.message);
+                console.error('Full error:', error);
+                return null;
+            }
+        };
+
+        // Cross-browser clipboard copy with Safari fallback
+        const copyToClipboard = async (text) => {
+            try {
+                await navigator.clipboard.writeText(text);
+                return true;
+            } catch (err) {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    return true;
+                } catch (err) {
+                    console.error('Fallback copy failed:', err);
+                    return false;
+                } finally {
+                    document.body.removeChild(textArea);
+                }
+            }
+        };
+
+        // Icon components
+        const Building = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect width="16" height="20" x="4" y="2" rx="2" ry="2"/>
+                <path d="M9 22v-4h6v4"/>
+                <path d="M8 6h.01"/>
+                <path d="M16 6h.01"/>
+                <path d="M12 6h.01"/>
+                <path d="M12 10h.01"/>
+                <path d="M12 14h.01"/>
+                <path d="M16 10h.01"/>
+                <path d="M16 14h.01"/>
+                <path d="M8 10h.01"/>
+                <path d="M8 14h.01"/>
+            </svg>
+        );
+
+        const Target = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="6"/>
+                <circle cx="12" cy="12" r="2"/>
+            </svg>
+        );
+
+        const TrendingUp = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="22,7 13.5,15.5 8.5,10.5 2,17"/>
+                <polyline points="16,7 22,7 22,13"/>
+            </svg>
+        );
+
+        const CheckCircle = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22,4 12,14.01 9,11.01"/>
+            </svg>
+        );
+
+        const AlertTriangle = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+        );
+
+        const Clock = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12,6 12,12 16,14"/>
+            </svg>
+        );
+
+        const FileText = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14,2 14,8 20,8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10,9 9,9 8,9"/>
+            </svg>
+        );
+
+        const Copy = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                <path d="M4 16c-1.1 0-2-.9-2 2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+            </svg>
+        );
+
+        const ChevronDown = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="6,9 12,15 18,9"/>
+            </svg>
+        );
+
+        const ChevronRight = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="9,18 15,12 9,6"/>
+            </svg>
+        );
+
+        const MarketEntryActivity1 = () => {
+            const [currentStep, setCurrentStep] = useState(1);
+            
+            // Current Position Assessment state
+            const [strengths, setStrengths] = useState(['', '', '']);
+            const [limitations, setLimitations] = useState(['', '', '']);
+            
+            // Success Metrics state
+            const [activeTab, setActiveTab] = useState('6months');
+            const [sixMonthMetrics, setSixMonthMetrics] = useState(['', '', '']);
+            const [sixMonthTargets, setSixMonthTargets] = useState(['', '', '']);
+            const [twelveMonthMetrics, setTwelveMonthMetrics] = useState(['', '', '']);
+            const [twelveMonthTargets, setTwelveMonthTargets] = useState(['', '', '']);
+            
+            // Progress Code System state
+            const [workshopData, setWorkshopData] = useState({
+                version: "1.0",
+                createdAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString(),
+                day1: {},
+                day2_1: {},
+                day2_2: {},
+                day3: {}
+            });
+            const [showImportSection, setShowImportSection] = useState(true);
+            const [importExpanded, setImportExpanded] = useState(false);
+            const [importedContext, setImportedContext] = useState(null);
+
+            // Reset function
+            const resetActivity = () => {
+                setStrengths(['', '', '']);
+                setLimitations(['', '', '']);
+                setSixMonthMetrics(['', '', '']);
+                setSixMonthTargets(['', '', '']);
+                setTwelveMonthMetrics(['', '', '']);
+                setTwelveMonthTargets(['', '', '']);
+                setImportedContext(null);
+                setShowImportSection(true);
+                setImportExpanded(false);
+                setCurrentStep(1);
+                setActiveTab('6months');
+                setWorkshopData({
+                    version: "1.0",
+                    createdAt: new Date().toISOString(),
+                    lastUpdated: new Date().toISOString(),
+                    day1: {},
+                    day2_1: {},
+                    day2_2: {},
+                    day3: {}
+                });
+            };
+
+            // Validation helpers
+            const isSection1Complete = () => {
+                const validStrengths = strengths.filter(s => s.trim().length >= 10).length;
+                const validLimitations = limitations.filter(l => l.trim().length >= 10).length;
+                return validStrengths >= 2 && validLimitations >= 2;
+            };
+
+            const isSection2Complete = () => {
+                const valid6MonthPairs = sixMonthMetrics.filter((m, i) => 
+                    m.trim().length >= 5 && sixMonthTargets[i].trim().length >= 5
+                ).length;
+                const valid12MonthPairs = twelveMonthMetrics.filter((m, i) => 
+                    m.trim().length >= 5 && twelveMonthTargets[i].trim().length >= 5
+                ).length;
+                return valid6MonthPairs >= 2 && valid12MonthPairs >= 2;
+            };
+
+            const isActivityComplete = () => isSection1Complete() && isSection2Complete();
+
+            // Handle import
+            const handleImport = (input) => {
+                if (input && input.startFresh) {
+                    setShowImportSection(false);
+                    return { success: true };
+                }
+                
+                if (input && input.hideImportSection) {
+                    setShowImportSection(false);
+                    return { success: true };
+                }
+                
+                // Clean the progress code input thoroughly
+                const cleanedCode = input
+                    .trim()                    // Remove leading/trailing whitespace
+                    .replace(/\s+/g, '')       // Remove ALL whitespace including line breaks
+                    .replace(/[\r\n]+/g, '');  // Extra insurance against newlines
+                
+                console.log('Attempting to import code:', cleanedCode.substring(0, 50) + '...'); // Debug log
+                
+                const decoded = decodeProgressCode(cleanedCode);
+                if (!decoded) {
+                    console.error('Failed to decode:', cleanedCode); // Debug log
+                    return { success: false, error: 'Invalid progress code. Please check that you copied the entire code correctly.' };
+                }
+                
+                setWorkshopData(decoded);
+                setImportedContext(decoded);
+                
+                // Handle different data structures (legacy vs current)
+                const workshops = decoded.workshops || decoded;
+                
+                // Auto-populate based on previous workshop data
+                if (workshops.day1?.problemStatement) {
+                    // Use problem statement to suggest initial strengths
+                    const problemSuggestion = `Strong product-market fit: ${workshops.day1.problemStatement.substring(0, 100)}...`;
+                    setStrengths(prev => [problemSuggestion, prev[1], prev[2]]);
+                }
+                
+                return { success: true };
+            };
+
+            // Update workshop data when activity completes
+            useEffect(() => {
+                if (isActivityComplete()) {
+                    const updatedData = {
+                        ...workshopData,
+                        lastUpdated: new Date().toISOString(),
+                        day3: {
+                            ...workshopData.day3,
+                            activity1: {
+                                currentPosition: {
+                                    strengths: strengths.filter(s => s.trim()),
+                                    limitations: limitations.filter(l => l.trim())
+                                },
+                                successMetrics: {
+                                    sixMonthTargets: {
+                                        metrics: sixMonthMetrics.filter(m => m.trim()),
+                                        targets: sixMonthTargets.filter(t => t.trim())
+                                    },
+                                    twelveMonthTargets: {
+                                        metrics: twelveMonthMetrics.filter(m => m.trim()),
+                                        targets: twelveMonthTargets.filter(t => t.trim())
+                                    }
+                                },
+                                completedAt: new Date().toISOString()
+                            }
+                        }
+                    };
+                    setWorkshopData(updatedData);
+                }
+            }, [strengths, limitations, sixMonthMetrics, sixMonthTargets, twelveMonthMetrics, twelveMonthTargets]);
+
+            // Array update helpers
+            const updateArrayItem = (arr, setArr, index, value) => {
+                const newArr = [...arr];
+                newArr[index] = value;
+                setArr(newArr);
+            };
+
+            // Import Section Component
+            const ImportSection = ({ onImport, isVisible }) => {
+                const [progressCode, setProgressCode] = useState('');
+                const [error, setError] = useState('');
+                const [success, setSuccess] = useState(false);
+                
+                const handleImportClick = () => {
+                    // Clean the progress code input
+                    const cleanedCode = progressCode
+                        .trim()
+                        .replace(/\s+/g, '')
+                        .replace(/[\r\n]+/g, '');
+                    
+                    if (!cleanedCode) {
+                        setError('Please paste a progress code');
+                        return;
+                    }
+                    
+                    // Enhanced debugging
+                    console.log('=== IMPORT DEBUG ===');
+                    console.log('Original length:', progressCode.length);
+                    console.log('Cleaned length:', cleanedCode.length);
+                    console.log('First 100 chars:', cleanedCode.substring(0, 100));
+                    console.log('Last 50 chars:', cleanedCode.substring(cleanedCode.length - 50));
+                    console.log('Starts with GSAP2025-:', cleanedCode.startsWith('GSAP2025-'));
+                    console.log('===================');
+                    
+                    const result = onImport(cleanedCode);
+                    if (result.success) {
+                        setSuccess(true);
+                        setError('');
+                        
+                        // Log what we successfully decoded
+                        console.log('Successfully imported progress code');
+                        
+                        setTimeout(() => {
+                            onImport({ hideImportSection: true });
+                        }, 3000);
+                    } else {
+                        setError(result.error);
+                        setSuccess(false);
+                    }
+                };
+                
+                const handleStartFresh = () => {
+                    setProgressCode('');
+                    setError('');
+                    setSuccess(false);
+                    onImport({ startFresh: true });
+                };
+                
+                if (!isVisible) return null;
+                
+                return (
+                    <div className="bg-white border border-gray-200 rounded-lg mb-4">
+                        <div 
+                            className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50"
+                            onClick={() => setImportExpanded(!importExpanded)}
+                        >
+                            <div className="flex items-center">
+                                <FileText className="text-blue-600 mr-2" size={20} />
+                                <h3 className="text-md font-semibold text-gray-800">Continue Your Progress</h3>
+                            </div>
+                            {importExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                        </div>
+                        
+                        <div className={`import-content ${importExpanded ? 'expanded' : ''}`}>
+                            <div className="px-4 pb-4">
+                                {importedContext && (
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                                        <h4 className="font-medium text-blue-800 mb-2">Previous Workshop Context:</h4>
+                                        <div className="text-sm space-y-2">
+                                            {(() => {
+                                                const workshops = importedContext.workshops || importedContext;
+                                                const day1 = workshops.day1;
+                                                const day21 = workshops.day21 || workshops.day2_1;
+                                                const day22 = workshops.day22 || workshops.day2_2;
+                                                
+                                                return (
+                                                    <>
+                                                        {day1?.problemStatement && (
+                                                            <div>
+                                                                <strong>Problem:</strong> {day1.problemStatement.substring(0, 100)}...
+                                                            </div>
+                                                        )}
+                                                        {day21?.activity3?.icpSummary && (
+                                                            <div>
+                                                                <strong>Target Customer:</strong> {day21.activity3.icpSummary.substring(0, 100)}...
+                                                            </div>
+                                                        )}
+                                                        {day22?.positioningActivity3?.primaryMessage && (
+                                                            <div>
+                                                                <strong>Positioning:</strong> {day22.positioningActivity3.primaryMessage.substring(0, 100)}...
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                <textarea
+                                    value={progressCode}
+                                    onChange={(e) => setProgressCode(e.target.value)}
+                                    placeholder="Paste your Workshop Progress Code here (starts with GSAP2025-)..."
+                                    className="w-full h-16 p-3 border border-gray-300 rounded-lg resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-sm"
+                                />
+                                
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Copy the entire code including the GSAP2025- prefix. The code should be one continuous string.
+                                </p>
+                                
+                                {progressCode.trim().startsWith('GSAP2025-') && (
+                                    <p className="text-xs text-green-600 mt-1">
+                                        ✓ Valid code format detected
+                                    </p>
+                                )}
+                                
+                                {error && (
+                                    <div className="mt-2 text-red-600 text-sm">{error}</div>
+                                )}
+                                
+                                {success && (
+                                    <div className="mt-2 text-green-600 text-sm">
+                                        ✓ Progress loaded successfully! Previous workshop data has been imported.
+                                    </div>
+                                )}
+                                
+                                <div className="flex space-x-3 mt-3">
+                                    <button
+                                        onClick={handleImportClick}
+                                        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                                    >
+                                        Load Progress
+                                    </button>
+                                    <button
+                                        onClick={handleStartFresh}
+                                        className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors text-sm"
+                                    >
+                                        Start Fresh
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            // Export Section Component
+            const ExportSection = ({ workshopData }) => {
+                const [showCopySuccess, setShowCopySuccess] = useState(false);
+                const [showHelpModal, setShowHelpModal] = useState(false);
+                const progressCode = encodeProgressCode(workshopData);
+                
+                const handleCopy = async () => {
+                    const success = await copyToClipboard(progressCode);
+                    if (success) {
+                        setShowCopySuccess(true);
+                        setTimeout(() => setShowCopySuccess(false), 2000);
+                    }
+                };
+                
+                const HelpModal = ({ isOpen, onClose }) => {
+                    if (!isOpen) return null;
+                    
+                    return (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 max-w-md mx-4">
+                                <h3 className="text-lg font-semibold mb-4">About Progress Codes</h3>
+                                <p className="text-gray-600 mb-4">
+                                    Progress codes save your workshop responses so you can continue later. 
+                                    They contain only your workshop data - no personal information.
+                                </p>
+                                <ul className="text-sm text-gray-600 space-y-2 mb-4">
+                                    <li>• Codes work across all market entry activities</li>
+                                    <li>• Save codes externally (email, notes)</li>
+                                    <li>• Data stays on your device</li>
+                                    <li>• One code contains all workshop history</li>
+                                </ul>
+                                <button 
+                                    onClick={onClose}
+                                    className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+                                >
+                                    Got it
+                                </button>
+                            </div>
+                        </div>
+                    );
+                };
+                
+                return (
+                    <>
+                        <div className="bg-green-50 border border-green-300 rounded-lg p-4 mt-6">
+                            <div className="flex items-center mb-3">
+                                <CheckCircle className="text-green-600 mr-2" size={20} />
+                                <h3 className="text-md font-semibold text-green-800">Activity 1 Complete! Save Your Progress</h3>
+                            </div>
+                            
+                            <p className="text-green-700 mb-3 text-sm">
+                                Copy this code to continue to Activity 2 or return later:
+                            </p>
+                            
+                            <div className="bg-white border border-green-200 rounded-lg p-2 mb-3">
+                                <code className="text-xs font-mono break-all">{progressCode}</code>
+                            </div>
+                            
+                            <div className="flex items-center space-x-4">
+                                <button
+                                    onClick={handleCopy}
+                                    className="flex items-center bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
+                                >
+                                    <Copy className="mr-2" size={14} />
+                                    Copy Code
+                                </button>
+                                
+                                <button
+                                    onClick={() => setShowHelpModal(true)}
+                                    className="text-green-700 hover:text-green-800 text-sm underline"
+                                >
+                                    What's this?
+                                </button>
+                                
+                                {showCopySuccess && (
+                                    <span className="text-green-600 text-sm">✓ Copied!</span>
+                                )}
+                            </div>
+                        </div>
+                        
+                        <HelpModal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} />
+                    </>
+                );
+            };
+
+            const renderSection1 = () => (
+                <div className="space-y-4">
+                    <div className="text-center mb-4">
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">
+                            Current Position Assessment
+                        </h3>
+                        <p className="text-gray-600 text-sm">
+                            Evaluate your current strengths vs limitations for global market expansion
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 laptop-grid">
+                        {/* Strengths */}
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div className="flex items-center mb-3">
+                                <CheckCircle className="text-green-600 mr-2" size={20} />
+                                <h4 className="text-md font-semibold text-green-800">Local Strengths</h4>
+                            </div>
+                            <p className="text-green-700 text-sm mb-3">
+                                What advantages do you have in your current market?
+                            </p>
+                            
+                            {strengths.map((strength, index) => (
+                                <div key={index} className="mb-3">
+                                    <label className="block text-green-700 text-sm font-medium mb-1">
+                                        Strength {index + 1}:
+                                    </label>
+                                    <textarea
+                                        value={strength}
+                                        onChange={(e) => updateArrayItem(strengths, setStrengths, index, e.target.value)}
+                                        placeholder={
+                                            index === 0 ? "e.g., Strong brand recognition in local market" :
+                                            index === 1 ? "e.g., Established partnerships and distribution" :
+                                            "e.g., Deep understanding of local customer needs"
+                                        }
+                                        className="w-full laptop-textarea p-3 border border-green-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 text-sm"
+                                    />
+                                    <div className="text-xs text-green-600 mt-1">
+                                        {strength.trim().split(/\s+/).filter(w => w.length > 0).length} words
+                                        {strength.trim().length >= 10 && " ✓"}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Limitations */}
+                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                            <div className="flex items-center mb-3">
+                                <AlertTriangle className="text-orange-600 mr-2" size={20} />
+                                <h4 className="text-md font-semibold text-orange-800">Limitations for Global Markets</h4>
+                            </div>
+                            <p className="text-orange-700 text-sm mb-3">
+                                What challenges will you face expanding globally?
+                            </p>
+                            
+                            {limitations.map((limitation, index) => (
+                                <div key={index} className="mb-3">
+                                    <label className="block text-orange-700 text-sm font-medium mb-1">
+                                        Limitation {index + 1}:
+                                    </label>
+                                    <textarea
+                                        value={limitation}
+                                        onChange={(e) => updateArrayItem(limitations, setLimitations, index, e.target.value)}
+                                        placeholder={
+                                            index === 0 ? "e.g., Limited international market knowledge" :
+                                            index === 1 ? "e.g., No established global partnerships" :
+                                            "e.g., Product not yet optimized for international markets"
+                                        }
+                                        className="w-full laptop-textarea p-3 border border-orange-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 text-sm"
+                                    />
+                                    <div className="text-xs text-orange-600 mt-1">
+                                        {limitation.trim().split(/\s+/).filter(w => w.length > 0).length} words
+                                        {limitation.trim().length >= 10 && " ✓"}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <p className="text-blue-700 text-sm">
+                            <strong>Tip:</strong> Complete at least 2 strengths and 2 limitations (10+ words each) to proceed.
+                            Current: {strengths.filter(s => s.trim().length >= 10).length}/2 strengths, {limitations.filter(l => l.trim().length >= 10).length}/2 limitations
+                        </p>
+                    </div>
+
+                    <div className="flex justify-end">
+                        <button
+                            onClick={() => setCurrentStep(2)}
+                            disabled={!isSection1Complete()}
+                            className={`px-6 py-2 rounded-lg text-white font-medium transition-colors ${
+                                isSection1Complete() 
+                                    ? 'bg-orange-500 hover:bg-orange-600' 
+                                    : 'bg-gray-300 cursor-not-allowed'
+                            }`}
+                        >
+                            Set Success Metrics →
+                        </button>
+                    </div>
+                </div>
+            );
+
+            const renderSection2 = () => (
+                <div className="space-y-4">
+                    <div className="text-center mb-4">
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">
+                            Success Metrics Builder
+                        </h3>
+                        <p className="text-gray-600 text-sm">
+                            Define measurable goals for your market entry timeline
+                        </p>
+                    </div>
+
+                    {/* Tab Navigation */}
+                    <div className="flex space-x-1 mb-4">
+                        <button
+                            onClick={() => setActiveTab('6months')}
+                            className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
+                                activeTab === '6months'
+                                    ? 'bg-orange-500 text-white'
+                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                        >
+                            <Clock className="inline mr-2" size={16} />
+                            6 Months
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('12months')}
+                            className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
+                                activeTab === '12months'
+                                    ? 'bg-orange-500 text-white'
+                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                        >
+                            <TrendingUp className="inline mr-2" size={16} />
+                            12 Months
+                        </button>
+                    </div>
+
+                    {/* Tab Content */}
+                    {activeTab === '6months' && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h4 className="text-md font-semibold text-blue-800 mb-3">6-Month Targets</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 laptop-grid">
+                                <div>
+                                    <label className="block text-blue-700 text-sm font-medium mb-2">Key Metrics <span className="text-xs text-gray-500">(describe in 2+ words)</span></label>
+                                    {sixMonthMetrics.map((metric, index) => (
+                                        <div key={index} className="mb-3">
+                                            <textarea
+                                                value={metric}
+                                                onChange={(e) => updateArrayItem(sixMonthMetrics, setSixMonthMetrics, index, e.target.value)}
+                                                placeholder={
+                                                    index === 0 ? "e.g., Pilot customers secured" :
+                                                    index === 1 ? "e.g., Market validation completed" :
+                                                    "e.g., Partnership agreements signed"
+                                                }
+                                                className="w-full laptop-textarea p-2 border border-blue-300 rounded focus:border-blue-500 text-sm placeholder-gray-400"
+                                            />
+                                            <div className="flex justify-between items-center mt-1">
+                                                <span className="text-xs text-gray-500">
+                                                    {/* Hint text or empty */}
+                                                </span>
+                                                <span className={`text-sm flex items-center gap-1 ${metric.trim().split(/\s+/).filter(w => w.length > 0).length >= 2 ? 'text-green-600' : 'text-gray-500'}`}>
+                                                    {metric.trim().split(/\s+/).filter(w => w.length > 0).length} words
+                                                    {metric.trim().split(/\s+/).filter(w => w.length > 0).length >= 2 && <CheckCircle size={16} />}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div>
+                                    <label className="block text-blue-700 text-sm font-medium mb-2">Target Goals <span className="text-xs text-gray-500">(describe in 2+ words)</span></label>
+                                    {sixMonthTargets.map((target, index) => (
+                                        <div key={index} className="mb-3">
+                                            <textarea
+                                                value={target}
+                                                onChange={(e) => updateArrayItem(sixMonthTargets, setSixMonthTargets, index, e.target.value)}
+                                                placeholder={
+                                                    index === 0 ? "e.g., 3-5 paying pilot customers" :
+                                                    index === 1 ? "e.g., Complete market research in 2 target regions" :
+                                                    "e.g., 2-3 strategic partnership MOUs"
+                                                }
+                                                className="w-full laptop-textarea p-2 border border-blue-300 rounded focus:border-blue-500 text-sm placeholder-gray-400"
+                                            />
+                                            <div className="flex justify-between items-center mt-1">
+                                                <span className="text-xs text-gray-500">
+                                                    {/* Hint text or empty */}
+                                                </span>
+                                                <span className={`text-sm flex items-center gap-1 ${target.trim().split(/\s+/).filter(w => w.length > 0).length >= 2 ? 'text-green-600' : 'text-gray-500'}`}>
+                                                    {target.trim().split(/\s+/).filter(w => w.length > 0).length} words
+                                                    {target.trim().split(/\s+/).filter(w => w.length > 0).length >= 2 && <CheckCircle size={16} />}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === '12months' && (
+                        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                            <h4 className="text-md font-semibold text-purple-800 mb-3">12-Month Targets</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 laptop-grid">
+                                <div>
+                                    <label className="block text-purple-700 text-sm font-medium mb-2">Key Metrics <span className="text-xs text-gray-500">(describe in 2+ words)</span></label>
+                                    {twelveMonthMetrics.map((metric, index) => (
+                                        <div key={index} className="mb-3">
+                                            <textarea
+                                                value={metric}
+                                                onChange={(e) => updateArrayItem(twelveMonthMetrics, setTwelveMonthMetrics, index, e.target.value)}
+                                                placeholder={
+                                                    index === 0 ? "e.g., Monthly Recurring Revenue (MRR)" :
+                                                    index === 1 ? "e.g., Customer acquisition rate" :
+                                                    "e.g., Market penetration percentage"
+                                                }
+                                                className="w-full laptop-textarea p-2 border border-purple-300 rounded focus:border-purple-500 text-sm placeholder-gray-400"
+                                            />
+                                            <div className="flex justify-between items-center mt-1">
+                                                <span className="text-xs text-gray-500">
+                                                    {/* Hint text or empty */}
+                                                </span>
+                                                <span className={`text-sm flex items-center gap-1 ${metric.trim().split(/\s+/).filter(w => w.length > 0).length >= 2 ? 'text-green-600' : 'text-gray-500'}`}>
+                                                    {metric.trim().split(/\s+/).filter(w => w.length > 0).length} words
+                                                    {metric.trim().split(/\s+/).filter(w => w.length > 0).length >= 2 && <CheckCircle size={16} />}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div>
+                                    <label className="block text-purple-700 text-sm font-medium mb-2">Target Goals <span className="text-xs text-gray-500">(describe in 2+ words)</span></label>
+                                    {twelveMonthTargets.map((target, index) => (
+                                        <div key={index} className="mb-3">
+                                            <textarea
+                                                value={target}
+                                                onChange={(e) => updateArrayItem(twelveMonthTargets, setTwelveMonthTargets, index, e.target.value)}
+                                                placeholder={
+                                                    index === 0 ? "e.g., $50K+ MRR from international markets" :
+                                                    index === 1 ? "e.g., 10+ new customers per month" :
+                                                    "e.g., 2-3% market share in target region"
+                                                }
+                                                className="w-full laptop-textarea p-2 border border-purple-300 rounded focus:border-purple-500 text-sm placeholder-gray-400"
+                                            />
+                                            <div className="flex justify-between items-center mt-1">
+                                                <span className="text-xs text-gray-500">
+                                                    {/* Hint text or empty */}
+                                                </span>
+                                                <span className={`text-sm flex items-center gap-1 ${target.trim().split(/\s+/).filter(w => w.length > 0).length >= 2 ? 'text-green-600' : 'text-gray-500'}`}>
+                                                    {target.trim().split(/\s+/).filter(w => w.length > 0).length} words
+                                                    {target.trim().split(/\s+/).filter(w => w.length > 0).length >= 2 && <CheckCircle size={16} />}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                        <p className="text-green-700 text-sm">
+                            <strong>Progress:</strong> Complete at least 2 metric/target pairs for each timeframe to finish this activity.
+                            6-month: {sixMonthMetrics.filter((m, i) => m.trim().length >= 5 && sixMonthTargets[i].trim().length >= 5).length}/2 pairs, 
+                            12-month: {twelveMonthMetrics.filter((m, i) => m.trim().length >= 5 && twelveMonthTargets[i].trim().length >= 5).length}/2 pairs
+                        </p>
+                    </div>
+
+                    <div className="flex justify-between">
+                        <button
+                            onClick={() => setCurrentStep(1)}
+                            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+                        >
+                            ← Back to Assessment
+                        </button>
+                        
+                        <button
+                            onClick={() => setCurrentStep(3)}
+                            disabled={!isSection2Complete()}
+                            className={`px-6 py-2 rounded-lg text-white font-medium transition-colors ${
+                                isSection2Complete() 
+                                    ? 'bg-orange-500 hover:bg-orange-600' 
+                                    : 'bg-gray-300 cursor-not-allowed'
+                            }`}
+                        >
+                            Complete Activity →
+                        </button>
+                    </div>
+                </div>
+            );
+
+            const renderSection3 = () => (
+                <div className="space-y-4">
+                    <div className="text-center mb-4">
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">
+                            Foundation & Goals Complete
+                        </h3>
+                        <p className="text-gray-600 text-sm">
+                            You've assessed your position and set success metrics for market entry
+                        </p>
+                    </div>
+
+                    <div className="bg-green-50 border border-green-300 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-800 mb-3 flex items-center">
+                            <CheckCircle className="mr-2" size={20} />
+                            Market Entry Foundation Complete!
+                        </h4>
+                        
+                        <div className="space-y-3">
+                            <div>
+                                <h5 className="font-medium text-green-700 mb-1">Current Position Summary:</h5>
+                                <p className="text-sm text-gray-700 mb-2">
+                                    <strong>Strengths:</strong> {strengths.filter(s => s.trim()).length} identified
+                                </p>
+                                <p className="text-sm text-gray-700">
+                                    <strong>Limitations:</strong> {limitations.filter(l => l.trim()).length} to address
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <h5 className="font-medium text-green-700 mb-1">Success Metrics Defined:</h5>
+                                <p className="text-sm text-gray-700 mb-2">
+                                    <strong>6-Month Goals:</strong> {sixMonthMetrics.filter(m => m.trim()).length} metrics set
+                                </p>
+                                <p className="text-sm text-gray-700">
+                                    <strong>12-Month Goals:</strong> {twelveMonthMetrics.filter(m => m.trim()).length} metrics set
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                        <h4 className="text-md font-bold text-orange-800 mb-2">🎯 Next: Market Reality Check</h4>
+                        <p className="text-orange-700 text-sm mb-2">
+                            In Activity 2, you'll analyze your target market and compare Japan vs US market dynamics.
+                        </p>
+                        <div className="text-sm text-orange-700">
+                            <p className="mb-1"><strong>Coming up:</strong></p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
+                                <div>• Target market analysis (5 factors)</div>
+                                <div>• Japan vs US comparison</div>
+                                <div>• Market opportunity assessment</div>
+                                <div>• Risk evaluation framework</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Export Section */}
+                    <ExportSection workshopData={workshopData} />
+
+                    <div className="text-center space-x-4 mt-6">
+                        <button
+                            onClick={() => setCurrentStep(2)}
+                            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+                        >
+                            ← Back to Edit
+                        </button>
+                        <button
+                            onClick={() => window.location.href = 'market-entry-activity-2.html'}
+                            className="bg-orange-500 text-white px-8 py-3 rounded-lg hover:bg-orange-600 transition-colors font-semibold"
+                        >
+                            Continue to Activity 2
+                        </button>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="max-w-[900px] mx-auto p-4 bg-gradient-to-br from-orange-100 to-orange-200 min-h-screen">
+                    {/* Header */}
+                    <div className="bg-white rounded-lg shadow-lg p-4 mb-4 sticky top-0 z-50">
+                        <div className="flex justify-between items-center w-full mb-2">
+                            <a 
+                                href="index.html" 
+                                className="inline-flex items-center text-orange-600 hover:text-orange-700 transition-colors text-sm font-medium"
+                            >
+                                <span className="mr-1">←</span> Back to Workshop
+                            </a>
+                            <a 
+                                href="../" 
+                                className="inline-flex items-center text-gray-600 hover:text-orange-700 transition-colors text-sm font-medium"
+                            >
+                                All GTM Workshops <span className="ml-1">↑</span>
+                            </a>
+                        </div>
+                        <div className="flex items-center justify-between mb-2">
+                            <h1 className="text-xl font-bold text-gray-800">
+                                Activity 1: Foundation and Goals Assessment
+                            </h1>
+                            <div className="text-sm text-gray-600">
+                                Activity 1 of 3
+                            </div>
+                        </div>
+                        
+                        {/* Progress indicator */}
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div className={`bg-orange-500 h-2 rounded-full transition-all duration-300 ${
+                                currentStep === 1 ? 'w-1/3' : currentStep === 2 ? 'w-2/3' : 'w-full'
+                            }`}></div>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-600 mt-1">
+                            <span>Position</span>
+                            <span>Metrics</span>
+                            <span>Complete</span>
+                        </div>
+                    </div>
+
+                    {/* Import Section */}
+                    {currentStep < 3 && (
+                        <ImportSection 
+                            onImport={handleImport}
+                            isVisible={showImportSection}
+                        />
+                    )}
+
+                    {/* Main Content */}
+                    <div className="bg-white rounded-lg shadow-lg p-6 relative">
+                        <button
+                            onClick={resetActivity}
+                            className="absolute -top-2 -right-2 w-8 h-8 bg-gray-200 hover:bg-orange-500 hover:text-white rounded-full flex items-center justify-center transition-all duration-200 text-gray-600"
+                            title="Reset Activity"
+                        >
+                            <span className="text-lg font-bold">↻</span>
+                        </button>
+                        {currentStep === 1 && renderSection1()}
+                        {currentStep === 2 && renderSection2()}
+                        {currentStep === 3 && renderSection3()}
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<MarketEntryActivity1 />, document.getElementById('root'));
+    </script>
+</body>
+</html>

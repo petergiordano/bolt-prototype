@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Define Customer & Alternative - Day 2-2</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .lucide-icon {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Progress Code System - Encoding/Decoding Functions
+        const encodeProgressCode = (workshopData) => {
+            try {
+                const jsonString = JSON.stringify(workshopData);
+                const base64 = btoa(jsonString);
+                return `GSAP2025-${base64}`;
+            } catch (error) {
+                console.error('Error encoding progress code:', error);
+                return null;
+            }
+        };
+
+        const decodeProgressCode = (code) => {
+            try {
+                console.log('🔧 decodeProgressCode called with:', code?.substring(0, 50) + '...');
+                
+                if (!code || !code.startsWith('GSAP2025-')) {
+                    console.error('❌ Invalid progress code format - missing GSAP2025- prefix');
+                    throw new Error('Invalid progress code format');
+                }
+                
+                const base64 = code.substring(9);
+                console.log('🔧 Extracted base64 part, length:', base64.length);
+                
+                const jsonString = atob(base64);
+                console.log('🔧 Decoded base64 to JSON string, length:', jsonString.length);
+                console.log('🔧 JSON string preview:', jsonString.substring(0, 100) + '...');
+                
+                const parsed = JSON.parse(jsonString);
+                console.log('✅ Successfully parsed JSON');
+                return parsed;
+            } catch (error) {
+                console.error('❌ Error decoding progress code:', error.message);
+                console.error('❌ Full error:', error);
+                return null;
+            }
+        };
+
+        // Cross-browser clipboard copy with Safari fallback
+        const copyToClipboard = async (text) => {
+            try {
+                await navigator.clipboard.writeText(text);
+                return true;
+            } catch (err) {
+                // Fallback for Safari or older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    return true;
+                } catch (err) {
+                    console.error('Fallback copy failed:', err);
+                    return false;
+                } finally {
+                    document.body.removeChild(textArea);
+                }
+            }
+        };
+
+        // Icon components
+        const Users = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+        );
+
+        const Target = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="6"/>
+                <circle cx="12" cy="12" r="2"/>
+            </svg>
+        );
+
+        const CheckCircle = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22,4 12,14.01 9,11.01"/>
+            </svg>
+        );
+
+        const AlertCircle = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+        );
+
+        const Clock = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12,6 12,12 16,14"/>
+            </svg>
+        );
+
+        const FileText = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14,2 14,8 20,8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10,9 9,9 8,9"/>
+            </svg>
+        );
+
+        const Copy = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+            </svg>
+        );
+
+        const CustomerAlternativeActivity = () => {
+            const [currentStep, setCurrentStep] = useState(1);
+            const [customerProfile, setCustomerProfile] = useState('');
+            const [competitiveAlternative, setCompetitiveAlternative] = useState('');
+            const [alternativeDescription, setAlternativeDescription] = useState('');
+            
+            // Progress Code System state
+            const [workshopData, setWorkshopData] = useState({
+                version: "1.0",
+                createdAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString(),
+                day1: {},
+                day2_1: {},
+                day2_2: {},
+                day3: {}
+            });
+            const [showImportSection, setShowImportSection] = useState(true);
+            
+            // Debug logging for showImportSection changes
+            useEffect(() => {
+                console.log('showImportSection changed to:', showImportSection);
+            }, [showImportSection]);
+
+            const resetActivity = () => {
+                setCurrentStep(1);
+                setCustomerProfile('');
+                setCompetitiveAlternative('');
+                setAlternativeDescription('');
+            };
+
+            const isStepComplete = () => {
+                if (currentStep === 1) {
+                    return customerProfile.length >= 25;
+                } else if (currentStep === 2) {
+                    return competitiveAlternative.length >= 15 && alternativeDescription.length >= 25;
+                }
+                return false;
+            };
+
+            const nextStep = () => {
+                if (isStepComplete()) {
+                    setCurrentStep(prev => Math.min(prev + 1, 3));
+                }
+            };
+
+            const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
+
+            // Handle import - updated to handle both progress codes and "start fresh" action
+            const handleImport = (input) => {
+                console.log('🔄 handleImport called with input:', input);
+                
+                // Handle "Start Fresh" button click
+                if (input && input.startFresh) {
+                    console.log('✅ User clicked Start Fresh - hiding import section');
+                    setShowImportSection(false);
+                    return { success: true };
+                }
+                
+                // Handle auto-hide callback from ImportSection
+                if (input && input.hideImportSection) {
+                    console.log('⏰ Auto-hiding import section after successful import');
+                    setShowImportSection(false);
+                    return { success: true };
+                }
+                
+                // Handle progress code import
+                console.log('🔍 Attempting to decode progress code...');
+                console.log('📝 Progress code length:', input?.length || 'undefined');
+                console.log('📝 Progress code preview:', input?.substring(0, 50) + '...');
+                
+                const decoded = decodeProgressCode(input);
+                if (!decoded) {
+                    console.error('❌ Failed to decode progress code');
+                    return { success: false, error: 'Invalid progress code. Please check and try again.' };
+                }
+                
+                console.log('✅ Progress code decoded successfully!');
+                console.log('📊 Decoded data structure:', JSON.stringify(decoded, null, 2));
+                
+                setWorkshopData(decoded);
+                console.log('💾 Workshop data updated in state');
+                
+                // Auto-populate from Day 2-1 data
+                console.log('🔍 Checking for Day 2-1 auto-population data...');
+                if (decoded.day2_1?.activity3?.basic_profile) {
+                    const profileData = decoded.day2_1.activity3.basic_profile;
+                    console.log('✅ Found basic_profile data:', profileData);
+                    setCustomerProfile(profileData);
+                    console.log('📝 Customer profile field populated with:', profileData);
+                } else {
+                    console.log('⚠️ No Day 2-1 basic_profile data found for auto-population');
+                    console.log('📊 Available Day 2-1 data:', decoded.day2_1);
+                }
+                
+                // Don't hide immediately - let ImportSection handle the auto-hide after showing success message
+                console.log('✅ Progress code imported successfully - ImportSection will auto-hide after 3 seconds');
+                return { success: true };
+            };
+
+            // Update workshop data when moving to step 3
+            useEffect(() => {
+                if (currentStep === 3) {
+                    const updatedData = {
+                        ...workshopData,
+                        lastUpdated: new Date().toISOString(),
+                        day2_2: {
+                            ...workshopData.day2_2,
+                            activity1: {
+                                customerProfile,
+                                competitiveAlternative,
+                                alternativeDescription,
+                                completedAt: new Date().toISOString()
+                            }
+                        }
+                    };
+                    setWorkshopData(updatedData);
+                }
+            }, [currentStep]);
+
+            // Import Section Component
+            const ImportSection = ({ onImport, isVisible }) => {
+                const [progressCode, setProgressCode] = useState('');
+                const [error, setError] = useState('');
+                const [success, setSuccess] = useState(false);
+                
+                const handleImportClick = () => {
+                    console.log('🎯 ImportSection: Load Progress button clicked');
+                    console.log('📝 ImportSection: Progress code length:', progressCode.trim().length);
+                    
+                    if (!progressCode.trim()) {
+                        console.log('❌ ImportSection: Empty progress code');
+                        setError('Please enter a progress code');
+                        return;
+                    }
+                    
+                    console.log('🚀 ImportSection: Calling parent onImport handler...');
+                    const result = onImport(progressCode);
+                    console.log('📥 ImportSection: Import result:', result);
+                    
+                    if (result.success) {
+                        console.log('✅ ImportSection: Import successful - showing success message');
+                        setSuccess(true);
+                        setError('');
+                        // Auto-hide after 3 seconds to let user see success message
+                        console.log('⏰ ImportSection: Setting 3 second auto-hide timer');
+                        setTimeout(() => {
+                            console.log('⏰ ImportSection: 3 seconds elapsed - triggering auto-hide');
+                            // Call parent's setShowImportSection through a callback
+                            onImport({ hideImportSection: true });
+                        }, 3000);
+                    } else {
+                        console.log('❌ ImportSection: Import failed:', result.error);
+                        setError(result.error);
+                        setSuccess(false);
+                    }
+                };
+                
+                const handleStartFresh = () => {
+                    setProgressCode('');
+                    setError('');
+                    setSuccess(false);
+                    onImport({ startFresh: true });
+                };
+                
+                if (!isVisible) return null;
+                
+                return (
+                    <div className="bg-white border-2 border-gray-200 rounded-lg p-6 mb-6">
+                        <div className="flex items-center mb-4">
+                            <FileText className="text-blue-600 mr-2" size={24} />
+                            <h3 className="text-lg font-semibold text-gray-800">Continue Your Progress</h3>
+                        </div>
+                        
+                        <p className="text-gray-600 mb-4">
+                            Have a progress code from a previous session? Paste it below to continue where you left off.
+                        </p>
+                        
+                        <textarea
+                            value={progressCode}
+                            onChange={(e) => setProgressCode(e.target.value)}
+                            placeholder="Paste your progress code here..."
+                            className="w-full h-20 p-3 border border-gray-300 rounded-lg resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                        />
+                        
+                        {error && (
+                            <div className="mt-2 text-red-600 text-sm">{error}</div>
+                        )}
+                        
+                        {success && (
+                            <div className="mt-2 text-green-600 text-sm">
+                                ✓ Progress loaded successfully! Your previous responses have been filled in below.
+                            </div>
+                        )}
+                        
+                        <div className="flex space-x-3 mt-4">
+                            <button
+                                onClick={handleImportClick}
+                                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                            >
+                                Load Progress
+                            </button>
+                            <button
+                                onClick={handleStartFresh}
+                                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                            >
+                                Start Fresh Instead
+                            </button>
+                        </div>
+                    </div>
+                );
+            };
+
+            // Export Section Component
+            const ExportSection = ({ workshopData }) => {
+                const [showCopySuccess, setShowCopySuccess] = useState(false);
+                const [showHelpModal, setShowHelpModal] = useState(false);
+                const progressCode = encodeProgressCode(workshopData);
+                
+                const handleCopy = async () => {
+                    const success = await copyToClipboard(progressCode);
+                    if (success) {
+                        setShowCopySuccess(true);
+                        setTimeout(() => setShowCopySuccess(false), 2000);
+                    }
+                };
+                
+                const HelpModal = ({ isOpen, onClose }) => {
+                    if (!isOpen) return null;
+                    
+                    return (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 max-w-md mx-4">
+                                <h3 className="text-lg font-semibold mb-4">About Progress Codes</h3>
+                                <p className="text-gray-600 mb-4">
+                                    Progress codes save your workshop responses so you can continue later. 
+                                    They contain only your workshop data - no personal information.
+                                </p>
+                                <ul className="text-sm text-gray-600 space-y-2 mb-4">
+                                    <li>• Codes expire after 30 days</li>
+                                    <li>• Save codes externally (email, notes)</li>
+                                    <li>• One code works across all workshops</li>
+                                    <li>• Data stays on your device</li>
+                                </ul>
+                                <button 
+                                    onClick={onClose}
+                                    className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+                                >
+                                    Got it
+                                </button>
+                            </div>
+                        </div>
+                    );
+                };
+                
+                return (
+                    <>
+                        <div className="bg-green-50 border-2 border-green-300 rounded-lg p-6 mt-6">
+                            <div className="flex items-center mb-4">
+                                <CheckCircle className="text-green-600 mr-2" size={24} />
+                                <h3 className="text-lg font-semibold text-green-800">Activity Complete! Save Your Progress</h3>
+                            </div>
+                            
+                            <p className="text-green-700 mb-4">
+                                Copy this code to continue your progress in the next workshop session:
+                            </p>
+                            
+                            <div className="bg-white border border-green-200 rounded-lg p-3 mb-4">
+                                <code className="text-sm font-mono break-all">{progressCode}</code>
+                            </div>
+                            
+                            <div className="flex items-center space-x-4">
+                                <button
+                                    onClick={handleCopy}
+                                    className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                                >
+                                    <Copy className="mr-2" size={16} />
+                                    Copy Code
+                                </button>
+                                
+                                <button
+                                    onClick={() => setShowHelpModal(true)}
+                                    className="text-green-700 hover:text-green-800 text-sm underline"
+                                >
+                                    What's this?
+                                </button>
+                                
+                                {showCopySuccess && (
+                                    <span className="text-green-600 text-sm">✓ Copied to clipboard!</span>
+                                )}
+                            </div>
+                        </div>
+                        
+                        <HelpModal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} />
+                    </>
+                );
+            };
+
+            const renderStep1 = () => (
+                <div className="space-y-6">
+                    <div className="text-center mb-6">
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">
+                            Confirm Your Early Customer Profile
+                        </h3>
+                        <p className="text-gray-600">
+                            Use yesterday's work to define your target customer precisely
+                        </p>
+                    </div>
+
+                    <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-5 mb-6">
+                        <div className="flex items-center mb-3">
+                            <Users className="text-orange-600 mr-2" size={24} />
+                            <h4 className="text-lg font-semibold text-orange-800">Build on Yesterday's ECP Work</h4>
+                        </div>
+                        <p className="text-orange-700 mb-3">
+                            Yesterday you identified your Early Customer Profile. Now refine it using the 6 target market characteristics:
+                        </p>
+                        <div className="grid grid-cols-2 gap-2 text-sm text-orange-700">
+                            <div>• <strong>Needs:</strong> What problem/progress</div>
+                            <div>• <strong>Demographic:</strong> Role, title, motivations</div>
+                            <div>• <strong>Firmographic:</strong> Company size, industry</div>
+                            <div>• <strong>Technographic:</strong> Technology stack</div>
+                            <div>• <strong>Psychographic:</strong> Attitudes, values</div>
+                            <div>• <strong>Behavioral:</strong> Usage, buying habits</div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
+                        <label className="block text-gray-700 font-medium mb-2">
+                            Your Early Customer Profile: <span className="text-xs text-gray-400">(describe in 5+ words)</span>
+                        </label>
+                        <p className="text-gray-500 text-sm mb-3">
+                            Be specific about WHO your target customer is. Use your ECP from yesterday and the 6 characteristics framework.
+                        </p>
+                        <textarea
+                            value={customerProfile}
+                            onChange={(e) => setCustomerProfile(e.target.value)}
+                            placeholder="Example: Development teams at fast-growing B2B SaaS companies (100-1000 employees) who manage critical API infrastructure, use modern cloud tools, value reliability over cost, and make technology decisions quickly when preventing customer impact."
+                            className="w-full h-32 p-4 border border-gray-300 rounded-lg resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 placeholder-gray-400"
+                        />
+                        
+                        <div className="flex justify-between items-center text-sm mt-2">
+                            <span className="text-gray-500">
+                                Be specific about company type, role, and key characteristics
+                            </span>
+                            <div className={`flex items-center space-x-1 ${customerProfile.length >= 25 ? 'text-green-600' : 'text-gray-500'}`}>
+                                {customerProfile.length >= 25 && <CheckCircle size={16} />}
+                                <span className="font-medium">
+                                    {customerProfile.trim().split(/\s+/).filter(w => w.length > 0).length} words
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div className="mt-4 flex items-start space-x-3 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                            <div className="text-blue-500 mt-1">
+                                <Target size={20} />
+                            </div>
+                            <div>
+                                <p className="text-blue-700 text-sm font-medium">ECP Refinement Tips:</p>
+                                <ul className="text-blue-600 text-sm mt-1 space-y-1">
+                                    <li>• Include company characteristics (size, industry, stage)</li>
+                                    <li>• Specify the role/title of your target buyer</li>
+                                    <li>• Add psychographic details (values, attitudes)</li>
+                                    <li>• Mention relevant technology or buying behavior</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end">
+                        <button
+                            onClick={nextStep}
+                            disabled={!isStepComplete()}
+                            className={`px-6 py-2 rounded-lg text-white font-medium transition-colors ${
+                                isStepComplete() 
+                                    ? 'bg-orange-500 hover:bg-orange-600' 
+                                    : 'bg-gray-300 cursor-not-allowed'
+                            }`}
+                        >
+                            Define Alternative →
+                        </button>
+                    </div>
+                </div>
+            );
+
+            const renderStep2 = () => (
+                <div className="space-y-6">
+                    <div className="text-center mb-6">
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">
+                            Identify Their Main Competitive Alternative
+                        </h3>
+                        <p className="text-gray-600">
+                            What does your target customer use today to solve their problem?
+                        </p>
+                    </div>
+
+                    <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-5 mb-6">
+                        <div className="flex items-center mb-3">
+                            <AlertCircle className="text-blue-600 mr-2" size={24} />
+                            <h4 className="text-lg font-semibold text-blue-800">Competition is Broader Than You Think</h4>
+                        </div>
+                        <p className="text-blue-700 mb-3">
+                            Your competition includes everything customers use today:
+                        </p>
+                        <div className="grid grid-cols-2 gap-3 text-sm text-blue-700">
+                            <div>• <strong>Direct competitors:</strong> Similar products</div>
+                            <div>• <strong>Indirect alternatives:</strong> Different approach, same outcome</div>
+                            <div>• <strong>Manual processes:</strong> Spreadsheets, email, etc.</div>
+                            <div>• <strong>Status quo:</strong> "Do nothing" option</div>
+                        </div>
+                    </div>
+
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+                        <h4 className="font-medium text-gray-700 mb-2">Your Target Customer:</h4>
+                        <div className="bg-white border border-gray-300 rounded-lg p-3">
+                            <p className="text-sm text-gray-800">{customerProfile}</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-6">
+                        <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
+                            <label className="block text-gray-700 font-medium mb-2">
+                                Primary competitive alternative: <span className="text-xs text-gray-400">(describe in 3+ words)</span>
+                            </label>
+                            <p className="text-gray-500 text-sm mb-3">
+                                What is the main thing your target customer uses today to address this problem?
+                            </p>
+                            <input
+                                type="text"
+                                value={competitiveAlternative}
+                                onChange={(e) => setCompetitiveAlternative(e.target.value)}
+                                placeholder="Example: Manual API monitoring with basic alerting tools"
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 placeholder-gray-400"
+                            />
+                            <div className="flex justify-end text-sm mt-2">
+                                <div className={`flex items-center space-x-1 ${competitiveAlternative.length >= 15 ? 'text-green-600' : 'text-gray-500'}`}>
+                                    {competitiveAlternative.length >= 15 && <CheckCircle size={16} />}
+                                    <span className="font-medium">
+                                        {competitiveAlternative.trim().split(/\s+/).filter(w => w.length > 0).length} words
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
+                            <label className="block text-gray-700 font-medium mb-2">
+                                How does this alternative work? <span className="text-xs text-gray-400">(describe in 5+ words)</span>
+                            </label>
+                            <p className="text-gray-500 text-sm mb-3">
+                                Briefly describe how customers currently solve this problem and why it's inadequate.
+                            </p>
+                            <textarea
+                                value={alternativeDescription}
+                                onChange={(e) => setAlternativeDescription(e.target.value)}
+                                placeholder="Example: Teams use basic monitoring tools that only alert after problems occur, requiring manual investigation. This leads to longer downtime and more customer impact because issues aren't caught proactively."
+                                className="w-full h-24 p-3 border border-gray-300 rounded-lg resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 placeholder-gray-400"
+                            />
+                            <div className="flex justify-between items-center text-sm mt-2">
+                                <span className="text-gray-500">
+                                    Focus on what they do and why it falls short
+                                </span>
+                                <div className={`flex items-center space-x-1 ${alternativeDescription.length >= 25 ? 'text-green-600' : 'text-gray-500'}`}>
+                                    {alternativeDescription.length >= 25 && <CheckCircle size={16} />}
+                                    <span className="font-medium">
+                                        {alternativeDescription.trim().split(/\s+/).filter(w => w.length > 0).length} words
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-between">
+                        <button
+                            onClick={prevStep}
+                            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+                        >
+                            ← Back
+                        </button>
+                        
+                        <button
+                            onClick={nextStep}
+                            disabled={!isStepComplete()}
+                            className={`px-6 py-2 rounded-lg text-white font-medium transition-colors ${
+                                isStepComplete() 
+                                    ? 'bg-orange-500 hover:bg-orange-600' 
+                                    : 'bg-gray-300 cursor-not-allowed'
+                            }`}
+                        >
+                            Review Context →
+                        </button>
+                    </div>
+                </div>
+            );
+
+            const renderStep3 = () => (
+                <div className="space-y-6">
+                    <div className="text-center mb-6">
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">
+                            Market Context Complete
+                        </h3>
+                        <p className="text-gray-600">
+                            You've defined WHO your customer is and WHAT they compare you to
+                        </p>
+                    </div>
+
+                    <div className="bg-green-50 border-2 border-green-300 rounded-lg p-6 mb-6">
+                        <div className="flex items-center mb-4">
+                            <CheckCircle className="text-green-600 mr-2" size={24} />
+                            <h4 className="text-lg font-semibold text-green-800">Market Context Defined!</h4>
+                        </div>
+                        
+                        <p className="text-green-700 mb-4">
+                            You've completed the foundation for your positioning statement by answering the first two questions:
+                        </p>
+                        
+                        <div className="space-y-4">
+                            <div className="bg-white border border-green-200 rounded-lg p-4">
+                                <h5 className="font-medium text-green-800 mb-2 flex items-center">
+                                    <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold mr-2">1</span>
+                                    FOR: Your Target Customer
+                                </h5>
+                                <p className="text-sm text-gray-700 ml-8">{customerProfile}</p>
+                            </div>
+                            
+                            <div className="bg-white border border-green-200 rounded-lg p-4">
+                                <h5 className="font-medium text-green-800 mb-2 flex items-center">
+                                    <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold mr-2">2</span>
+                                    UNLIKE: Their Main Alternative
+                                </h5>
+                                <p className="text-sm text-gray-700 ml-8 mb-2">
+                                    <strong>Alternative:</strong> {competitiveAlternative}
+                                </p>
+                                <p className="text-sm text-gray-700 ml-8">
+                                    <strong>How it works:</strong> {alternativeDescription}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-5">
+                        <h4 className="text-lg font-bold text-orange-800 mb-3">🎯 Next: Define Your Unique Value</h4>
+                        <p className="text-orange-700 mb-3">
+                            In Activity 2, you'll identify what makes your solution unique and the specific value it creates for these customers.
+                        </p>
+                        <div className="text-sm text-orange-700">
+                            <p className="mb-2"><strong>Coming up:</strong></p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <div>• Your unique differentiators</div>
+                                <div>• Customer value you deliver</div>
+                                <div>• Product category positioning</div>
+                                <div>• Complete positioning statement</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Export Section for saving progress */}
+                    <ExportSection workshopData={workshopData} />
+
+                    <div className="text-center space-x-4 mt-6">
+                        <button
+                            onClick={prevStep}
+                            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+                        >
+                            ← Back to Edit
+                        </button>
+                        <button
+                            onClick={resetActivity}
+                            className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                        >
+                            Start Over
+                        </button>
+                        <button
+                            onClick={() => window.location.href = 'positioning-activity-2.html'}
+                            className="bg-orange-500 text-white px-8 py-3 rounded-lg hover:bg-orange-600 transition-colors font-semibold"
+                        >
+                            Continue to Activity 2
+                        </button>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="max-w-[1200px] mx-auto p-5 bg-gradient-to-br from-orange-100 to-orange-200 min-h-screen">
+                    {/* Header */}
+                    <div className="bg-white rounded-lg shadow-lg p-4 mb-4 sticky top-0 z-50">
+                        <div className="flex justify-between items-center w-full mb-3">
+                            <a 
+                                href="index.html" 
+                                className="inline-flex items-center text-orange-600 hover:text-orange-700 transition-colors text-sm font-medium"
+                            >
+                                <span className="mr-1">←</span> Back to Workshop
+                            </a>
+                            <a 
+                                href="../" 
+                                className="inline-flex items-center text-gray-600 hover:text-orange-700 transition-colors text-sm font-medium"
+                            >
+                                All GTM Workshops <span className="ml-1">↑</span>
+                            </a>
+                        </div>
+                        <div className="flex items-center justify-between mb-3">
+                            <h1 className="text-2xl font-bold text-gray-800">
+                                Activity 1: Define Customer & Alternative
+                            </h1>
+                        </div>
+                        
+                        {/* Progress indicator */}
+                        <div className="flex items-center space-x-4">
+                            <div className={`flex items-center space-x-2 ${currentStep >= 1 ? 'text-orange-600' : 'text-gray-400'}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= 1 ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}>
+                                    1
+                                </div>
+                                <span className="font-semibold">Target Customer</span>
+                            </div>
+                            <div className="flex-1 h-1 bg-gray-200 rounded">
+                                <div className={`h-full bg-orange-500 rounded transition-all duration-300 ${
+                                    currentStep === 1 ? 'w-0' : currentStep === 2 ? 'w-1/2' : 'w-full'
+                                }`}></div>
+                            </div>
+                            <div className={`flex items-center space-x-2 ${currentStep >= 2 ? 'text-orange-600' : 'text-gray-400'}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= 2 ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}>
+                                    2
+                                </div>
+                                <span className="font-semibold">Alternative</span>
+                            </div>
+                            <div className="flex-1 h-1 bg-gray-200 rounded">
+                                <div className={`h-full bg-orange-500 rounded transition-all duration-300 ${currentStep >= 3 ? 'w-full' : 'w-0'}`}></div>
+                            </div>
+                            <div className={`flex items-center space-x-2 ${currentStep >= 3 ? 'text-orange-600' : 'text-gray-400'}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= 3 ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}>
+                                    3
+                                </div>
+                                <span className="font-semibold">Review</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Import Section - Only show if not completed */}
+                    {currentStep < 3 && (
+                        <ImportSection 
+                            onImport={handleImport}
+                            isVisible={showImportSection}
+                        />
+                    )}
+                    
+                    {/* Debug info - remove after testing */}
+                    <div style={{padding: '10px', backgroundColor: '#f0f0f0', margin: '10px 0', fontSize: '12px'}}>
+                        Debug: currentStep={currentStep}, showImportSection={showImportSection.toString()}, shouldShow={(currentStep < 3).toString()}
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="bg-white rounded-lg shadow-lg p-6 relative">
+                        <button
+                            onClick={resetActivity}
+                            className="absolute -top-2 -right-2 w-8 h-8 bg-gray-200 hover:bg-orange-500 hover:text-white rounded-full flex items-center justify-center transition-all duration-200 text-gray-600"
+                            title="Reset Activity"
+                        >
+                            <span className="text-lg font-bold">↻</span>
+                        </button>
+
+                        {currentStep === 1 && renderStep1()}
+                        {currentStep === 2 && renderStep2()}
+                        {currentStep === 3 && renderStep3()}
+                    </div>
+
+                    {/* Footer decoration */}
+                    <div className="mt-4 text-center">
+                        <div className="w-12 h-12 mx-auto bg-white bg-opacity-30 rounded-full flex items-center justify-center">
+                            <div className="w-8 h-8 border-4 border-white border-opacity-50 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<CustomerAlternativeActivity />, document.getElementById('root'));
+    </script>
+</body>
+</html>

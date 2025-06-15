@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Landing Zone Analysis</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .lucide-icon {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .landing-zone {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .landing-zone:hover {
+            filter: brightness(1.1);
+        }
+        .marker {
+            cursor: move;
+            transition: transform 0.2s ease;
+        }
+        .marker:hover {
+            transform: scale(1.1);
+        }
+        .marker-competitor {
+            filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.2));
+        }
+        .marker-underserved {
+            filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.2));
+        }
+        .marker-strategic {
+            filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.3));
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useRef, useEffect } = React;
+
+        // Progress Code System - Encoding/Decoding Functions
+        const encodeProgressCode = (workshopData) => {
+            try {
+                const jsonString = JSON.stringify(workshopData);
+                const base64 = btoa(jsonString);
+                return `GSAP2025-${base64}`;
+            } catch (error) {
+                console.error('Error encoding progress code:', error);
+                return null;
+            }
+        };
+
+        const decodeProgressCode = (code) => {
+            try {
+                console.log('🔧 decodeProgressCode called with:', code?.substring(0, 50) + '...');
+                
+                // Handle both old and new formats
+                let jsonString;
+                
+                if (code.startsWith('GSAP2025-')) {
+                    // New format with prefix
+                    const base64 = code.substring(9);
+                    console.log('🔧 New format - extracted base64 part, length:', base64.length);
+                    jsonString = atob(base64);
+                } else {
+                    // Old format without prefix - handle legacy codes
+                    console.log('🔧 Legacy format detected - migrating...');
+                    const base64 = code.replace(/-/g, '+').replace(/_/g, '/');
+                    const padding = (4 - (base64.length % 4)) % 4;
+                    const paddedBase64 = base64 + '='.repeat(padding);
+                    jsonString = atob(paddedBase64);
+                }
+                
+                console.log('🔧 Decoded to JSON string, length:', jsonString.length);
+                const parsed = JSON.parse(jsonString);
+                
+                // Migrate old nested format to new flat format
+                if (parsed.workshops) {
+                    console.log('🔧 Migrating old nested format to new flat format');
+                    const migrated = {
+                        version: "1.0",
+                        createdAt: new Date().toISOString(),
+                        lastUpdated: new Date().toISOString(),
+                        day1: parsed.workshops.day1 || {},
+                        day2_1: parsed.workshops.day2_1 || {},
+                        day2_2: parsed.workshops.day2_2 || {},
+                        day3: parsed.workshops.day3 || {}
+                    };
+                    console.log('✅ Migration complete');
+                    return migrated;
+                }
+                
+                console.log('✅ Successfully parsed JSON');
+                return parsed;
+            } catch (error) {
+                console.error('❌ Error decoding progress code:', error.message);
+                console.error('❌ Full error:', error);
+                return null;
+            }
+        };
+
+        // Icon components
+        const Target = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="6"/>
+                <circle cx="12" cy="12" r="2"/>
+            </svg>
+        );
+
+        const Flag = ({ size = 20, className = "", fill = "none" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2">
+                <path d="M4 22V4c0 0 3-2 6-2 4 0 6 3 10 3 2 0 4-1 4-1v11c0 0-2 1-4 1-4 0-6-3-10-3-3 0-6 2-6 2" />
+                <line x1="4" y1="22" x2="4" y2="15" />
+            </svg>
+        );
+
+
+        const MapPin = ({ size = 20, className = "", fill = "none" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+            </svg>
+        );
+
+
+        const Award = ({ size = 20, className = "", fill = "none" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="8" r="7"/>
+                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+            </svg>
+        );
+
+        const Lightbulb = ({ size = 20, className = "", fill = "none" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2">
+                <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
+                <path d="M9 18h6"/>
+                <path d="M10 22h4"/>
+            </svg>
+        );
+
+        const ArrowRight = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+            </svg>
+        );
+
+        const FileText = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14,2 14,8 20,8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <line x1="10" y1="9" x2="8" y2="9"/>
+            </svg>
+        );
+
+        const Download = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7,10 12,15 17,10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+        );
+
+        const HelpCircle = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+        );
+
+        const X = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        );
+
+        // ImportSection Component
+        const ImportSection = ({ onImport, autoHide = true }) => {
+            const [showImport, setShowImport] = useState(true);
+            const [importCode, setImportCode] = useState('');
+            const [importStatus, setImportStatus] = useState({ type: '', message: '' });
+            const [isStartingFresh, setIsStartingFresh] = useState(false);
+
+            const handleImport = () => {
+                if (!importCode.trim()) {
+                    setImportStatus({ type: 'error', message: 'Please enter a progress code' });
+                    return;
+                }
+
+                const data = decodeProgressCode(importCode.trim());
+                if (!data) {
+                    setImportStatus({ type: 'error', message: 'Invalid progress code format' });
+                    return;
+                }
+
+                // Check version compatibility - handle both old and new formats
+                if (data.version && data.version !== "1.0" && data.version !== 1) {
+                    setImportStatus({ type: 'error', message: 'Incompatible progress code version' });
+                    return;
+                }
+
+                onImport(data);
+                setImportStatus({ type: 'success', message: 'Progress imported successfully!' });
+                
+                if (autoHide) {
+                    setTimeout(() => setShowImport(false), 1500);
+                }
+            };
+
+            const handleStartFresh = () => {
+                setIsStartingFresh(true);
+                onImport(null);
+                setTimeout(() => setShowImport(false), 300);
+            };
+
+            if (!showImport) return null;
+
+            return (
+                <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-4">
+                    <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center">
+                            <FileText className="text-blue-600 mr-2" size={24} />
+                            <h3 className="text-lg font-semibold text-blue-900">Continue Your Progress</h3>
+                        </div>
+                        <button
+                            onClick={() => setShowImport(false)}
+                            className="text-blue-400 hover:text-blue-600"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
+                    
+                    <p className="text-blue-700 mb-3 text-sm">
+                        Have a progress code from Activity 1? Enter it below to continue with your saved data.
+                    </p>
+                    
+                    <div className="flex gap-2 mb-2">
+                        <input
+                            type="text"
+                            value={importCode}
+                            onChange={(e) => setImportCode(e.target.value)}
+                            placeholder="Enter your progress code..."
+                            className="flex-1 px-3 py-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button
+                            onClick={handleImport}
+                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+                        >
+                            Import Progress
+                        </button>
+                    </div>
+                    
+                    {importStatus.message && (
+                        <div className={`text-sm mt-2 ${importStatus.type === 'error' ? 'text-red-600' : 'text-green-600'}`}>
+                            {importStatus.message}
+                        </div>
+                    )}
+                    
+                    <div className="text-center mt-3">
+                        <button
+                            onClick={handleStartFresh}
+                            className="text-blue-600 hover:text-blue-800 text-sm underline"
+                        >
+                            {isStartingFresh ? 'Starting fresh...' : 'Or start fresh without importing →'}
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // ExportSection Component
+        const ExportSection = ({ data, show }) => {
+            const [copied, setCopied] = useState(false);
+            const [showHelp, setShowHelp] = useState(false);
+
+            if (!show) return null;
+
+            const progressCode = encodeProgressCode(data);
+
+            const copyToClipboard = async () => {
+                try {
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        await navigator.clipboard.writeText(progressCode);
+                        setCopied(true);
+                    } else {
+                        // Fallback for Safari
+                        const textArea = document.createElement('textarea');
+                        textArea.value = progressCode;
+                        textArea.style.position = 'fixed';
+                        textArea.style.opacity = '0';
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        try {
+                            document.execCommand('copy');
+                            setCopied(true);
+                        } catch (err) {
+                            console.error('Fallback copy failed:', err);
+                        }
+                        document.body.removeChild(textArea);
+                    }
+                    setTimeout(() => setCopied(false), 2000);
+                } catch (err) {
+                    console.error('Failed to copy:', err);
+                }
+            };
+
+            return (
+                <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4 mt-4">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center">
+                            <Download className="text-green-600 mr-2" size={24} />
+                            <h3 className="text-lg font-semibold text-green-900">Activity Complete! Save Your Progress</h3>
+                        </div>
+                        <button
+                            onClick={() => setShowHelp(!showHelp)}
+                            className="text-green-600 hover:text-green-800"
+                            title="What's this?"
+                        >
+                            <HelpCircle size={20} />
+                        </button>
+                    </div>
+                    
+                    {showHelp && (
+                        <div className="bg-green-100 rounded p-3 mb-3 text-sm text-green-800">
+                            <p className="font-semibold mb-1">What is a Progress Code?</p>
+                            <p>Your Progress Code saves all your workshop data in a secure, portable format. Use it to:</p>
+                            <ul className="list-disc ml-5 mt-1">
+                                <li>Continue in the next activity without re-entering data</li>
+                                <li>Return to any workshop later</li>
+                                <li>Share progress with team members or instructors</li>
+                            </ul>
+                        </div>
+                    )}
+                    
+                    <p className="text-green-700 mb-3 text-sm">
+                        Copy this code to continue in the next activity:
+                    </p>
+                    
+                    <div className="bg-white border border-green-300 rounded p-3 mb-3 font-mono text-xs break-all">
+                        {progressCode}
+                    </div>
+                    
+                    <button
+                        onClick={copyToClipboard}
+                        className={`w-full py-2 rounded font-semibold transition-colors ${
+                            copied 
+                                ? 'bg-green-600 text-white' 
+                                : 'bg-green-500 text-white hover:bg-green-600'
+                        }`}
+                    >
+                        {copied ? '✓ Copied!' : 'Copy Progress Code'}
+                    </button>
+                </div>
+            );
+        };
+
+        // Word count and validation utility
+        const getWordCount = (text) => {
+            return text.trim().split(/\s+/).filter(w => w.length > 0).length;
+        };
+
+        const renderWordCountFeedback = (text, minWords, fieldId) => {
+            const wordCount = getWordCount(text);
+            const isValid = wordCount >= minWords;
+            
+            return (
+                <div className="flex justify-between items-center mt-2 text-sm">
+                    <span className="text-gray-500">
+                        (describe in {minWords}+ words)
+                    </span>
+                    {isValid ? (
+                        <div className="flex items-center text-green-600">
+                            <div className="w-4 h-4 mr-1 flex items-center justify-center">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-full h-full">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22,4 12,14.01 9,11.01"/>
+                                </svg>
+                            </div>
+                            <span>{wordCount} words</span>
+                        </div>
+                    ) : (
+                        <span className="text-gray-400">
+                            {wordCount} words
+                        </span>
+                    )}
+                </div>
+            );
+        };
+
+        const MarketLandingZoneAnalysis = () => {
+            const [currentStep, setCurrentStep] = useState(1);
+            const [showInstructions, setShowInstructions] = useState(true);
+            const [selectedMarkerType, setSelectedMarkerType] = useState('competitor');
+            const [markers, setMarkers] = useState([]);
+            const [activeMarkerIndex, setActiveMarkerIndex] = useState(null);
+            const [justification, setJustification] = useState('');
+            const [landingZoneChoice, setLandingZoneChoice] = useState('');
+            const [evidence, setEvidence] = useState('');
+            const [hasPlacedStrategic, setHasPlacedStrategic] = useState(false);
+            const [importedData, setImportedData] = useState(null);
+            const [exportData, setExportData] = useState(null);
+            const [activityComplete, setActivityComplete] = useState(false);
+            
+            const diagramRef = useRef(null);
+
+            // Handle import
+            const handleImport = (data) => {
+                if (data) {
+                    setImportedData(data);
+                    console.log('[Problems-2] Imported data:', data);
+                    
+                    // Restore Activity 2 data if it exists (handle both old and new formats)
+                    const activity2Data = data.day1?.activity2 || data.workshops?.day1?.activity2;
+                    if (activity2Data) {
+                        setMarkers(activity2Data.markers || []);
+                        setLandingZoneChoice(activity2Data.landingZoneChoice || '');
+                        setEvidence(activity2Data.evidence || '');
+                        
+                        // Check if strategic marker exists
+                        const hasStrategic = (activity2Data.markers || []).some(m => m.type === 'strategic');
+                        setHasPlacedStrategic(hasStrategic);
+                    }
+                } else {
+                    console.log('[Problems-2] Starting fresh - no import');
+                }
+            };
+            
+            const handleAddMarker = (e) => {
+                if (!diagramRef.current) return;
+                
+                const rect = diagramRef.current.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                // Limit strategic markers to one
+                if (selectedMarkerType === 'strategic' && markers.some(m => m.type === 'strategic')) {
+                    // Replace the existing strategic marker
+                    setMarkers(prev => [
+                        ...prev.filter(m => m.type !== 'strategic'),
+                        { id: Date.now(), type: selectedMarkerType, x, y, notes: '' }
+                    ]);
+                    setHasPlacedStrategic(true);
+                } else {
+                    setMarkers(prev => [
+                        ...prev,
+                        { id: Date.now(), type: selectedMarkerType, x, y, notes: '' }
+                    ]);
+                    if (selectedMarkerType === 'strategic') {
+                        setHasPlacedStrategic(true);
+                    }
+                }
+            };
+            
+            const handleMarkerClick = (index) => {
+                setActiveMarkerIndex(index);
+            };
+            
+            const handleMarkerDrag = (e, index) => {
+                if (!diagramRef.current) return;
+                
+                const rect = diagramRef.current.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                setMarkers(prev => prev.map((marker, i) => 
+                    i === index ? { ...marker, x, y } : marker
+                ));
+            };
+            
+            const handleDeleteMarker = (index) => {
+                setMarkers(prev => {
+                    const newMarkers = [...prev];
+                    const deletedMarker = newMarkers.splice(index, 1)[0];
+                    if (deletedMarker.type === 'strategic') {
+                        setHasPlacedStrategic(false);
+                    }
+                    return newMarkers;
+                });
+                setActiveMarkerIndex(null);
+            };
+            
+            const handleMarkerNotesChange = (notes) => {
+                if (activeMarkerIndex === null) return;
+                
+                console.log('Updating marker notes:', notes, 'for index:', activeMarkerIndex);
+                setMarkers(prev => {
+                    const updated = prev.map((marker, i) => 
+                        i === activeMarkerIndex ? { ...marker, notes } : marker
+                    );
+                    console.log('Updated markers:', updated);
+                    return updated;
+                });
+            };
+            
+            const resetActivity = () => {
+                setCurrentStep(1);
+                setShowInstructions(true);
+                setSelectedMarkerType('competitor');
+                setMarkers([]);
+                setActiveMarkerIndex(null);
+                setJustification('');
+                setLandingZoneChoice('');
+                setEvidence('');
+                setHasPlacedStrategic(false);
+            };
+            
+            const isReadyForNextStep = () => {
+                if (currentStep === 1) {
+                    return markers.some(m => m.type === 'competitor') && 
+                           markers.some(m => m.type === 'underserved');
+                } else if (currentStep === 2) {
+                    return hasPlacedStrategic;
+                } else if (currentStep === 3) {
+                    return landingZoneChoice && getWordCount(evidence) >= 10;
+                }
+                return false;
+            };
+            
+            const renderMarker = (marker, index) => {
+                const isActive = activeMarkerIndex === index;
+                let markerIcon;
+                
+                switch(marker.type) {
+                    case 'competitor':
+                        markerIcon = <Flag 
+                            size={isActive ? 32 : 28} 
+                            className="marker-competitor text-gray-700" 
+                            fill={isActive ? "#f59e0b30" : "#64748b20"}
+                        />;
+                        break;
+                    case 'underserved':
+                        markerIcon = <Lightbulb 
+                            size={isActive ? 32 : 28} 
+                            className="marker-underserved text-blue-600" 
+                            fill={isActive ? "#3b82f630" : "#3b82f620"}
+                        />;
+                        break;
+                    case 'strategic':
+                        markerIcon = <MapPin 
+                            size={isActive ? 36 : 32} 
+                            className="marker-strategic text-orange-600" 
+                            fill={isActive ? "#f97316" : "#f97316"}
+                        />;
+                        break;
+                    default:
+                        markerIcon = <div className="w-4 h-4 bg-black rounded-full" />;
+                }
+                
+                return (
+                    <div 
+                        key={marker.id}
+                        className={`marker absolute ${isActive ? 'z-30' : 'z-20'}`}
+                        style={{ 
+                            left: `${marker.x}px`, 
+                            top: `${marker.y}px`,
+                            transform: `translate(-50%, -50%) ${isActive ? 'scale(1.1)' : ''}`
+                        }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleMarkerClick(index);
+                        }}
+                        draggable="true"
+                        onDragStart={(e) => {
+                            // Set some required data for Firefox
+                            e.dataTransfer.setData('text/plain', '');
+                            handleMarkerClick(index);
+                        }}
+                        onDrag={(e) => {
+                            if (e.clientX === 0 && e.clientY === 0) return; // Ignore invalid drag events
+                            handleMarkerDrag(e, index);
+                        }}
+                    >
+                        {markerIcon}
+                    </div>
+                );
+            };
+            
+            const renderMarkerDetails = () => {
+                if (activeMarkerIndex === null) return null;
+                
+                const marker = markers[activeMarkerIndex];
+                const typeLabels = {
+                    competitor: 'Competitor Focus Area',
+                    underserved: 'Underserved Segment',
+                    strategic: 'Strategic Entry Point'
+                };
+                
+                const typeColors = {
+                    competitor: 'bg-gray-100 border-gray-300 text-gray-800',
+                    underserved: 'bg-blue-50 border-blue-200 text-blue-800',
+                    strategic: 'bg-orange-50 border-orange-300 text-orange-800'
+                };
+                
+                return (
+                    <div className={`mt-4 p-4 rounded-lg border ${typeColors[marker.type]}`}>
+                        <div className="flex justify-between items-start mb-3">
+                            <h4 className="font-semibold">{typeLabels[marker.type]}</h4>
+                            <button 
+                                onClick={() => handleDeleteMarker(activeMarkerIndex)}
+                                className="text-red-500 hover:text-red-700 text-xs"
+                            >
+                                Remove
+                            </button>
+                        </div>
+                        
+                        <label className="block text-sm font-medium mb-1">
+                            Notes about this {marker.type === 'competitor' ? 'competitor' : marker.type === 'underserved' ? 'opportunity' : 'strategic choice'}:
+                        </label>
+                        <textarea
+                            value={marker.notes}
+                            onChange={(e) => handleMarkerNotesChange(e.target.value)}
+                            className="w-full h-20 p-2 border border-gray-300 rounded text-sm placeholder-gray-400"
+                            placeholder={marker.type === 'competitor' 
+                                ? "Who is this competitor and what segment are they targeting?"
+                                : marker.type === 'underserved'
+                                ? "Why is this segment underserved? What needs aren't being met?"
+                                : "Why is this a strategic entry point for your product?"
+                            }
+                        />
+                        {renderWordCountFeedback(marker.notes, 5, `marker-${activeMarkerIndex}`)}
+                    </div>
+                );
+            };
+            
+            const renderStep1 = () => (
+                <div className="space-y-6">
+                    <div className="text-center mb-4">
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">
+                            Map Your Market Landscape
+                        </h3>
+                        <p className="text-gray-600">
+                            Mark where competitors are focusing and where customers are underserved
+                        </p>
+                    </div>
+                    
+                    {showInstructions && (
+                        <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-6">
+                            <div className="flex justify-between items-start">
+                                <h4 className="font-semibold text-blue-800 mb-2">Instructions</h4>
+                                <button 
+                                    onClick={() => setShowInstructions(false)}
+                                    className="text-blue-500 hover:text-blue-700 text-xs"
+                                >
+                                    Hide
+                                </button>
+                            </div>
+                            <ol className="list-decimal list-inside text-blue-700 space-y-2 ml-2">
+                                <li>Select "Competitor Focus" from the toolbar</li>
+                                <li>Click on the diagram to place markers where competitors are focusing</li>
+                                <li>Switch to "Underserved Segment" and mark areas with unmet needs</li>
+                                <li>Add notes to each marker for more context</li>
+                            </ol>
+                        </div>
+                    )}
+                    
+                    <div className="flex space-x-4 mb-4">
+                        <button
+                            className={`px-3 py-2 rounded-lg flex items-center ${
+                                selectedMarkerType === 'competitor' 
+                                    ? 'bg-gray-700 text-white' 
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                            onClick={() => setSelectedMarkerType('competitor')}
+                        >
+                            <Flag className="mr-2" size={16} />
+                            <span>Competitor Focus</span>
+                        </button>
+                        
+                        <button
+                            className={`px-3 py-2 rounded-lg flex items-center ${
+                                selectedMarkerType === 'underserved' 
+                                    ? 'bg-blue-600 text-white' 
+                                    : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                            }`}
+                            onClick={() => setSelectedMarkerType('underserved')}
+                        >
+                            <Lightbulb className="mr-2" size={16} />
+                            <span>Underserved Segment</span>
+                        </button>
+                    </div>
+                    
+                    <div 
+                        ref={diagramRef}
+                        className="relative w-full h-[400px] border-2 border-gray-200 rounded-xl bg-white overflow-hidden"
+                        onClick={handleAddMarker}
+                    >
+                        {/* Diagram background with three overlapping circles */}
+                        <svg width="100%" height="100%" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
+                            <defs>
+                                <radialGradient id="gradient-mainstream" cx="0.5" cy="0.5" r="0.5" fx="0.5" fy="0.5">
+                                    <stop offset="0%" stopColor="#f8fafc" />
+                                    <stop offset="100%" stopColor="#e2e8f0" />
+                                </radialGradient>
+                                <radialGradient id="gradient-lowend" cx="0.5" cy="0.5" r="0.5" fx="0.5" fy="0.5">
+                                    <stop offset="0%" stopColor="#f8fafc" />
+                                    <stop offset="100%" stopColor="#dbeafe" />
+                                </radialGradient>
+                                <radialGradient id="gradient-new" cx="0.5" cy="0.5" r="0.5" fx="0.5" fy="0.5">
+                                    <stop offset="0%" stopColor="#f8fafc" />
+                                    <stop offset="100%" stopColor="#ffedd5" />
+                                </radialGradient>
+                            </defs>
+                            
+                            {/* Mainstream Market Circle */}
+                            <circle cx="120" cy="140" r="110" fill="url(#gradient-mainstream)" fillOpacity="0.7" stroke="#94a3b8" strokeWidth="2" className="landing-zone" />
+                            <text x="120" y="70" textAnchor="middle" fill="#334155" fontWeight="bold">Mainstream Market</text>
+                            
+                            {/* Low-end Market Circle */}
+                            <circle cx="280" cy="140" r="110" fill="url(#gradient-lowend)" fillOpacity="0.7" stroke="#93c5fd" strokeWidth="2" className="landing-zone" />
+                            <text x="280" y="70" textAnchor="middle" fill="#2563eb" fontWeight="bold">Low-end Market</text>
+                            
+                            {/* New/Overlooked Segments Circle */}
+                            <circle cx="200" cy="280" r="110" fill="url(#gradient-new)" fillOpacity="0.7" stroke="#fdba74" strokeWidth="2" className="landing-zone" />
+                            <text x="200" y="360" textAnchor="middle" fill="#ea580c" fontWeight="bold">New/Overlooked Segments</text>
+                            
+                            {/* Center overlap highlight */}
+                            <circle cx="200" cy="187" r="25" fill="#fff" fillOpacity="0.3" stroke="none" />
+                        </svg>
+                        
+                        {/* Render all placed markers */}
+                        {markers.map((marker, index) => renderMarker(marker, index))}
+                    </div>
+                    
+                    {/* Marker details section */}
+                    {renderMarkerDetails()}
+                    
+                    {/* Navigation */}
+                    <div className="flex justify-between mt-6">
+                        <button
+                            onClick={() => setShowInstructions(!showInstructions)}
+                            className="text-gray-500 hover:text-gray-700"
+                        >
+                            {showInstructions ? 'Hide Instructions' : 'Show Instructions'}
+                        </button>
+                        
+                        <button
+                            onClick={() => setCurrentStep(2)}
+                            disabled={!isReadyForNextStep()}
+                            className={`px-4 py-2 rounded-lg flex items-center ${
+                                isReadyForNextStep()
+                                    ? 'bg-orange-500 text-white hover:bg-orange-600'
+                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            }`}
+                        >
+                            <span>Continue</span>
+                            <ArrowRight className="ml-2" size={16} />
+                        </button>
+                    </div>
+                </div>
+            );
+            
+            const renderStep2 = () => (
+                <div className="space-y-6">
+                    <div className="text-center mb-4">
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">
+                            Identify Your Strategic Entry Point
+                        </h3>
+                        <p className="text-gray-600">
+                            Place a strategic entry point marker where your product should focus
+                        </p>
+                    </div>
+                    
+                    <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-4 mb-6">
+                        <h4 className="font-semibold text-orange-800 mb-2">Instructions</h4>
+                        <ol className="list-decimal list-inside text-orange-700 space-y-2 ml-2">
+                            <li>Examine where competitors are focusing and where segments are underserved</li>
+                            <li>Click on the diagram to place your strategic entry point</li>
+                            <li>Add notes explaining why this is your best market entry strategy</li>
+                        </ol>
+                    </div>
+                    
+                    <div className="flex justify-center mb-4">
+                        <button
+                            className="px-4 py-2 rounded-lg flex items-center bg-orange-500 text-white"
+                            onClick={() => setSelectedMarkerType('strategic')}
+                        >
+                            <MapPin className="mr-2" size={18} fill="#ffffff50" />
+                            <span>Strategic Entry Point</span>
+                        </button>
+                    </div>
+                    
+                    <div 
+                        ref={diagramRef}
+                        className="relative w-full h-[400px] border-2 border-gray-200 rounded-xl bg-white overflow-hidden"
+                        onClick={handleAddMarker}
+                    >
+                        {/* Diagram background with three overlapping circles */}
+                        <svg width="100%" height="100%" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
+                            <defs>
+                                <radialGradient id="gradient-mainstream" cx="0.5" cy="0.5" r="0.5" fx="0.5" fy="0.5">
+                                    <stop offset="0%" stopColor="#f8fafc" />
+                                    <stop offset="100%" stopColor="#e2e8f0" />
+                                </radialGradient>
+                                <radialGradient id="gradient-lowend" cx="0.5" cy="0.5" r="0.5" fx="0.5" fy="0.5">
+                                    <stop offset="0%" stopColor="#f8fafc" />
+                                    <stop offset="100%" stopColor="#dbeafe" />
+                                </radialGradient>
+                                <radialGradient id="gradient-new" cx="0.5" cy="0.5" r="0.5" fx="0.5" fy="0.5">
+                                    <stop offset="0%" stopColor="#f8fafc" />
+                                    <stop offset="100%" stopColor="#ffedd5" />
+                                </radialGradient>
+                            </defs>
+                            
+                            {/* Mainstream Market Circle */}
+                            <circle cx="120" cy="140" r="110" fill="url(#gradient-mainstream)" fillOpacity="0.7" stroke="#94a3b8" strokeWidth="2" className="landing-zone" />
+                            <text x="120" y="70" textAnchor="middle" fill="#334155" fontWeight="bold">Mainstream Market</text>
+                            
+                            {/* Low-end Market Circle */}
+                            <circle cx="280" cy="140" r="110" fill="url(#gradient-lowend)" fillOpacity="0.7" stroke="#93c5fd" strokeWidth="2" className="landing-zone" />
+                            <text x="280" y="70" textAnchor="middle" fill="#2563eb" fontWeight="bold">Low-end Market</text>
+                            
+                            {/* New/Overlooked Segments Circle */}
+                            <circle cx="200" cy="280" r="110" fill="url(#gradient-new)" fillOpacity="0.7" stroke="#fdba74" strokeWidth="2" className="landing-zone" />
+                            <text x="200" y="360" textAnchor="middle" fill="#ea580c" fontWeight="bold">New/Overlooked Segments</text>
+                            
+                            {/* Center overlap highlight */}
+                            <circle cx="200" cy="187" r="25" fill="#fff" fillOpacity="0.3" stroke="none" />
+                        </svg>
+                        
+                        {/* Render all placed markers */}
+                        {markers.map((marker, index) => renderMarker(marker, index))}
+                    </div>
+                    
+                    {/* Marker details section */}
+                    {renderMarkerDetails()}
+                    
+                    {/* Strategic Entry Point Notes - Always Visible */}
+                    <div className="mt-6 p-4 rounded-lg border bg-orange-50 border-orange-300 text-orange-800">
+                        <h4 className="font-semibold mb-3">Strategy Entry Point - Notes about this strategic choice:</h4>
+                        <textarea
+                            value={(() => {
+                                const strategicMarker = markers.find(m => m.type === 'strategic');
+                                return strategicMarker ? strategicMarker.notes : '';
+                            })()}
+                            onChange={(e) => {
+                                const strategicMarkerIndex = markers.findIndex(m => m.type === 'strategic');
+                                if (strategicMarkerIndex !== -1) {
+                                    // Update existing strategic marker
+                                    setMarkers(prev => prev.map((marker, i) => 
+                                        i === strategicMarkerIndex ? { ...marker, notes: e.target.value } : marker
+                                    ));
+                                } else {
+                                    // Create a new strategic marker at center of diagram if none exists
+                                    setMarkers(prev => [
+                                        ...prev,
+                                        { 
+                                            id: Date.now(), 
+                                            type: 'strategic', 
+                                            x: 200, 
+                                            y: 187, 
+                                            notes: e.target.value 
+                                        }
+                                    ]);
+                                    setHasPlacedStrategic(true);
+                                }
+                            }}
+                            className="w-full h-24 p-3 border border-orange-300 rounded-lg text-sm placeholder-gray-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                            placeholder="Why is this a strategic entry point for your product? Explain your reasoning..."
+                        />
+                        {(() => {
+                            const strategicMarker = markers.find(m => m.type === 'strategic');
+                            const notes = strategicMarker ? strategicMarker.notes : '';
+                            return renderWordCountFeedback(notes, 5, 'strategic-notes');
+                        })()}
+                    </div>
+                    
+                    {/* Navigation */}
+                    <div className="flex justify-between mt-6">
+                        <button
+                            onClick={() => setCurrentStep(1)}
+                            className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+                        >
+                            Back
+                        </button>
+                        
+                        <button
+                            onClick={() => setCurrentStep(3)}
+                            disabled={!isReadyForNextStep()}
+                            className={`px-4 py-2 rounded-lg flex items-center ${
+                                isReadyForNextStep()
+                                    ? 'bg-orange-500 text-white hover:bg-orange-600'
+                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            }`}
+                        >
+                            <span>Continue</span>
+                            <ArrowRight className="ml-2" size={16} />
+                        </button>
+                    </div>
+                </div>
+            );
+            
+            const renderStep3 = () => (
+                <div className="space-y-6">
+                    <div className="text-center mb-4">
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">
+                            Justify Your Strategic Choice
+                        </h3>
+                        <p className="text-gray-600">
+                            Provide evidence for why your selected entry point is the best strategy
+                        </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <div 
+                                className="relative w-full h-[300px] border-2 border-gray-200 rounded-xl bg-white overflow-hidden mb-4"
+                            >
+                                {/* Diagram background with three overlapping circles */}
+                                <svg width="100%" height="100%" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
+                                    <defs>
+                                        <radialGradient id="gradient-mainstream" cx="0.5" cy="0.5" r="0.5" fx="0.5" fy="0.5">
+                                            <stop offset="0%" stopColor="#f8fafc" />
+                                            <stop offset="100%" stopColor="#e2e8f0" />
+                                        </radialGradient>
+                                        <radialGradient id="gradient-lowend" cx="0.5" cy="0.5" r="0.5" fx="0.5" fy="0.5">
+                                            <stop offset="0%" stopColor="#f8fafc" />
+                                            <stop offset="100%" stopColor="#dbeafe" />
+                                        </radialGradient>
+                                        <radialGradient id="gradient-new" cx="0.5" cy="0.5" r="0.5" fx="0.5" fy="0.5">
+                                            <stop offset="0%" stopColor="#f8fafc" />
+                                            <stop offset="100%" stopColor="#ffedd5" />
+                                        </radialGradient>
+                                    </defs>
+                                    
+                                    {/* Mainstream Market Circle */}
+                                    <circle cx="120" cy="140" r="110" fill="url(#gradient-mainstream)" fillOpacity="0.7" stroke="#94a3b8" strokeWidth="2" />
+                                    <text x="120" y="70" textAnchor="middle" fill="#334155" fontWeight="bold">Mainstream Market</text>
+                                    
+                                    {/* Low-end Market Circle */}
+                                    <circle cx="280" cy="140" r="110" fill="url(#gradient-lowend)" fillOpacity="0.7" stroke="#93c5fd" strokeWidth="2" />
+                                    <text x="280" y="70" textAnchor="middle" fill="#2563eb" fontWeight="bold">Low-end Market</text>
+                                    
+                                    {/* New/Overlooked Segments Circle */}
+                                    <circle cx="200" cy="280" r="110" fill="url(#gradient-new)" fillOpacity="0.7" stroke="#fdba74" strokeWidth="2" />
+                                    <text x="200" y="360" textAnchor="middle" fill="#ea580c" fontWeight="bold">New/Overlooked Segments</text>
+                                    
+                                    {/* Center overlap highlight */}
+                                    <circle cx="200" cy="187" r="25" fill="#fff" fillOpacity="0.3" stroke="none" />
+                                </svg>
+                                
+                                {/* Render all placed markers */}
+                                {markers.map((marker, index) => renderMarker(marker, index))}
+                            </div>
+                            
+                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                <h4 className="font-medium text-gray-800 mb-2">Marker Summary</h4>
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex items-start">
+                                        <Flag className="mr-2 text-gray-700 flex-shrink-0 mt-1" size={16} />
+                                        <div>
+                                            <p className="font-medium">Competitor Focus Areas:</p>
+                                            <p className="text-gray-600">{markers.filter(m => m.type === 'competitor').length} markers placed</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-start">
+                                        <Lightbulb className="mr-2 text-blue-600 flex-shrink-0 mt-1" size={16} />
+                                        <div>
+                                            <p className="font-medium">Underserved Segments:</p>
+                                            <p className="text-gray-600">{markers.filter(m => m.type === 'underserved').length} markers placed</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-start">
+                                        <MapPin className="mr-2 text-orange-600 flex-shrink-0 mt-1" size={16} fill="#f97316" />
+                                        <div>
+                                            <p className="font-medium">Strategic Entry Point:</p>
+                                            {(() => {
+                                                const strategicMarker = markers.find(m => m.type === 'strategic');
+                                                if (!strategicMarker) {
+                                                    return <p className="text-gray-500 italic">No strategic entry point placed</p>;
+                                                }
+                                                if (strategicMarker.notes && strategicMarker.notes.length > 0) {
+                                                    return <p className="text-gray-600">{strategicMarker.notes}</p>;
+                                                }
+                                                return <p className="text-gray-500 italic">No notes added</p>;
+                                            })()}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Which landing zone did you choose?
+                                </label>
+                                <select
+                                    value={landingZoneChoice}
+                                    onChange={(e) => setLandingZoneChoice(e.target.value)}
+                                    className="w-full p-2 border border-gray-300 rounded-lg"
+                                >
+                                    <option value="">Select a landing zone</option>
+                                    <option value="mainstream">Mainstream Market</option>
+                                    <option value="lowend">Low-end Market</option>
+                                    <option value="new">New/Overlooked Segments</option>
+                                    <option value="overlap">Overlap Between Segments</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    What evidence supports your choice?
+                                </label>
+                                <textarea
+                                    value={evidence}
+                                    onChange={(e) => setEvidence(e.target.value)}
+                                    className="w-full h-40 p-3 border border-gray-300 rounded-lg placeholder-gray-400"
+                                    placeholder="Explain why this landing zone matches your strengths and market opportunity. Consider:
+- What specific advantage do you have in this segment?
+- Why are customers underserved here?
+- How does your technology or approach fit this segment?"
+                                />
+                                {renderWordCountFeedback(evidence, 10, 'evidence')}
+                            </div>
+                            
+                            <div className="bg-orange-50 border-l-4 border-orange-500 p-4 mt-4">
+                                <h4 className="font-medium text-orange-800 mb-2">Strategic Entry Guidance</h4>
+                                <div className="text-sm text-orange-700">
+                                    <p className="mb-2"><strong>Mainstream Market:</strong> Requires a product 10-100x better than competitors</p>
+                                    <p className="mb-2"><strong>Low-end Market:</strong> Needs a simpler, cheaper alternative to mainstream offerings</p>
+                                    <p><strong>New/Overlooked Segments:</strong> Targets customers not yet served by existing solutions</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Navigation */}
+                    <div className="flex justify-between mt-6">
+                        <button
+                            onClick={() => setCurrentStep(2)}
+                            className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+                        >
+                            Back
+                        </button>
+                        
+                        <button
+                            onClick={() => setCurrentStep(4)}
+                            disabled={!isReadyForNextStep()}
+                            className={`px-4 py-2 rounded-lg flex items-center ${
+                                isReadyForNextStep()
+                                    ? 'bg-orange-500 text-white hover:bg-orange-600'
+                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            }`}
+                        >
+                            <span>Complete Analysis</span>
+                            <ArrowRight className="ml-2" size={16} />
+                        </button>
+                    </div>
+                </div>
+            );
+            
+            const renderStep4 = () => (
+                <div className="space-y-6">
+                    <div className="text-center mb-6">
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">
+                            Market Landing Zone Analysis Complete
+                        </h3>
+                        <p className="text-gray-600">
+                            Summary of your strategic market entry analysis
+                        </p>
+                    </div>
+                    
+                    <div className="bg-green-50 border-2 border-green-300 rounded-lg p-6 mb-6">
+                        <div className="flex items-center mb-4">
+                            <Award className="text-green-600 mr-2" size={24} fill="#22c55e30" />
+                            <h4 className="text-lg font-semibold text-green-800">Analysis Complete!</h4>
+                        </div>
+                        
+                        <p className="text-green-700 mb-4">You've successfully completed the Market Landing Zone Analysis. Here's your strategy:</p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <div 
+                                    className="relative w-full h-[250px] border-2 border-gray-200 rounded-xl bg-white overflow-hidden mb-4"
+                                >
+                                    {/* Diagram background with three overlapping circles */}
+                                    <svg width="100%" height="100%" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
+                                        <defs>
+                                            <radialGradient id="gradient-mainstream" cx="0.5" cy="0.5" r="0.5" fx="0.5" fy="0.5">
+                                                <stop offset="0%" stopColor="#f8fafc" />
+                                                <stop offset="100%" stopColor="#e2e8f0" />
+                                            </radialGradient>
+                                            <radialGradient id="gradient-lowend" cx="0.5" cy="0.5" r="0.5" fx="0.5" fy="0.5">
+                                                <stop offset="0%" stopColor="#f8fafc" />
+                                                <stop offset="100%" stopColor="#dbeafe" />
+                                            </radialGradient>
+                                            <radialGradient id="gradient-new" cx="0.5" cy="0.5" r="0.5" fx="0.5" fy="0.5">
+                                                <stop offset="0%" stopColor="#f8fafc" />
+                                                <stop offset="100%" stopColor="#ffedd5" />
+                                            </radialGradient>
+                                        </defs>
+                                        
+                                        {/* Mainstream Market Circle */}
+                                        <circle cx="150" cy="150" r="120" fill="url(#gradient-mainstream)" fillOpacity="0.7" stroke="#94a3b8" strokeWidth="2" />
+                                        <text x="150" y="80" textAnchor="middle" fill="#334155" fontWeight="bold">Mainstream Market</text>
+                                        
+                                        {/* Low-end Market Circle */}
+                                        <circle cx="250" cy="150" r="120" fill="url(#gradient-lowend)" fillOpacity="0.7" stroke="#93c5fd" strokeWidth="2" />
+                                        <text x="250" y="80" textAnchor="middle" fill="#2563eb" fontWeight="bold">Low-end Market</text>
+                                        
+                                        {/* New/Overlooked Segments Circle */}
+                                        <circle cx="200" cy="250" r="120" fill="url(#gradient-new)" fillOpacity="0.7" stroke="#fdba74" strokeWidth="2" />
+                                        <text x="200" y="330" textAnchor="middle" fill="#ea580c" fontWeight="bold">New/Overlooked Segments</text>
+                                        
+                                        {/* Center overlap highlight */}
+                                        <circle cx="200" cy="180" r="40" fill="#fff" fillOpacity="0.3" stroke="none" />
+                                    </svg>
+                                    
+                                    {/* Render all placed markers */}
+                                    {markers.map((marker, index) => renderMarker(marker, index))}
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div className="bg-white border border-green-200 rounded-lg p-4 mb-4">
+                                    <h5 className="font-medium text-green-800 mb-2">Strategic Entry Point</h5>
+                                    <p className="text-sm text-gray-700 mb-2">
+                                        <span className="font-semibold">Selected landing zone:</span> {
+                                            landingZoneChoice === 'mainstream' ? 'Mainstream Market' :
+                                            landingZoneChoice === 'lowend' ? 'Low-end Market' :
+                                            landingZoneChoice === 'new' ? 'New/Overlooked Segments' :
+                                            'Overlap Between Segments'
+                                        }
+                                    </p>
+                                    <p className="text-sm text-gray-700">
+                                        <span className="font-semibold">Strategic reasoning:</span> {evidence}
+                                    </p>
+                                </div>
+                                
+                                <div className="bg-white border border-green-200 rounded-lg p-4">
+                                    <h5 className="font-medium text-green-800 mb-2">Market Landscape</h5>
+                                    <p className="text-sm text-gray-700 mb-1">
+                                        <span className="font-semibold">Competitor focus areas:</span> {markers.filter(m => m.type === 'competitor').length}
+                                    </p>
+                                    <p className="text-sm text-gray-700">
+                                        <span className="font-semibold">Underserved segments:</span> {markers.filter(m => m.type === 'underserved').length}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="bg-orange-100 border-l-4 border-orange-500 p-4 mb-6">
+                        <div className="flex">
+                            <div className="flex-shrink-0">
+                                <svg className="h-5 w-5 text-orange-500" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <div className="ml-3">
+                                <h3 className="text-sm font-medium text-orange-800">Key Takeaway</h3>
+                                <div className="mt-2 text-sm text-orange-700">
+                                    <p>
+                                        Your market entry strategy is crucial for startup success. By targeting {
+                                            landingZoneChoice === 'mainstream' ? 'the mainstream market with a significantly better solution' :
+                                            landingZoneChoice === 'lowend' ? 'the low-end market with a simpler, more affordable solution' :
+                                            landingZoneChoice === 'new' ? 'new or overlooked segments not yet served by competitors' :
+                                            'the overlap between market segments where you can leverage unique advantages'
+                                        }, you've identified a strategic path forward that aligns with your strengths and market opportunities.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="text-center space-x-4">
+                        <button
+                            onClick={resetActivity}
+                            className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                        >
+                            Reset Activity
+                        </button>
+                        
+                        <button
+                            onClick={() => {
+                                if (!activityComplete) {
+                                    // Generate export data when completing the activity
+                                    const newExportData = {
+                                        version: "1.0",
+                                        createdAt: importedData?.createdAt || new Date().toISOString(),
+                                        lastUpdated: new Date().toISOString(),
+                                        day1: {
+                                            ...(importedData?.day1 || {}),
+                                            activity2: {
+                                                markers: markers,
+                                                landingZoneChoice: landingZoneChoice,
+                                                evidence: evidence,
+                                                completedAt: new Date().toISOString()
+                                            }
+                                        },
+                                        day2_1: importedData?.day2_1 || {},
+                                        day2_2: importedData?.day2_2 || {},
+                                        day3: importedData?.day3 || {}
+                                    };
+                                    setExportData(newExportData);
+                                    setActivityComplete(true);
+                                    console.log('[Problems-2] Export data generated:', newExportData);
+                                } else {
+                                    // If export data already generated, navigate to workshop
+                                    window.location.href = 'index.html';
+                                }
+                            }}
+                            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors font-semibold"
+                        >
+                            {activityComplete ? 'Return to Workshop' : 'Generate Code'}
+                        </button>
+                        
+                        <button
+                            onClick={() => window.location.href = 'problems-activity-3.html'}
+                            className="bg-orange-500 text-white px-8 py-3 rounded-lg hover:bg-orange-600 transition-colors font-semibold"
+                        >
+                            Continue to Next Activity
+                        </button>
+                    </div>
+                </div>
+            );
+            
+            return (
+                <div className="max-w-4xl mx-auto p-5 bg-gradient-to-br from-orange-100 to-orange-200 min-h-screen">
+                    {/* Header */}
+                    <div className="bg-white rounded-lg shadow-lg p-4 mb-4">
+                        <div className="flex justify-between items-center w-full mb-3">
+                            <a 
+                                href="index.html" 
+                                className="inline-flex items-center text-orange-600 hover:text-orange-700 transition-colors text-sm font-medium"
+                            >
+                                <span className="mr-1">←</span> Back to Workshop
+                            </a>
+                            <a 
+                                href="../" 
+                                className="inline-flex items-center text-gray-600 hover:text-orange-700 transition-colors text-sm font-medium"
+                            >
+                                All GTM Workshops <span className="ml-1">↑</span>
+                            </a>
+                        </div>
+                        <div className="flex items-center justify-between mb-3">
+                            <h1 className="text-2xl font-bold text-gray-800">
+                                Activity 2: Market Landing Zone Analysis
+                            </h1>
+                        </div>
+                        
+                        {/* Progress indicator */}
+                        <div className="flex items-center space-x-4">
+                            <div className={`flex items-center space-x-2 ${currentStep >= 1 ? 'text-orange-600' : 'text-gray-400'}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= 1 ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}>
+                                    1
+                                </div>
+                                <span className="font-semibold">Map Market</span>
+                            </div>
+                            <div className="flex-1 h-1 bg-gray-200 rounded">
+                                <div className={`h-full bg-orange-500 rounded transition-all duration-300 ${
+                                    currentStep === 1 ? 'w-0' : currentStep === 2 ? 'w-1/3' : currentStep === 3 ? 'w-2/3' : 'w-full'
+                                }`}></div>
+                            </div>
+                            <div className={`flex items-center space-x-2 ${currentStep >= 2 ? 'text-orange-600' : 'text-gray-400'}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= 2 ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}>
+                                    2
+                                </div>
+                                <span className="font-semibold">Strategic Entry</span>
+                            </div>
+                            <div className="flex-1 h-1 bg-gray-200 rounded">
+                                <div className={`h-full bg-orange-500 rounded transition-all duration-300 ${
+                                    currentStep <= 2 ? 'w-0' : currentStep === 3 ? 'w-1/2' : 'w-full'
+                                }`}></div>
+                            </div>
+                            <div className={`flex items-center space-x-2 ${currentStep >= 3 ? 'text-orange-600' : 'text-gray-400'}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= 3 ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}>
+                                    3
+                                </div>
+                                <span className="font-semibold">Justification</span>
+                            </div>
+                            <div className="flex-1 h-1 bg-gray-200 rounded">
+                                <div className={`h-full bg-orange-500 rounded transition-all duration-300 ${currentStep >= 4 ? 'w-full' : 'w-0'}`}></div>
+                            </div>
+                            <div className={`flex items-center space-x-2 ${currentStep >= 4 ? 'text-orange-600' : 'text-gray-400'}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= 4 ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}>
+                                    4
+                                </div>
+                                <span className="font-semibold">Summary</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Import Section */}
+                    {currentStep === 1 && <ImportSection onImport={handleImport} />}
+
+                    {/* Main Content */}
+                    <div className="bg-white rounded-lg shadow-lg p-5 relative">
+                        <button
+                            onClick={resetActivity}
+                            className="absolute -top-2 -right-2 w-8 h-8 bg-gray-200 hover:bg-orange-500 hover:text-white rounded-full flex items-center justify-center transition-all duration-200 text-gray-600"
+                            title="Reset Activity"
+                        >
+                            <span className="text-lg font-bold">↻</span>
+                        </button>
+
+                        {currentStep === 1 && renderStep1()}
+                        {currentStep === 2 && renderStep2()}
+                        {currentStep === 3 && renderStep3()}
+                        {currentStep === 4 && renderStep4()}
+                        
+                        {/* Export Section - show after completing step 4 */}
+                        {currentStep === 4 && activityComplete && (
+                            <ExportSection data={exportData} show={true} />
+                        )}
+                    </div>
+
+                    {/* Footer decoration */}
+                    <div className="mt-4 text-center">
+                        <div className="w-12 h-12 mx-auto bg-white bg-opacity-30 rounded-full flex items-center justify-center">
+                            <div className="w-8 h-8 border-4 border-white border-opacity-50 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Get the container element
+        const container = document.getElementById('root');
+
+        // Create a root
+        const root = ReactDOM.createRoot(container);
+
+        // Render the app
+        root.render(<MarketLandingZoneAnalysis />);
+    </script>
+</body>
+</html>

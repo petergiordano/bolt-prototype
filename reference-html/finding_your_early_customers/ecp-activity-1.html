@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECP Activity: Early Market vs Mainstream</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .lucide-icon {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Progress Code System - Encoding/Decoding Functions
+        const encodeProgressCode = (workshopData) => {
+            try {
+                const jsonString = JSON.stringify(workshopData);
+                const base64 = btoa(jsonString);
+                return `GSAP2025-${base64}`;
+            } catch (error) {
+                console.error('Error encoding progress code:', error);
+                return null;
+            }
+        };
+
+        const decodeProgressCode = (code) => {
+            try {
+                console.log('🔧 decodeProgressCode called with:', code?.substring(0, 50) + '...');
+                
+                // Handle both old and new formats
+                let jsonString;
+                
+                if (code.startsWith('GSAP2025-')) {
+                    // New format with prefix
+                    const base64 = code.substring(9);
+                    console.log('🔧 New format - extracted base64 part, length:', base64.length);
+                    jsonString = atob(base64);
+                } else {
+                    // Old format without prefix - handle legacy codes
+                    console.log('🔧 Legacy format detected - migrating...');
+                    const base64 = code.replace(/-/g, '+').replace(/_/g, '/');
+                    const padding = (4 - (base64.length % 4)) % 4;
+                    const paddedBase64 = base64 + '='.repeat(padding);
+                    jsonString = atob(paddedBase64);
+                }
+                
+                console.log('🔧 Decoded to JSON string, length:', jsonString.length);
+                const parsed = JSON.parse(jsonString);
+                
+                // Migrate old nested format to new flat format
+                if (parsed.workshops) {
+                    console.log('🔧 Migrating old nested format to new flat format');
+                    const migrated = {
+                        version: "1.0",
+                        createdAt: new Date().toISOString(),
+                        lastUpdated: new Date().toISOString(),
+                        day1: parsed.workshops.day1 || {},
+                        day2_1: parsed.workshops.day2_1 || {},
+                        day2_2: parsed.workshops.day2_2 || {},
+                        day3: parsed.workshops.day3 || {}
+                    };
+                    console.log('✅ Migration complete');
+                    return migrated;
+                }
+                
+                console.log('✅ Successfully parsed JSON');
+                return parsed;
+            } catch (error) {
+                console.error('❌ Error decoding progress code:', error.message);
+                console.error('❌ Full error:', error);
+                return null;
+            }
+        };
+
+        // Simple icon components as SVGs
+        const Clock = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12,6 12,12 16,14"/>
+            </svg>
+        );
+
+        const Target = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="6"/>
+                <circle cx="12" cy="12" r="2"/>
+            </svg>
+        );
+
+        const Users = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+        );
+
+        const CheckCircle = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22,4 12,14.01 9,11.01"/>
+            </svg>
+        );
+
+        const FileText = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14,2 14,8 20,8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <line x1="10" y1="9" x2="8" y2="9"/>
+            </svg>
+        );
+
+        const Download = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7,10 12,15 17,10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+        );
+
+        const HelpCircle = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+        );
+
+        const X = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        );
+
+        // ImportSection Component
+        const ImportSection = ({ onImport, autoHide = true }) => {
+            const [showImport, setShowImport] = useState(true);
+            const [importCode, setImportCode] = useState('');
+            const [importStatus, setImportStatus] = useState({ type: '', message: '' });
+            const [isStartingFresh, setIsStartingFresh] = useState(false);
+
+            const handleImport = () => {
+                if (!importCode.trim()) {
+                    setImportStatus({ type: 'error', message: 'Please enter a progress code' });
+                    return;
+                }
+
+                const data = decodeProgressCode(importCode.trim());
+                if (!data) {
+                    setImportStatus({ type: 'error', message: 'Invalid progress code format' });
+                    return;
+                }
+
+                // Check version compatibility - handle both old and new formats
+                if (data.version && data.version !== "1.0" && data.version !== 1) {
+                    setImportStatus({ type: 'error', message: 'Incompatible progress code version' });
+                    return;
+                }
+
+                onImport(data);
+                setImportStatus({ type: 'success', message: 'Progress imported successfully!' });
+                
+                if (autoHide) {
+                    setTimeout(() => setShowImport(false), 1500);
+                }
+            };
+
+            const handleStartFresh = () => {
+                setIsStartingFresh(true);
+                onImport(null);
+                setTimeout(() => setShowImport(false), 300);
+            };
+
+            if (!showImport) return null;
+
+            return (
+                <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-4">
+                    <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center">
+                            <FileText className="text-blue-600 mr-2" size={24} />
+                            <h3 className="text-lg font-semibold text-blue-900">Continue Your Progress</h3>
+                        </div>
+                        <button
+                            onClick={() => setShowImport(false)}
+                            className="text-blue-400 hover:text-blue-600"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
+                    
+                    <p className="text-blue-700 mb-3 text-sm">
+                        Have a progress code from Day 1? Enter it below to continue with your saved data.
+                    </p>
+                    
+                    <div className="flex gap-2 mb-2">
+                        <input
+                            type="text"
+                            value={importCode}
+                            onChange={(e) => setImportCode(e.target.value)}
+                            placeholder="Enter your progress code..."
+                            className="flex-1 px-3 py-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+                        />
+                        <button
+                            onClick={handleImport}
+                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+                        >
+                            Import Progress
+                        </button>
+                    </div>
+                    
+                    {importStatus.message && (
+                        <div className={`text-sm mt-2 ${importStatus.type === 'error' ? 'text-red-600' : 'text-green-600'}`}>
+                            {importStatus.message}
+                        </div>
+                    )}
+                    
+                    <div className="text-center mt-3">
+                        <button
+                            onClick={handleStartFresh}
+                            className="text-blue-600 hover:text-blue-800 text-sm underline"
+                        >
+                            {isStartingFresh ? 'Starting fresh...' : 'Or start fresh without importing →'}
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // ExportSection Component
+        const ExportSection = ({ data, show }) => {
+            const [copied, setCopied] = useState(false);
+            const [showHelp, setShowHelp] = useState(false);
+
+            if (!show) return null;
+
+            const progressCode = encodeProgressCode(data);
+
+            const copyToClipboard = async () => {
+                try {
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        await navigator.clipboard.writeText(progressCode);
+                        setCopied(true);
+                    } else {
+                        // Fallback for Safari
+                        const textArea = document.createElement('textarea');
+                        textArea.value = progressCode;
+                        textArea.style.position = 'fixed';
+                        textArea.style.opacity = '0';
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        try {
+                            document.execCommand('copy');
+                            setCopied(true);
+                        } catch (err) {
+                            console.error('Fallback copy failed:', err);
+                        }
+                        document.body.removeChild(textArea);
+                    }
+                    setTimeout(() => setCopied(false), 2000);
+                } catch (err) {
+                    console.error('Failed to copy:', err);
+                }
+            };
+
+            return (
+                <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4 mt-4">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center">
+                            <Download className="text-green-600 mr-2" size={24} />
+                            <h3 className="text-lg font-semibold text-green-900">Activity Complete! Save Your Progress</h3>
+                        </div>
+                        <button
+                            onClick={() => setShowHelp(!showHelp)}
+                            className="text-green-600 hover:text-green-800"
+                            title="What's this?"
+                        >
+                            <HelpCircle size={20} />
+                        </button>
+                    </div>
+                    
+                    {showHelp && (
+                        <div className="bg-green-100 rounded p-3 mb-3 text-sm text-green-800">
+                            <p className="font-semibold mb-1">What is a Progress Code?</p>
+                            <p>Your Progress Code saves all your workshop data in a secure, portable format. Use it to:</p>
+                            <ul className="list-disc ml-5 mt-1">
+                                <li>Continue in the next activity without re-entering data</li>
+                                <li>Return to any workshop later</li>
+                                <li>Share progress with team members or instructors</li>
+                            </ul>
+                        </div>
+                    )}
+                    
+                    <p className="text-green-700 mb-3 text-sm">
+                        Copy this code to continue in the next activity:
+                    </p>
+                    
+                    <div className="bg-white border border-green-300 rounded p-3 mb-3 font-mono text-xs break-all">
+                        {progressCode}
+                    </div>
+                    
+                    <button
+                        onClick={copyToClipboard}
+                        className={`w-full py-2 rounded font-semibold transition-colors ${
+                            copied 
+                                ? 'bg-green-600 text-white' 
+                                : 'bg-green-500 text-white hover:bg-green-600'
+                        }`}
+                    >
+                        {copied ? '✓ Copied!' : 'Copy Progress Code'}
+                    </button>
+                </div>
+            );
+        };
+
+        const ECPActivity = () => {
+            const [currentStep, setCurrentStep] = useState(1);
+            const [selectedScenarios, setSelectedScenarios] = useState([]);
+            const [wrongAnswers, setWrongAnswers] = useState([]);
+            const [importedData, setImportedData] = useState(null);
+            const [exportData, setExportData] = useState(null);
+            const [activityComplete, setActivityComplete] = useState(false);
+
+            // Handle import
+            const handleImport = (data) => {
+                if (data) {
+                    setImportedData(data);
+                    console.log('[ECP-1] Imported data:', data);
+                } else {
+                    console.log('[ECP-1] Starting fresh - no import');
+                }
+            };
+            
+            const scenarios = [
+                {
+                    id: 1,
+                    title: "Manufacturing Company A",
+                    description: "Looking for 10x faster production with new robotics technology",
+                    characteristics: ["Seeks breakthrough innovation", "Willing to test new solutions", "Quick decision making"],
+                    isEarlyMarket: true
+                },
+                {
+                    id: 2,
+                    title: "Enterprise Corp B", 
+                    description: "Wants proven software with complete training and 24/7 support",
+                    characteristics: ["Needs complete solution", "Risk-averse", "Long evaluation process"],
+                    isEarlyMarket: false
+                },
+                {
+                    id: 3,
+                    title: "Tech Startup C",
+                    description: "Needs AI solution to solve urgent customer retention problem",
+                    characteristics: ["Problem urgency", "Open to new technology", "Can implement quickly"],
+                    isEarlyMarket: true
+                },
+                {
+                    id: 4,
+                    title: "Financial Services D",
+                    description: "Wants incremental improvement to existing compliance system",
+                    characteristics: ["Preserve current workflow", "Minimal risk tolerance", "Extensive approval process"],
+                    isEarlyMarket: false
+                }
+            ];
+
+            const handleScenarioSelect = (scenarioId, isEarlyMarket) => {
+                const scenario = scenarios.find(s => s.id === scenarioId);
+                const isCorrect = isEarlyMarket === scenario.isEarlyMarket;
+                
+                // Update or add the selection
+                setSelectedScenarios(prev => {
+                    const existing = prev.filter(s => s.id !== scenarioId);
+                    return [...existing, { id: scenarioId, selected: isEarlyMarket, correct: isCorrect }];
+                });
+                
+                // If wrong, add to wrong answers and remove after 1.5 seconds
+                if (!isCorrect) {
+                    setWrongAnswers(prev => [...prev, scenarioId]);
+                    setTimeout(() => {
+                        setWrongAnswers(prev => prev.filter(id => id !== scenarioId));
+                    }, 1500);
+                }
+            };
+            
+            const resetActivity = () => {
+                setSelectedScenarios([]);
+                setWrongAnswers([]);
+            };
+
+            const getResultColor = (scenario) => {
+                const selection = selectedScenarios.find(s => s.id === scenario.id);
+                if (!selection) return 'border-gray-200';
+                
+                // Show red briefly for wrong answers
+                if (wrongAnswers.includes(scenario.id)) {
+                    return 'border-red-500 bg-red-50';
+                }
+                
+                // Show green for correct answers
+                if (selection.correct) {
+                    return 'border-green-500 bg-green-50';
+                }
+                
+                return 'border-gray-200';
+            };
+
+            const renderStep1 = () => (
+                <div className="space-y-4 relative">
+                    <button
+                        onClick={resetActivity}
+                        className="absolute -top-2 -right-2 w-8 h-8 bg-gray-200 hover:bg-orange-500 hover:text-white rounded-full flex items-center justify-center transition-all duration-200 text-gray-600"
+                        title="Reset Activity"
+                    >
+                        <span className="text-lg font-bold">↻</span>
+                    </button>
+                    <div className="text-center mb-4">
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">
+                            Identify Early Market Customers
+                        </h3>
+                        <p className="text-gray-600 text-sm">
+                            Read each scenario and decide: Early Market or Mainstream?
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-5">
+                        {scenarios.map((scenario) => (
+                            <div
+                                key={scenario.id}
+                                className={`border-2 rounded-lg p-4 ${getResultColor(scenario)} transition-all duration-300`}
+                            >
+                                <h4 className="font-bold text-base mb-2 text-gray-800">{scenario.title}</h4>
+                                <p className="text-gray-600 text-sm mb-3">{scenario.description}</p>
+                                
+                                <div className="mb-3">
+                                    <p className="text-xs font-semibold text-gray-700 mb-1">Key Characteristics:</p>
+                                    <ul className="text-xs text-gray-600 space-y-1">
+                                        {scenario.characteristics.map((char, index) => (
+                                            <li key={index} className="flex items-center">
+                                                <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
+                                                {char}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handleScenarioSelect(scenario.id, true)}
+                                        className="flex-1 bg-orange-500 text-white px-3 py-1.5 rounded-lg hover:bg-orange-600 transition-colors text-sm"
+                                    >
+                                        Early Market
+                                    </button>
+                                    <button
+                                        onClick={() => handleScenarioSelect(scenario.id, false)}
+                                        className="flex-1 bg-gray-500 text-white px-3 py-1.5 rounded-lg hover:bg-gray-600 transition-colors text-sm"
+                                    >
+                                        Mainstream
+                                    </button>
+                                </div>
+                                {selectedScenarios.find(s => s.id === scenario.id && s.correct) && (
+                                    <div className="text-center mt-2">
+                                        <CheckCircle className="mx-auto text-green-500" size={20} />
+                                        <p className="text-xs font-semibold text-green-700">✓ Correct!</p>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+
+                    {selectedScenarios.filter(s => s.correct).length === scenarios.length && (
+                        <div className="text-center">
+                            <button
+                                onClick={() => setCurrentStep(2)}
+                                className="bg-orange-500 text-white px-8 py-3 rounded-lg hover:bg-orange-600 transition-colors font-semibold"
+                            >
+                                View Results & Discussion
+                            </button>
+                        </div>
+                    )}
+                </div>
+            );
+
+            const renderStep2 = () => (
+                <div className="space-y-4">
+                    <div className="text-center">
+                        <h3 className="text-xl font-bold text-gray-800 mb-3">
+                            Activity Results & Key Insights
+                        </h3>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-6">
+                            <h4 className="text-lg font-bold text-orange-800 mb-3 flex items-center">
+                                <Target className="mr-2" size={20} />
+                                Early Market Customers
+                            </h4>
+                            <div className="space-y-3">
+                                <div className="bg-white rounded-lg p-3">
+                                    <p className="font-semibold text-gray-800">Manufacturing Company A</p>
+                                    <p className="text-sm text-gray-600">Seeks breakthrough innovation</p>
+                                </div>
+                                <div className="bg-white rounded-lg p-3">
+                                    <p className="font-semibold text-gray-800">Tech Startup C</p>
+                                    <p className="text-sm text-gray-600">Urgent problem, quick adoption</p>
+                                </div>
+                            </div>
+                            
+                            <div className="mt-4 p-3 bg-orange-100 rounded-lg">
+                                <p className="text-sm font-semibold text-orange-800 mb-2">Why Early Market?</p>
+                                <ul className="text-sm text-orange-700 space-y-1">
+                                    <li>• Willing to adopt new technology</li>
+                                    <li>• Have urgent problems to solve</li>
+                                    <li>• Can make quick decisions</li>
+                                    <li>• Seek breakthrough results</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className="bg-gray-50 border-2 border-gray-200 rounded-lg p-6">
+                            <h4 className="text-lg font-bold text-gray-800 mb-3 flex items-center">
+                                <Users className="mr-2" size={20} />
+                                Mainstream Customers
+                            </h4>
+                            <div className="space-y-3">
+                                <div className="bg-white rounded-lg p-3">
+                                    <p className="font-semibold text-gray-800">Enterprise Corp B</p>
+                                    <p className="text-sm text-gray-600">Needs complete, proven solution</p>
+                                </div>
+                                <div className="bg-white rounded-lg p-3">
+                                    <p className="font-semibold text-gray-800">Financial Services D</p>
+                                    <p className="text-sm text-gray-600">Incremental improvements only</p>
+                                </div>
+                            </div>
+                            
+                            <div className="mt-4 p-3 bg-gray-100 rounded-lg">
+                                <p className="text-sm font-semibold text-gray-800 mb-2">Why Mainstream?</p>
+                                <ul className="text-sm text-gray-700 space-y-1">
+                                    <li>• Want proven, complete solutions</li>
+                                    <li>• Preserve existing workflows</li>
+                                    <li>• Risk-averse with long evaluations</li>
+                                    <li>• Seek incremental improvements</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6">
+                        <h4 className="text-lg font-bold text-blue-800 mb-3">💡 Key Takeaway for Startups</h4>
+                        <p className="text-blue-700 mb-3">
+                            <strong>Focus on Early Market customers first!</strong> They're willing to work with your early-stage product 
+                            and provide valuable feedback to help you iterate toward Product-Market Fit.
+                        </p>
+                        <p className="text-blue-700">
+                            Once you have proven success with Early Market customers, you can then expand to Mainstream customers 
+                            with a more mature product and proven value proposition.
+                        </p>
+                    </div>
+
+                    <div className="text-center">
+                        <button
+                            onClick={() => {
+                                setCurrentStep(1);
+                                resetActivity();
+                            }}
+                            className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors mr-4"
+                        >
+                            Try Again
+                        </button>
+                        <button
+                            onClick={() => {
+                                // Generate export data when completing the activity
+                                const newExportData = {
+                                    version: "1.0",
+                                    createdAt: importedData?.createdAt || new Date().toISOString(),
+                                    lastUpdated: new Date().toISOString(),
+                                    day1: importedData?.day1 || {},
+                                    day2_1: {
+                                        ...(importedData?.day2_1 || {}),
+                                        activity1: {
+                                            scenarioAnswers: selectedScenarios.map(s => ({
+                                                scenarioId: s.id,
+                                                answer: s.selected ? 'early' : 'mainstream',
+                                                correct: s.correct
+                                            })),
+                                            completedAt: new Date().toISOString()
+                                        }
+                                    },
+                                    day2_2: importedData?.day2_2 || {},
+                                    day3: importedData?.day3 || {}
+                                };
+                                setExportData(newExportData);
+                                setActivityComplete(true);
+                                console.log('[ECP-1] Export data generated:', newExportData);
+                                setCurrentStep(3);
+                            }}
+                            className="bg-orange-500 text-white px-8 py-3 rounded-lg hover:bg-orange-600 transition-colors font-semibold"
+                        >
+                            Continue to Discussion
+                        </button>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="max-w-[1200px] mx-auto p-5 bg-gradient-to-br from-orange-100 to-orange-200 min-h-screen">
+                    {/* Header */}
+                    <div className="bg-white rounded-lg shadow-lg p-4 mb-4">
+                        <div className="flex justify-between items-center w-full mb-3">
+                            <a 
+                                href="index.html" 
+                                className="inline-flex items-center text-orange-600 hover:text-orange-700 transition-colors text-sm font-medium"
+                            >
+                                <span className="mr-1">←</span> Back to Workshop
+                            </a>
+                            <a 
+                                href="../" 
+                                className="inline-flex items-center text-gray-600 hover:text-orange-700 transition-colors text-sm font-medium"
+                            >
+                                All GTM Workshops <span className="ml-1">↑</span>
+                            </a>
+                        </div>
+                        <div className="flex items-center justify-between mb-3">
+                            <h1 className="text-2xl font-bold text-gray-800">
+                                Activity 1: Early Market vs Mainstream
+                            </h1>
+                        </div>
+                        
+                        {/* Progress indicator */}
+                        <div className="flex items-center space-x-4">
+                            <div className={`flex items-center space-x-2 ${currentStep >= 1 ? 'text-orange-600' : 'text-gray-400'}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= 1 ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}>
+                                    1
+                                </div>
+                                <span className="font-semibold">Identify Customers</span>
+                            </div>
+                            <div className="flex-1 h-1 bg-gray-200 rounded">
+                                <div className={`h-full bg-orange-500 rounded transition-all duration-300 ${currentStep >= 2 ? 'w-full' : currentStep >= 1 ? 'w-1/2' : 'w-0'}`}></div>
+                            </div>
+                            <div className={`flex items-center space-x-2 ${currentStep >= 2 ? 'text-orange-600' : 'text-gray-400'}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= 2 ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}>
+                                    2
+                                </div>
+                                <span className="font-semibold">Review & Discuss</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Import Section */}
+                    {currentStep === 1 && <ImportSection onImport={handleImport} />}
+
+                    {/* Main Content */}
+                    <div className="bg-white rounded-lg shadow-lg p-5">
+                        {currentStep === 1 && renderStep1()}
+                        {currentStep === 2 && renderStep2()}
+                        
+                        {/* Export Section - show after viewing results */}
+                        {currentStep === 2 && activityComplete && (
+                            <ExportSection data={exportData} show={true} />
+                        )}
+                    </div>
+
+                    {/* Footer decoration */}
+                    <div className="mt-4 text-center">
+                        <div className="w-12 h-12 mx-auto bg-white bg-opacity-30 rounded-full flex items-center justify-center">
+                            <div className="w-8 h-8 border-4 border-white border-opacity-50 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<ECPActivity />, document.getElementById('root'));
+    </script>
+</body>
+</html>

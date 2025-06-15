@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Define Differentiators & Value - Day 2-2</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .lucide-icon {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Progress Code System - Encoding/Decoding Functions
+        const encodeProgressCode = (workshopData) => {
+            try {
+                const jsonString = JSON.stringify(workshopData);
+                const base64 = btoa(jsonString);
+                return `GSAP2025-${base64}`;
+            } catch (error) {
+                console.error('Error encoding progress code:', error);
+                return null;
+            }
+        };
+
+        const decodeProgressCode = (code) => {
+            try {
+                console.log('🔧 decodeProgressCode called with:', code?.substring(0, 50) + '...');
+                
+                if (!code || !code.startsWith('GSAP2025-')) {
+                    console.error('❌ Invalid progress code format - missing GSAP2025- prefix');
+                    throw new Error('Invalid progress code format');
+                }
+                
+                const base64 = code.substring(9);
+                console.log('🔧 Extracted base64 part, length:', base64.length);
+                
+                const jsonString = atob(base64);
+                console.log('🔧 Decoded base64 to JSON string, length:', jsonString.length);
+                console.log('🔧 JSON string preview:', jsonString.substring(0, 100) + '...');
+                
+                const parsed = JSON.parse(jsonString);
+                console.log('✅ Successfully parsed JSON');
+                return parsed;
+            } catch (error) {
+                console.error('❌ Error decoding progress code:', error.message);
+                console.error('❌ Full error:', error);
+                return null;
+            }
+        };
+
+        // Cross-browser clipboard copy with Safari fallback
+        const copyToClipboard = async (text) => {
+            try {
+                await navigator.clipboard.writeText(text);
+                return true;
+            } catch (err) {
+                // Fallback for Safari or older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    return true;
+                } catch (err) {
+                    console.error('Fallback copy failed:', err);
+                    return false;
+                } finally {
+                    document.body.removeChild(textArea);
+                }
+            }
+        };
+
+        // Icon components
+        const Settings = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                <circle cx="12" cy="12" r="3"/>
+            </svg>
+        );
+
+        const Gem = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M6 3h12l4 6-10 13L2 9Z"/>
+                <path d="M11 3L8 9l4 13 4-13-3-6"/>
+                <path d="M2 9h20"/>
+            </svg>
+        );
+
+        const CheckCircle = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22,4 12,14.01 9,11.01"/>
+            </svg>
+        );
+
+        const FileText = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14,2 14,8 20,8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10,9 9,9 8,9"/>
+            </svg>
+        );
+
+        const Copy = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+            </svg>
+        );
+
+        const ArrowRight = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+            </svg>
+        );
+
+        const Lightbulb = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
+                <path d="M9 18h6"/>
+                <path d="M10 22h4"/>
+            </svg>
+        );
+
+        const DifferentiatorsValueActivity = () => {
+            const [currentStep, setCurrentStep] = useState(1);
+            const [differentiators, setDifferentiators] = useState(['', '', '']);
+            const [values, setValues] = useState(['', '', '']);
+            
+            // Progress Code System state
+            const [workshopData, setWorkshopData] = useState({
+                version: "1.0",
+                createdAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString(),
+                day1: {},
+                day2_1: {},
+                day2_2: {},
+                day3: {}
+            });
+            const [showImportSection, setShowImportSection] = useState(true);
+            
+            // Debug logging for showImportSection changes
+            useEffect(() => {
+                console.log('showImportSection changed to:', showImportSection);
+            }, [showImportSection]);
+
+            const resetActivity = () => {
+                setCurrentStep(1);
+                setDifferentiators(['', '', '']);
+                setValues(['', '', '']);
+            };
+
+            // Handle import - updated to handle both progress codes and "start fresh" action
+            const handleImport = (input) => {
+                console.log('🔄 handleImport called with input:', input);
+                
+                // Handle "Start Fresh" button click
+                if (input && input.startFresh) {
+                    console.log('✅ User clicked Start Fresh - hiding import section');
+                    setShowImportSection(false);
+                    return { success: true };
+                }
+                
+                // Handle auto-hide callback from ImportSection
+                if (input && input.hideImportSection) {
+                    console.log('⏰ Auto-hiding import section after successful import');
+                    setShowImportSection(false);
+                    return { success: true };
+                }
+                
+                // Handle progress code import
+                console.log('🔍 Attempting to decode progress code...');
+                console.log('📝 Progress code length:', input?.length || 'undefined');
+                console.log('📝 Progress code preview:', input?.substring(0, 50) + '...');
+                
+                const decoded = decodeProgressCode(input);
+                if (!decoded) {
+                    console.error('❌ Failed to decode progress code');
+                    return { success: false, error: 'Invalid progress code. Please check and try again.' };
+                }
+                
+                console.log('✅ Progress code decoded successfully!');
+                console.log('📊 Decoded data structure:', JSON.stringify(decoded, null, 2));
+                
+                setWorkshopData(decoded);
+                console.log('💾 Workshop data updated in state');
+                
+                // Auto-populate from Activity 1 data
+                console.log('🔍 Checking for Activity 1 auto-population data...');
+                if (decoded.day2_2?.activity1) {
+                    const activity1Data = decoded.day2_2.activity1;
+                    console.log('✅ Found Activity 1 data:', activity1Data);
+                    
+                    // Show imported data in UI - populate a summary box but don't fill form fields
+                    console.log('📝 Activity 1 customerProfile:', activity1Data.customerProfile);
+                    console.log('📝 Activity 1 competitiveAlternative:', activity1Data.competitiveAlternative);
+                } else {
+                    console.log('⚠️ No Activity 1 data found for auto-population');
+                    console.log('📊 Available day2_2 data:', decoded.day2_2);
+                }
+                
+                // Don't hide immediately - let ImportSection handle the auto-hide after showing success message
+                console.log('✅ Progress code imported successfully - ImportSection will auto-hide after 3 seconds');
+                return { success: true };
+            };
+
+            const updateDifferentiator = (index, value) => {
+                const newDifferentiators = [...differentiators];
+                newDifferentiators[index] = value;
+                setDifferentiators(newDifferentiators);
+            };
+
+            const updateValue = (index, value) => {
+                const newValues = [...values];
+                newValues[index] = value;
+                setValues(newValues);
+            };
+
+            const isStepComplete = () => {
+                if (currentStep === 1) {
+                    // Need at least 2 differentiators with minimum 15 characters each
+                    const validDifferentiators = differentiators.filter(d => d.length >= 15);
+                    return validDifferentiators.length >= 2;
+                } else if (currentStep === 2) {
+                    // Need corresponding values for the differentiators they filled out
+                    const validDifferentiators = differentiators.filter(d => d.length >= 15);
+                    const validValues = values.filter((v, index) => 
+                        differentiators[index].length >= 15 && v.length >= 25
+                    );
+                    return validValues.length >= validDifferentiators.length;
+                }
+                return false;
+            };
+
+            const nextStep = () => {
+                if (isStepComplete()) {
+                    setCurrentStep(prev => Math.min(prev + 1, 3));
+                }
+            };
+
+            const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
+
+            // Update workshop data when moving to step 3
+            useEffect(() => {
+                if (currentStep === 3) {
+                    // Filter out empty differentiators and values
+                    const validDifferentiators = differentiators.filter(d => d.length >= 15);
+                    const validValues = values.filter((v, index) => 
+                        differentiators[index].length >= 15 && v.length >= 25
+                    );
+                    
+                    const updatedData = {
+                        ...workshopData,
+                        lastUpdated: new Date().toISOString(),
+                        day2_2: {
+                            ...workshopData.day2_2,
+                            activity2: {
+                                uniqueDifferentiator: validDifferentiators,
+                                customerValue: validValues,
+                                completedAt: new Date().toISOString()
+                            }
+                        }
+                    };
+                    setWorkshopData(updatedData);
+                    console.log('💾 Activity 2 data saved to workshop data:', updatedData.day2_2.activity2);
+                }
+            }, [currentStep, differentiators, values]);
+
+            const getCompletedCount = () => {
+                if (currentStep === 1) {
+                    return differentiators.filter(d => d.length >= 15).length;
+                } else {
+                    const validDifferentiators = differentiators.filter(d => d.length >= 15);
+                    const validValues = values.filter((v, index) => 
+                        differentiators[index].length >= 15 && v.length >= 25
+                    );
+                    return validValues.length;
+                }
+            };
+
+            const attributeCategories = [
+                { icon: <Settings className="text-orange-600" size={18} />, label: "Product", desc: "Core features and functionality" },
+                { icon: <Gem className="text-blue-600" size={18} />, label: "Customer centricity", desc: "How you serve customers differently" },
+                { icon: "💰", label: "Pricing & Value", desc: "Unique pricing models or value delivery" },
+                { icon: "🛠️", label: "Service", desc: "Support, implementation, or service approach" }
+            ];
+
+            // Import Section Component
+            const ImportSection = ({ onImport, isVisible }) => {
+                const [progressCode, setProgressCode] = useState('');
+                const [error, setError] = useState('');
+                const [success, setSuccess] = useState(false);
+                
+                const handleImportClick = () => {
+                    console.log('🎯 ImportSection: Load Progress button clicked');
+                    console.log('📝 ImportSection: Progress code length:', progressCode.trim().length);
+                    
+                    if (!progressCode.trim()) {
+                        console.log('❌ ImportSection: Empty progress code');
+                        setError('Please enter a progress code');
+                        return;
+                    }
+                    
+                    console.log('🚀 ImportSection: Calling parent onImport handler...');
+                    const result = onImport(progressCode);
+                    console.log('📥 ImportSection: Import result:', result);
+                    
+                    if (result.success) {
+                        console.log('✅ ImportSection: Import successful - showing success message');
+                        setSuccess(true);
+                        setError('');
+                        // Auto-hide after 3 seconds to let user see success message
+                        console.log('⏰ ImportSection: Setting 3 second auto-hide timer');
+                        setTimeout(() => {
+                            console.log('⏰ ImportSection: 3 seconds elapsed - triggering auto-hide');
+                            // Call parent's setShowImportSection through a callback
+                            onImport({ hideImportSection: true });
+                        }, 3000);
+                    } else {
+                        console.log('❌ ImportSection: Import failed:', result.error);
+                        setError(result.error);
+                        setSuccess(false);
+                    }
+                };
+                
+                const handleStartFresh = () => {
+                    setProgressCode('');
+                    setError('');
+                    setSuccess(false);
+                    onImport({ startFresh: true });
+                };
+                
+                if (!isVisible) return null;
+                
+                return (
+                    <div className="bg-white border-2 border-gray-200 rounded-lg p-6 mb-6">
+                        <div className="flex items-center mb-4">
+                            <FileText className="text-blue-600 mr-2" size={24} />
+                            <h3 className="text-lg font-semibold text-gray-800">Continue Your Progress</h3>
+                        </div>
+                        
+                        <p className="text-gray-600 mb-4">
+                            Have a progress code from a previous session? Paste it below to continue where you left off.
+                        </p>
+                        
+                        <textarea
+                            value={progressCode}
+                            onChange={(e) => setProgressCode(e.target.value)}
+                            placeholder="Paste your progress code here..."
+                            className="w-full h-20 p-3 border border-gray-300 rounded-lg resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                        />
+                        
+                        {error && (
+                            <div className="mt-2 text-red-600 text-sm">{error}</div>
+                        )}
+                        
+                        {success && (
+                            <div className="mt-2 text-green-600 text-sm">
+                                ✓ Progress loaded successfully! Activity 1 data is available for reference.
+                            </div>
+                        )}
+                        
+                        <div className="flex space-x-3 mt-4">
+                            <button
+                                onClick={handleImportClick}
+                                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                            >
+                                Load Progress
+                            </button>
+                            <button
+                                onClick={handleStartFresh}
+                                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                            >
+                                Start Fresh Instead
+                            </button>
+                        </div>
+                    </div>
+                );
+            };
+
+            // Export Section Component
+            const ExportSection = ({ workshopData }) => {
+                const [showCopySuccess, setShowCopySuccess] = useState(false);
+                const [showHelpModal, setShowHelpModal] = useState(false);
+                const progressCode = encodeProgressCode(workshopData);
+                
+                const handleCopy = async () => {
+                    const success = await copyToClipboard(progressCode);
+                    if (success) {
+                        setShowCopySuccess(true);
+                        setTimeout(() => setShowCopySuccess(false), 2000);
+                    }
+                };
+                
+                const HelpModal = ({ isOpen, onClose }) => {
+                    if (!isOpen) return null;
+                    
+                    return (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 max-w-md mx-4">
+                                <h3 className="text-lg font-semibold mb-4">About Progress Codes</h3>
+                                <p className="text-gray-600 mb-4">
+                                    Progress codes save your workshop responses so you can continue later. 
+                                    They contain only your workshop data - no personal information.
+                                </p>
+                                <ul className="text-sm text-gray-600 space-y-2 mb-4">
+                                    <li>• Codes expire after 30 days</li>
+                                    <li>• Save codes externally (email, notes)</li>
+                                    <li>• One code works across all workshops</li>
+                                    <li>• Data stays on your device</li>
+                                </ul>
+                                <button 
+                                    onClick={onClose}
+                                    className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+                                >
+                                    Got it
+                                </button>
+                            </div>
+                        </div>
+                    );
+                };
+                
+                return (
+                    <>
+                        <div className="bg-green-50 border-2 border-green-300 rounded-lg p-6 mt-6">
+                            <div className="flex items-center mb-4">
+                                <CheckCircle className="text-green-600 mr-2" size={24} />
+                                <h3 className="text-lg font-semibold text-green-800">Activity Complete! Save Your Progress</h3>
+                            </div>
+                            
+                            <p className="text-green-700 mb-4">
+                                Copy this code to continue your progress in the next workshop session:
+                            </p>
+                            
+                            <div className="bg-white border border-green-200 rounded-lg p-3 mb-4">
+                                <code className="text-sm font-mono break-all">{progressCode}</code>
+                            </div>
+                            
+                            <div className="flex items-center space-x-4">
+                                <button
+                                    onClick={handleCopy}
+                                    className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                                >
+                                    <Copy className="mr-2" size={16} />
+                                    Copy Code
+                                </button>
+                                
+                                <button
+                                    onClick={() => setShowHelpModal(true)}
+                                    className="text-green-700 hover:text-green-800 text-sm underline"
+                                >
+                                    What's this?
+                                </button>
+                                
+                                {showCopySuccess && (
+                                    <span className="text-green-600 text-sm">✓ Copied to clipboard!</span>
+                                )}
+                            </div>
+                        </div>
+                        
+                        <HelpModal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} />
+                    </>
+                );
+            };
+
+            // Activity 1 Reference Component
+            const Activity1Reference = ({ workshopData }) => {
+                if (!workshopData.day2_2?.activity1) return null;
+                
+                const activity1Data = workshopData.day2_2.activity1;
+                
+                return (
+                    <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-5 mb-6">
+                        <h4 className="text-lg font-semibold text-blue-800 mb-3">📋 Reference: Your Activity 1 Results</h4>
+                        <div className="space-y-3">
+                            <div className="bg-white border border-blue-200 rounded-lg p-3">
+                                <h5 className="font-medium text-blue-800 mb-1">Target Customer:</h5>
+                                <p className="text-sm text-gray-700">{activity1Data.customerProfile}</p>
+                            </div>
+                            <div className="bg-white border border-blue-200 rounded-lg p-3">
+                                <h5 className="font-medium text-blue-800 mb-1">Their Main Alternative:</h5>
+                                <p className="text-sm text-gray-700">{activity1Data.competitiveAlternative}</p>
+                            </div>
+                        </div>
+                        <p className="text-blue-700 text-sm mt-3">
+                            Use this context to identify differentiators that matter to these specific customers.
+                        </p>
+                    </div>
+                );
+            };
+
+            const renderStep1 = () => (
+                <div className="space-y-6">
+                    <div className="text-center mb-6">
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">
+                            Identify Your Unique Differentiators
+                        </h3>
+                        <p className="text-gray-600">
+                            List 2-3 key features or capabilities that set you apart from alternatives
+                        </p>
+                    </div>
+
+                    {/* Activity 1 Reference */}
+                    <Activity1Reference workshopData={workshopData} />
+
+                    <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-5 mb-6">
+                        <div className="flex items-center mb-3">
+                            <Lightbulb className="text-orange-600 mr-2" size={24} />
+                            <h4 className="text-lg font-semibold text-orange-800">Four Categories of Unique Attributes</h4>
+                        </div>
+                        <p className="text-orange-700 mb-4">
+                            Use these categories to brainstorm what makes you different:
+                        </p>
+                        <div className="grid grid-cols-2 gap-4">
+                            {attributeCategories.map((category, index) => (
+                                <div key={index} className="flex items-start space-x-3 bg-white p-3 rounded-lg border border-orange-200">
+                                    <div className="flex-shrink-0 mt-1">
+                                        {typeof category.icon === 'string' ? (
+                                            <span className="text-lg">{category.icon}</span>
+                                        ) : (
+                                            category.icon
+                                        )}
+                                    </div>
+                                    <div>
+                                        <h5 className="font-semibold text-orange-800 text-sm">{category.label}</h5>
+                                        <p className="text-orange-600 text-xs">{category.desc}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="space-y-6">
+                        {differentiators.map((differentiator, index) => (
+                            <div key={index} className="bg-white border-2 border-gray-200 rounded-lg p-6">
+                                <div className="flex justify-between items-center mb-3">
+                                    <label className="text-gray-700 font-medium">
+                                        Unique differentiator #{index + 1}: <span className="text-xs text-gray-400">(describe in 3+ words)</span>
+                                        {index >= 2 && <span className="text-xs text-gray-400 ml-2">(optional)</span>}
+                                    </label>
+                                    {differentiator.length >= 15 && (
+                                        <CheckCircle className="text-green-500" size={20} />
+                                    )}
+                                </div>
+                                <p className="text-gray-500 text-sm mb-3">
+                                    {index === 0 && "What's your strongest unique capability that competitors don't have?"}
+                                    {index === 1 && "What's your second key differentiator?"}
+                                    {index === 2 && "Any additional unique capability?"}
+                                </p>
+                                <textarea
+                                    value={differentiator}
+                                    onChange={(e) => updateDifferentiator(index, e.target.value)}
+                                    placeholder={
+                                        index === 0 ? "Example: Real-time predictive API failure detection using machine learning" :
+                                        index === 1 ? "Example: Automated root cause analysis with suggested fixes" :
+                                        "Example: One-click integration with existing monitoring tools"
+                                    }
+                                    className="w-full h-20 p-3 border border-gray-300 rounded-lg resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 placeholder-gray-400"
+                                />
+                                <div className="flex justify-between items-center text-sm mt-2">
+                                    <span className="text-gray-500">
+                                        Focus on capabilities only you can deliver
+                                    </span>
+                                    <div className={`flex items-center space-x-1 ${differentiator.length >= 15 ? 'text-green-600' : 'text-gray-500'}`}>
+                                        {differentiator.length >= 15 && <CheckCircle size={16} />}
+                                        <span className="font-medium">
+                                            {differentiator.trim().split(/\s+/).filter(w => w.length > 0).length} words
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg">
+                        <h4 className="text-blue-800 font-semibold mb-2">💡 Differentiator Tips:</h4>
+                        <ul className="text-blue-700 text-sm space-y-1">
+                            <li>• Focus on the "Own this area!" space from the Venn diagram</li>
+                            <li>• Avoid table stakes features that everyone has</li>
+                            <li>• Think about what's hard for competitors to replicate</li>
+                            <li>• Consider your technology, approach, or business model advantages</li>
+                        </ul>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                        <div className="text-sm text-gray-600">
+                            Completed: {getCompletedCount()}/2 required (3 max)
+                        </div>
+                        <button
+                            onClick={nextStep}
+                            disabled={!isStepComplete()}
+                            className={`px-6 py-2 rounded-lg text-white font-medium transition-colors ${
+                                isStepComplete() 
+                                    ? 'bg-orange-500 hover:bg-orange-600' 
+                                    : 'bg-gray-300 cursor-not-allowed'
+                            }`}
+                        >
+                            Translate to Value →
+                        </button>
+                    </div>
+                </div>
+            );
+
+            const renderStep2 = () => (
+                <div className="space-y-6">
+                    <div className="text-center mb-6">
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">
+                            Translate Features to Customer Value
+                        </h3>
+                        <p className="text-gray-600">
+                            For each differentiator, describe the tangible value it creates for customers
+                        </p>
+                    </div>
+
+                    <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-5 mb-6">
+                        <div className="flex items-center mb-3">
+                            <ArrowRight className="text-blue-600 mr-2" size={24} />
+                            <h4 className="text-lg font-semibold text-blue-800">Features → Value Bridge</h4>
+                        </div>
+                        <div className="grid grid-cols-2 gap-6 text-sm">
+                            <div>
+                                <h5 className="font-semibold text-blue-800 mb-2">Your Features Are:</h5>
+                                <ul className="text-blue-700 space-y-1">
+                                    <li>• Technical capabilities</li>
+                                    <li>• What your product does</li>
+                                    <li>• How it works</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h5 className="font-semibold text-blue-800 mb-2">Customer Value Is:</h5>
+                                <ul className="text-blue-700 space-y-1">
+                                    <li>• Business outcomes</li>
+                                    <li>• Why they care</li>
+                                    <li>• Measurable benefits</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-6">
+                        {differentiators.map((differentiator, index) => {
+                            if (differentiator.length < 15) return null;
+                            
+                            return (
+                                <div key={index} className="bg-white border-2 border-gray-200 rounded-lg p-6">
+                                    <div className="mb-4">
+                                        <h4 className="font-semibold text-gray-800 mb-2 flex items-center">
+                                            <Settings className="text-orange-600 mr-2" size={18} />
+                                            Your Differentiator #{index + 1}:
+                                        </h4>
+                                        <div className="bg-gray-50 border border-gray-300 rounded-lg p-3">
+                                            <p className="text-sm text-gray-800">{differentiator}</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <div className="flex justify-between items-center mb-3">
+                                            <label className="text-gray-700 font-medium flex items-center">
+                                                <Gem className="text-orange-600 mr-2" size={18} />
+                                                Customer value this creates: <span className="text-xs text-gray-400 ml-2">(describe in 5+ words)</span>
+                                            </label>
+                                            {values[index] && values[index].length >= 20 && (
+                                                <CheckCircle className="text-green-500" size={20} />
+                                            )}
+                                        </div>
+                                        <p className="text-gray-500 text-sm mb-3">
+                                            What specific business outcomes does this capability deliver for customers?
+                                        </p>
+                                        <textarea
+                                            value={values[index] || ''}
+                                            onChange={(e) => updateValue(index, e.target.value)}
+                                            placeholder="Example: Prevents 80% of API failures before they impact customers, reducing revenue loss from outages by $500K annually and improving customer satisfaction scores"
+                                            className="w-full h-24 p-3 border border-gray-300 rounded-lg resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 placeholder-gray-400"
+                                        />
+                                        <div className="flex justify-between items-center text-sm mt-2">
+                                            <span className="text-gray-500">
+                                                Include metrics, cost savings, or measurable improvements
+                                            </span>
+                                            <div className={`flex items-center space-x-1 ${values[index] && values[index].length >= 25 ? 'text-green-600' : 'text-gray-500'}`}>
+                                                {values[index] && values[index].length >= 25 && <CheckCircle size={16} />}
+                                                <span className="font-medium">
+                                                    {values[index] ? values[index].trim().split(/\s+/).filter(w => w.length > 0).length : 0} words
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg">
+                        <h4 className="text-green-800 font-semibold mb-2">💡 Value Translation Tips:</h4>
+                        <ul className="text-green-700 text-sm space-y-1">
+                            <li>• Use numbers and percentages when possible</li>
+                            <li>• Focus on business outcomes, not technical details</li>
+                            <li>• Think about time saved, costs reduced, revenue increased</li>
+                            <li>• Consider risk mitigation and competitive advantages</li>
+                        </ul>
+                    </div>
+
+                    <div className="flex justify-between">
+                        <button
+                            onClick={prevStep}
+                            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+                        >
+                            ← Back
+                        </button>
+                        
+                        <div className="flex items-center space-x-4">
+                            <div className="text-sm text-gray-600">
+                                Completed: {getCompletedCount()}/{differentiators.filter(d => d.length >= 15).length} value translations
+                            </div>
+                            <button
+                                onClick={nextStep}
+                                disabled={!isStepComplete()}
+                                className={`px-6 py-2 rounded-lg text-white font-medium transition-colors ${
+                                    isStepComplete() 
+                                        ? 'bg-orange-500 hover:bg-orange-600' 
+                                        : 'bg-gray-300 cursor-not-allowed'
+                                }`}
+                            >
+                                Review & Complete →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderStep3 = () => (
+                <div className="space-y-6">
+                    <div className="text-center mb-6">
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">
+                            Your Differentiators & Value
+                        </h3>
+                        <p className="text-gray-600">
+                            Review your unique capabilities and the customer value they create
+                        </p>
+                    </div>
+
+                    <div className="bg-green-50 border-2 border-green-300 rounded-lg p-6 mb-6">
+                        <div className="flex items-center mb-4">
+                            <CheckCircle className="text-green-600 mr-2" size={24} />
+                            <h4 className="text-lg font-semibold text-green-800">Solution Positioning Complete!</h4>
+                        </div>
+                        
+                        <p className="text-green-700 mb-4">
+                            You've built the core elements for your positioning statement. You now have clear answers to:
+                        </p>
+                        
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="bg-white border border-green-200 rounded-lg p-3">
+                                <h5 className="font-medium text-green-800 mb-1">✓ WE ARE BETTER BECAUSE:</h5>
+                                <p className="text-gray-600">Your unique differentiators</p>
+                            </div>
+                            <div className="bg-white border border-green-200 rounded-lg p-3">
+                                <h5 className="font-medium text-green-800 mb-1">✓ THAT PROVIDES:</h5>
+                                <p className="text-gray-600">Customer value you deliver</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-6">
+                        {differentiators.map((differentiator, index) => {
+                            if (differentiator.length < 15) return null;
+                            
+                            return (
+                                <div key={index} className="bg-white border-2 border-gray-200 rounded-lg p-6">
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div>
+                                            <h5 className="font-medium text-gray-800 mb-2 flex items-center">
+                                                <Settings className="text-orange-600 mr-2" size={18} />
+                                                Unique Differentiator #{index + 1}
+                                            </h5>
+                                            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                                                <p className="text-sm text-gray-800">{differentiator}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <h5 className="font-medium text-gray-800 mb-2 flex items-center">
+                                                <Gem className="text-orange-600 mr-2" size={18} />
+                                                Customer Value Created
+                                            </h5>
+                                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                                <p className="text-sm text-gray-800">{values[index]}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-5">
+                        <h4 className="text-lg font-bold text-orange-800 mb-3">🎯 Next: Complete Your Positioning Statement</h4>
+                        <p className="text-orange-700 mb-3">
+                            In Activity 3, you'll combine today's work with yesterday's customer profile to create your complete positioning statement.
+                        </p>
+                        <div className="text-sm text-orange-700">
+                            <p className="mb-2"><strong>Your positioning statement will include:</strong></p>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <div>✓ FOR: Your target customer (Activity 1)</div>
+                                    <div>✓ UNLIKE: Their alternative (Activity 1)</div>
+                                    <div>✓ WE ARE BETTER BECAUSE: Your differentiators</div>
+                                </div>
+                                <div>
+                                    <div>• OUR PRODUCT IS A: Product category</div>
+                                    <div>• WHO STRUGGLES WITH: Core pain point</div>
+                                    <div>✓ THAT PROVIDES: Customer value</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Export Section for saving progress */}
+                    <ExportSection workshopData={workshopData} />
+
+                    <div className="text-center space-x-4">
+                        <button
+                            onClick={prevStep}
+                            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+                        >
+                            ← Back to Edit
+                        </button>
+                        <button
+                            onClick={resetActivity}
+                            className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                        >
+                            Start Over
+                        </button>
+                        <button
+                            onClick={() => window.location.href = 'positioning-activity-3.html'}
+                            className="bg-orange-500 text-white px-8 py-3 rounded-lg hover:bg-orange-600 transition-colors font-semibold"
+                        >
+                            Continue to Activity 3
+                        </button>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="max-w-[1200px] mx-auto p-5 bg-gradient-to-br from-orange-100 to-orange-200 min-h-screen">
+                    {/* Header */}
+                    <div className="bg-white rounded-lg shadow-lg p-4 mb-4 sticky top-0 z-50">
+                        <div className="flex justify-between items-center w-full mb-3">
+                            <a 
+                                href="index.html" 
+                                className="inline-flex items-center text-orange-600 hover:text-orange-700 transition-colors text-sm font-medium"
+                            >
+                                <span className="mr-1">←</span> Back to Workshop
+                            </a>
+                            <a 
+                                href="../" 
+                                className="inline-flex items-center text-gray-600 hover:text-orange-700 transition-colors text-sm font-medium"
+                            >
+                                All GTM Workshops <span className="ml-1">↑</span>
+                            </a>
+                        </div>
+                        <div className="flex items-center justify-between mb-3">
+                            <h1 className="text-2xl font-bold text-gray-800">
+                                Activity 2: Define Differentiators & Value
+                            </h1>
+                        </div>
+                        
+                        {/* Progress indicator */}
+                        <div className="flex items-center space-x-4">
+                            <div className={`flex items-center space-x-2 ${currentStep >= 1 ? 'text-orange-600' : 'text-gray-400'}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= 1 ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}>
+                                    1
+                                </div>
+                                <span className="font-semibold">Differentiators</span>
+                            </div>
+                            <div className="flex-1 h-1 bg-gray-200 rounded">
+                                <div className={`h-full bg-orange-500 rounded transition-all duration-300 ${
+                                    currentStep === 1 ? 'w-0' : currentStep === 2 ? 'w-1/2' : 'w-full'
+                                }`}></div>
+                            </div>
+                            <div className={`flex items-center space-x-2 ${currentStep >= 2 ? 'text-orange-600' : 'text-gray-400'}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= 2 ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}>
+                                    2
+                                </div>
+                                <span className="font-semibold">Customer Value</span>
+                            </div>
+                            <div className="flex-1 h-1 bg-gray-200 rounded">
+                                <div className={`h-full bg-orange-500 rounded transition-all duration-300 ${currentStep >= 3 ? 'w-full' : 'w-0'}`}></div>
+                            </div>
+                            <div className={`flex items-center space-x-2 ${currentStep >= 3 ? 'text-orange-600' : 'text-gray-400'}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= 3 ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}>
+                                    3
+                                </div>
+                                <span className="font-semibold">Review</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Import Section - Only show if not completed */}
+                    {currentStep < 3 && (
+                        <ImportSection 
+                            onImport={handleImport}
+                            isVisible={showImportSection}
+                        />
+                    )}
+                    
+                    {/* Debug info - remove after testing */}
+                    <div style={{padding: '10px', backgroundColor: '#f0f0f0', margin: '10px 0', fontSize: '12px'}}>
+                        Debug: currentStep={currentStep}, showImportSection={showImportSection.toString()}, shouldShow={(currentStep < 3).toString()}
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="bg-white rounded-lg shadow-lg p-6 relative">
+                        <button
+                            onClick={resetActivity}
+                            className="absolute -top-2 -right-2 w-8 h-8 bg-gray-200 hover:bg-orange-500 hover:text-white rounded-full flex items-center justify-center transition-all duration-200 text-gray-600"
+                            title="Reset Activity"
+                        >
+                            <span className="text-lg font-bold">↻</span>
+                        </button>
+
+                        {currentStep === 1 && renderStep1()}
+                        {currentStep === 2 && renderStep2()}
+                        {currentStep === 3 && renderStep3()}
+                    </div>
+
+                    {/* Footer decoration */}
+                    <div className="mt-4 text-center">
+                        <div className="w-12 h-12 mx-auto bg-white bg-opacity-30 rounded-full flex items-center justify-center">
+                            <div className="w-8 h-8 border-4 border-white border-opacity-50 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<DifferentiatorsValueActivity />, document.getElementById('root'));
+    </script>
+</body>
+</html>

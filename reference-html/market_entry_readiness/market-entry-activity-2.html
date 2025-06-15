@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity 2: Market Reality Check - Market Entry Readiness</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .lucide-icon {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        /* Laptop-optimized textarea styles */
+        .laptop-textarea {
+            min-height: 80px;
+            max-height: 120px;
+            transition: max-height 0.3s ease;
+            resize: none;
+        }
+        .laptop-textarea:focus {
+            max-height: 200px;
+        }
+        /* Collapsible import section */
+        .import-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .import-content.expanded {
+            max-height: 500px;
+        }
+        /* Side-by-side responsive layout */
+        @media (max-width: 768px) {
+            .laptop-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        /* Priority ranking styles */
+        .priority-item {
+            transition: all 0.2s ease;
+        }
+        .priority-item.selected {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 144, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Progress Code System - Encoding/Decoding Functions
+        const encodeProgressCode = (workshopData) => {
+            try {
+                const jsonString = JSON.stringify(workshopData);
+                const base64 = btoa(jsonString);
+                return `GSAP2025-${base64}`;
+            } catch (error) {
+                console.error('Error encoding progress code:', error);
+                return null;
+            }
+        };
+
+        const decodeProgressCode = (code) => {
+            try {
+                // First, clean the code of any line breaks and whitespace
+                const cleanedCode = code
+                    .trim()
+                    .split('\n')           // Split by line breaks
+                    .join('')              // Join back together without breaks
+                    .replace(/\s+/g, '');  // Remove any remaining whitespace
+                
+                let base64;
+                if (cleanedCode.startsWith('GSAP2025-')) {
+                    // Standard format with prefix
+                    base64 = cleanedCode.substring(9);
+                } else if (cleanedCode.length > 0) {
+                    // Raw base64 without prefix (legacy test files)
+                    base64 = cleanedCode;
+                } else {
+                    throw new Error('Invalid progress code format');
+                }
+                
+                // Validate base64 characters
+                const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+                if (!base64Regex.test(base64)) {
+                    console.error('Invalid base64 characters detected');
+                    console.error('Base64 sample:', base64.substring(0, 100));
+                    throw new Error('Progress code contains invalid characters');
+                }
+                
+                console.log('Base64 length:', base64.length);
+                console.log('Base64 ends with:', base64.substring(base64.length - 10));
+                
+                const jsonString = atob(base64);
+                console.log('Decoded JSON length:', jsonString.length);
+                console.log('JSON preview:', jsonString.substring(0, 200));
+                
+                const parsed = JSON.parse(jsonString);
+                console.log('Parsed structure:', Object.keys(parsed));
+                
+                return parsed;
+            } catch (error) {
+                console.error('Decode error:', error.message);
+                console.error('Full error:', error);
+                return null;
+            }
+        };
+
+        // Cross-browser clipboard copy with Safari fallback
+        const copyToClipboard = async (text) => {
+            try {
+                await navigator.clipboard.writeText(text);
+                return true;
+            } catch (err) {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    return true;
+                } catch (err) {
+                    console.error('Fallback copy failed:', err);
+                    return false;
+                } finally {
+                    document.body.removeChild(textArea);
+                }
+            }
+        };
+
+        // Market factors configuration
+        const marketFactors = [
+            {
+                id: 'market_size',
+                title: 'Market Size & Growth',
+                icon: '📊',
+                japanPrompt: 'What is the market size and growth rate in Japan?',
+                usPrompt: 'How does the US market size and growth compare?',
+                japanPlaceholder: 'e.g., $500M market, 5% annual growth, mature market',
+                usPlaceholder: 'e.g., $5B market, 15% annual growth, emerging segment'
+            },
+            {
+                id: 'customer_dynamics',
+                title: 'Customer Dynamics',
+                icon: '👥',
+                japanPrompt: 'How do customers buy and use solutions in Japan?',
+                usPrompt: 'How do US customer dynamics differ?',
+                japanPlaceholder: 'e.g., Enterprise-focused, long sales cycles, consensus decisions',
+                usPlaceholder: 'e.g., SMB-friendly, self-service, individual decision makers'
+            },
+            {
+                id: 'competitive_landscape',
+                title: 'Competitive Landscape',
+                icon: '🏆',
+                japanPrompt: 'Who are the main competitors in Japan?',
+                usPrompt: 'How is the US competitive landscape different?',
+                japanPlaceholder: 'e.g., 3 dominant players, focus on reliability and service',
+                usPlaceholder: 'e.g., Fragmented market, 20+ competitors, innovation-driven'
+            },
+            {
+                id: 'regulatory_environment',
+                title: 'Regulatory Environment',
+                icon: '📋',
+                japanPrompt: 'What regulations and compliance requirements exist in Japan?',
+                usPrompt: 'What US regulations must you navigate?',
+                japanPlaceholder: 'e.g., JPIPA for data privacy, industry-specific certifications',
+                usPlaceholder: 'e.g., SOC2, HIPAA, state privacy laws, FedRAMP'
+            },
+            {
+                id: 'operational_needs',
+                title: 'Operational Needs',
+                icon: '🛠️',
+                japanPrompt: 'What operational requirements exist in Japan?',
+                usPrompt: 'What operational changes are needed for the US?',
+                japanPlaceholder: 'e.g., Japanese language support, local office preferred',
+                usPlaceholder: 'e.g., 24/7 support, US entity, local data centers'
+            }
+        ];
+
+        // Icon components
+        const Building = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect width="16" height="20" x="4" y="2" rx="2" ry="2"/>
+                <path d="M9 22v-4h6v4"/>
+                <path d="M8 6h.01"/>
+                <path d="M16 6h.01"/>
+                <path d="M12 6h.01"/>
+                <path d="M12 10h.01"/>
+                <path d="M12 14h.01"/>
+                <path d="M16 10h.01"/>
+                <path d="M16 14h.01"/>
+                <path d="M8 10h.01"/>
+                <path d="M8 14h.01"/>
+            </svg>
+        );
+
+        const Target = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="6"/>
+                <circle cx="12" cy="12" r="2"/>
+            </svg>
+        );
+
+        const CheckCircle = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22,4 12,14.01 9,11.01"/>
+            </svg>
+        );
+
+        const AlertTriangle = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+        );
+
+        const FileText = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14,2 14,8 20,8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10,9 9,9 8,9"/>
+            </svg>
+        );
+
+        const Copy = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                <path d="M4 16c-1.1 0-2-.9-2 2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+            </svg>
+        );
+
+        const ChevronDown = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="6,9 12,15 18,9"/>
+            </svg>
+        );
+
+        const ChevronRight = ({ size = 20, className = "" }) => (
+            <svg className={`lucide-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="9,18 15,12 9,6"/>
+            </svg>
+        );
+
+        const MarketEntryActivity2 = () => {
+            const [currentStep, setCurrentStep] = useState(1);
+            
+            // Market factor comparison state
+            const [factorData, setFactorData] = useState({
+                market_size: { japan: '', us: '' },
+                customer_dynamics: { japan: '', us: '' },
+                competitive_landscape: { japan: '', us: '' },
+                regulatory_environment: { japan: '', us: '' },
+                operational_needs: { japan: '', us: '' }
+            });
+            
+            // Gap Priority Matrix state
+            const [priorities, setPriorities] = useState([]);
+            const [adaptationNotes, setAdaptationNotes] = useState('');
+            
+            // Progress Code System state
+            const [workshopData, setWorkshopData] = useState({
+                version: "1.0",
+                createdAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString(),
+                day1: {},
+                day2_1: {},
+                day2_2: {},
+                day3: {}
+            });
+            const [showImportSection, setShowImportSection] = useState(true);
+            const [importExpanded, setImportExpanded] = useState(false);
+            const [importedContext, setImportedContext] = useState(null);
+
+            // Reset function
+            const resetActivity = () => {
+                setFactorData({
+                    market_size: { japan: '', us: '' },
+                    customer_dynamics: { japan: '', us: '' },
+                    competitive_landscape: { japan: '', us: '' },
+                    regulatory_environment: { japan: '', us: '' },
+                    operational_needs: { japan: '', us: '' }
+                });
+                setPriorities([]);
+                setAdaptationNotes('');
+                setImportedContext(null);
+                setShowImportSection(true);
+                setImportExpanded(false);
+                setCurrentStep(1);
+                setWorkshopData({
+                    version: "1.0",
+                    createdAt: new Date().toISOString(),
+                    lastUpdated: new Date().toISOString(),
+                    day1: {},
+                    day2_1: {},
+                    day2_2: {},
+                    day3: {}
+                });
+            };
+
+            // Validation helpers
+            const getCompletedFactors = () => {
+                return marketFactors.filter(factor => {
+                    const data = factorData[factor.id];
+                    return data.japan.trim().length >= 25 && data.us.trim().length >= 25; // 5+ words each
+                }).length;
+            };
+
+            const isStep1Complete = () => getCompletedFactors() >= 4;
+            const isStep2Complete = () => priorities.length >= 3 && adaptationNotes.trim().length >= 50; // 10+ words
+            const isActivityComplete = () => isStep1Complete() && isStep2Complete();
+
+            // Handle import
+            const handleImport = (input) => {
+                if (input && input.startFresh) {
+                    setShowImportSection(false);
+                    return { success: true };
+                }
+                
+                if (input && input.hideImportSection) {
+                    setShowImportSection(false);
+                    return { success: true };
+                }
+                
+                // Clean the progress code input thoroughly
+                const cleanedCode = input
+                    .trim()                    // Remove leading/trailing whitespace
+                    .replace(/\s+/g, '')       // Remove ALL whitespace including line breaks
+                    .replace(/[\r\n]+/g, '');  // Extra insurance against newlines
+                
+                console.log('Attempting to import code:', cleanedCode.substring(0, 50) + '...'); // Debug log
+                
+                const decoded = decodeProgressCode(cleanedCode);
+                if (!decoded) {
+                    console.error('Failed to decode:', cleanedCode); // Debug log
+                    return { success: false, error: 'Invalid progress code. Please check that you copied the entire code correctly.' };
+                }
+                
+                setWorkshopData(decoded);
+                setImportedContext(decoded);
+                
+                return { success: true };
+            };
+
+            // Update workshop data when activity completes
+            useEffect(() => {
+                if (isActivityComplete()) {
+                    const updatedData = {
+                        ...workshopData,
+                        lastUpdated: new Date().toISOString(),
+                        day3: {
+                            ...workshopData.day3,
+                            activity2: {
+                                marketFactors: factorData,
+                                gapPriorities: priorities,
+                                adaptationStrategy: adaptationNotes,
+                                completedAt: new Date().toISOString()
+                            }
+                        }
+                    };
+                    setWorkshopData(updatedData);
+                }
+            }, [factorData, priorities, adaptationNotes]);
+
+            // Update factor data
+            const updateFactorData = (factorId, field, value) => {
+                setFactorData(prev => ({
+                    ...prev,
+                    [factorId]: {
+                        ...prev[factorId],
+                        [field]: value
+                    }
+                }));
+            };
+
+            // Handle priority selection
+            const togglePriority = (factorId) => {
+                setPriorities(prev => {
+                    if (prev.includes(factorId)) {
+                        return prev.filter(id => id !== factorId);
+                    } else if (prev.length < 3) {
+                        return [...prev, factorId];
+                    }
+                    return prev;
+                });
+            };
+
+            // Import Section Component
+            const ImportSection = ({ onImport, isVisible }) => {
+                const [progressCode, setProgressCode] = useState('');
+                const [error, setError] = useState('');
+                const [success, setSuccess] = useState(false);
+                
+                const handleImportClick = () => {
+                    // Clean the progress code input
+                    const cleanedCode = progressCode
+                        .trim()
+                        .replace(/\s+/g, '')
+                        .replace(/[\r\n]+/g, '');
+                    
+                    if (!cleanedCode) {
+                        setError('Please paste a progress code');
+                        return;
+                    }
+                    
+                    // Enhanced debugging
+                    console.log('=== IMPORT DEBUG ===');
+                    console.log('Original length:', progressCode.length);
+                    console.log('Cleaned length:', cleanedCode.length);
+                    console.log('First 100 chars:', cleanedCode.substring(0, 100));
+                    console.log('Last 50 chars:', cleanedCode.substring(cleanedCode.length - 50));
+                    console.log('Starts with GSAP2025-:', cleanedCode.startsWith('GSAP2025-'));
+                    console.log('===================');
+                    
+                    const result = onImport(cleanedCode);
+                    if (result.success) {
+                        setSuccess(true);
+                        setError('');
+                        
+                        // Log what we successfully decoded
+                        console.log('Successfully imported progress code');
+                        
+                        setTimeout(() => {
+                            onImport({ hideImportSection: true });
+                        }, 3000);
+                    } else {
+                        setError(result.error);
+                        setSuccess(false);
+                    }
+                };
+                
+                const handleStartFresh = () => {
+                    setProgressCode('');
+                    setError('');
+                    setSuccess(false);
+                    onImport({ startFresh: true });
+                };
+                
+                if (!isVisible) return null;
+                
+                return (
+                    <div className="bg-white border border-gray-200 rounded-lg mb-4">
+                        <div 
+                            className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50"
+                            onClick={() => setImportExpanded(!importExpanded)}
+                        >
+                            <div className="flex items-center">
+                                <FileText className="text-blue-600 mr-2" size={20} />
+                                <h3 className="text-md font-semibold text-gray-800">Continue Your Progress</h3>
+                            </div>
+                            {importExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                        </div>
+                        
+                        <div className={`import-content ${importExpanded ? 'expanded' : ''}`}>
+                            <div className="px-4 pb-4">
+                                {importedContext && (
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                                        <h4 className="font-medium text-blue-800 mb-2">Previous Workshop Context:</h4>
+                                        <div className="text-sm space-y-2">
+                                            {(() => {
+                                                const workshops = importedContext.workshops || importedContext;
+                                                const day1 = workshops.day1;
+                                                const day21 = workshops.day21 || workshops.day2_1;
+                                                const day22 = workshops.day22 || workshops.day2_2;
+                                                const day3 = workshops.day3;
+                                                
+                                                return (
+                                                    <>
+                                                        {day1?.problemStatement && (
+                                                            <div>
+                                                                <strong>Problem:</strong> {day1.problemStatement.substring(0, 100)}...
+                                                            </div>
+                                                        )}
+                                                        {day21?.activity3?.icpSummary && (
+                                                            <div>
+                                                                <strong>Target Customer:</strong> {day21.activity3.icpSummary.substring(0, 100)}...
+                                                            </div>
+                                                        )}
+                                                        {day22?.positioningActivity3?.primaryMessage && (
+                                                            <div>
+                                                                <strong>Positioning:</strong> {day22.positioningActivity3.primaryMessage.substring(0, 100)}...
+                                                            </div>
+                                                        )}
+                                                        {day3?.activity1 && (
+                                                            <div>
+                                                                <strong>Activity 1:</strong> Foundation & Goals completed with {day3.activity1.currentPosition?.strengths?.length || 0} strengths identified
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                <textarea
+                                    value={progressCode}
+                                    onChange={(e) => setProgressCode(e.target.value)}
+                                    placeholder="Paste your Workshop Progress Code here (starts with GSAP2025-)..."
+                                    className="w-full h-16 p-3 border border-gray-300 rounded-lg resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-sm"
+                                />
+                                
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Copy the entire code including the GSAP2025- prefix. The code should be one continuous string.
+                                </p>
+                                
+                                {progressCode.trim().startsWith('GSAP2025-') && (
+                                    <p className="text-xs text-green-600 mt-1">
+                                        ✓ Valid code format detected
+                                    </p>
+                                )}
+                                
+                                {error && (
+                                    <div className="mt-2 text-red-600 text-sm">{error}</div>
+                                )}
+                                
+                                {success && (
+                                    <div className="mt-2 text-green-600 text-sm">
+                                        ✓ Progress loaded successfully! Previous workshop data has been imported.
+                                    </div>
+                                )}
+                                
+                                <div className="flex space-x-3 mt-3">
+                                    <button
+                                        onClick={handleImportClick}
+                                        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                                    >
+                                        Load Progress
+                                    </button>
+                                    <button
+                                        onClick={handleStartFresh}
+                                        className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors text-sm"
+                                    >
+                                        Start Fresh
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            // Export Section Component
+            const ExportSection = ({ workshopData }) => {
+                const [showCopySuccess, setShowCopySuccess] = useState(false);
+                const [showHelpModal, setShowHelpModal] = useState(false);
+                const progressCode = encodeProgressCode(workshopData);
+                
+                const handleCopy = async () => {
+                    const success = await copyToClipboard(progressCode);
+                    if (success) {
+                        setShowCopySuccess(true);
+                        setTimeout(() => setShowCopySuccess(false), 2000);
+                    }
+                };
+                
+                const HelpModal = ({ isOpen, onClose }) => {
+                    if (!isOpen) return null;
+                    
+                    return (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 max-w-md mx-4">
+                                <h3 className="text-lg font-semibold mb-4">About Progress Codes</h3>
+                                <p className="text-gray-600 mb-4">
+                                    Progress codes save your workshop responses so you can continue later. 
+                                    They contain only your workshop data - no personal information.
+                                </p>
+                                <ul className="text-sm text-gray-600 space-y-2 mb-4">
+                                    <li>• Codes work across all market entry activities</li>
+                                    <li>• Save codes externally (email, notes)</li>
+                                    <li>• Data stays on your device</li>
+                                    <li>• One code contains all workshop history</li>
+                                </ul>
+                                <button 
+                                    onClick={onClose}
+                                    className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+                                >
+                                    Got it
+                                </button>
+                            </div>
+                        </div>
+                    );
+                };
+                
+                return (
+                    <>
+                        <div className="bg-green-50 border border-green-300 rounded-lg p-4 mt-6">
+                            <div className="flex items-center mb-3">
+                                <CheckCircle className="text-green-600 mr-2" size={20} />
+                                <h3 className="text-md font-semibold text-green-800">Activity 2 Complete! Save Your Progress</h3>
+                            </div>
+                            
+                            <p className="text-green-700 mb-3 text-sm">
+                                Copy this code to continue to Activity 3 or return later:
+                            </p>
+                            
+                            <div className="bg-white border border-green-200 rounded-lg p-2 mb-3">
+                                <code className="text-xs font-mono break-all">{progressCode}</code>
+                            </div>
+                            
+                            <div className="flex items-center space-x-4">
+                                <button
+                                    onClick={handleCopy}
+                                    className="flex items-center bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
+                                >
+                                    <Copy className="mr-2" size={14} />
+                                    Copy Code
+                                </button>
+                                
+                                <button
+                                    onClick={() => setShowHelpModal(true)}
+                                    className="text-green-700 hover:text-green-800 text-sm underline"
+                                >
+                                    What's this?
+                                </button>
+                                
+                                {showCopySuccess && (
+                                    <span className="text-green-600 text-sm">✓ Copied!</span>
+                                )}
+                            </div>
+                        </div>
+                        
+                        <HelpModal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} />
+                    </>
+                );
+            };
+
+            const renderStep1 = () => (
+                <div className="space-y-4">
+                    <div className="text-center mb-4">
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">
+                            Global Market Strategy Assessment
+                        </h3>
+                        <p className="text-gray-600 text-sm">
+                            Compare key market factors between Japan and US to identify critical gaps and opportunities
+                        </p>
+                    </div>
+
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                        <p className="text-blue-700 text-sm">
+                            <strong>Progress:</strong> {getCompletedFactors()}/5 factors completed. 
+                            Need at least 4 complete factors (5+ words each side) to proceed.
+                        </p>
+                    </div>
+
+                    <div className="space-y-4">
+                        {marketFactors.map((factor, index) => {
+                            const data = factorData[factor.id];
+                            const isComplete = data.japan.trim().length >= 25 && data.us.trim().length >= 25; // 5+ words each
+                            
+                            return (
+                                <div key={factor.id} className={`border rounded-lg p-4 ${isComplete ? 'border-green-300 bg-green-50' : 'border-gray-200 bg-white'}`}>
+                                    <div className="flex items-center mb-3">
+                                        <span className="text-2xl mr-3">{factor.icon}</span>
+                                        <h4 className="text-md font-semibold text-gray-800">{factor.title}</h4>
+                                        {isComplete && <CheckCircle className="ml-auto text-green-600" size={20} />}
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 laptop-grid">
+                                        {/* Japan */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                🇯🇵 {factor.japanPrompt} <span className="text-xs text-gray-500">(describe in 5+ words)</span>
+                                            </label>
+                                            <textarea
+                                                value={data.japan}
+                                                onChange={(e) => updateFactorData(factor.id, 'japan', e.target.value)}
+                                                placeholder={factor.japanPlaceholder}
+                                                className="w-full laptop-textarea p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 text-sm placeholder-gray-400"
+                                            />
+                                            <div className="flex justify-between items-center mt-1">
+                                                <span className="text-xs text-gray-500"></span>
+                                                <span className={`text-sm flex items-center gap-1 ${
+                                                    data.japan.trim().length >= 25 ? 'text-green-600' : 'text-gray-500'
+                                                }`}>
+                                                    {data.japan.trim().split(/\s+/).filter(w => w.length > 0).length} words
+                                                    {data.japan.trim().length >= 25 && <CheckCircle size={16} />}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* US */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                🇺🇸 {factor.usPrompt} <span className="text-xs text-gray-500">(describe in 5+ words)</span>
+                                            </label>
+                                            <textarea
+                                                value={data.us}
+                                                onChange={(e) => updateFactorData(factor.id, 'us', e.target.value)}
+                                                placeholder={factor.usPlaceholder}
+                                                className="w-full laptop-textarea p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 text-sm placeholder-gray-400"
+                                            />
+                                            <div className="flex justify-between items-center mt-1">
+                                                <span className="text-xs text-gray-500"></span>
+                                                <span className={`text-sm flex items-center gap-1 ${
+                                                    data.us.trim().length >= 25 ? 'text-green-600' : 'text-gray-500'
+                                                }`}>
+                                                    {data.us.trim().split(/\s+/).filter(w => w.length > 0).length} words
+                                                    {data.us.trim().length >= 25 && <CheckCircle size={16} />}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    <div className="flex justify-end">
+                        <button
+                            onClick={() => setCurrentStep(2)}
+                            disabled={!isStep1Complete()}
+                            className={`px-6 py-2 rounded-lg text-white font-medium transition-colors ${
+                                isStep1Complete() 
+                                    ? 'bg-orange-500 hover:bg-orange-600' 
+                                    : 'bg-gray-300 cursor-not-allowed'
+                            }`}
+                        >
+                            Set Gap Priorities →
+                        </button>
+                    </div>
+                </div>
+            );
+
+            const renderStep2 = () => (
+                <div className="space-y-4">
+                    <div className="text-center mb-4">
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">
+                            Gap Priority Matrix
+                        </h3>
+                        <p className="text-gray-600 text-sm">
+                            Identify your top 3 priority gaps and plan your adaptation strategy
+                        </p>
+                    </div>
+
+                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
+                        <h4 className="text-md font-semibold text-orange-800 mb-3">
+                            Select Your Top 3 Priority Gaps
+                        </h4>
+                        <p className="text-orange-700 text-sm mb-3">
+                            Click on the factors where you identified the biggest differences that need addressing:
+                        </p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {marketFactors.map(factor => {
+                                const isSelected = priorities.includes(factor.id);
+                                const isCompleted = factorData[factor.id].japan.trim().length >= 25 && 
+                                                  factorData[factor.id].us.trim().length >= 25; // 5+ words each
+                                
+                                return (
+                                    <button
+                                        key={factor.id}
+                                        onClick={() => togglePriority(factor.id)}
+                                        disabled={!isCompleted || (priorities.length >= 3 && !isSelected)}
+                                        className={`priority-item p-3 rounded-lg border text-left transition-all ${
+                                            isSelected 
+                                                ? 'border-orange-500 bg-orange-100 text-orange-800 selected' 
+                                                : isCompleted
+                                                    ? 'border-gray-300 bg-white hover:border-orange-300 hover:bg-orange-50'
+                                                    : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                                        }`}
+                                    >
+                                        <div className="flex items-center">
+                                            <span className="text-lg mr-2">{factor.icon}</span>
+                                            <span className="text-sm font-medium">{factor.title}</span>
+                                        </div>
+                                        {isSelected && (
+                                            <div className="text-xs text-orange-600 mt-1">
+                                                Priority #{priorities.indexOf(factor.id) + 1}
+                                            </div>
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        
+                        <p className="text-orange-600 text-sm mt-3">
+                            Selected: {priorities.length}/3 priorities
+                        </p>
+                    </div>
+
+                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                        <h4 className="text-md font-semibold text-purple-800 mb-3">
+                            Adaptation Strategy
+                        </h4>
+                        <p className="text-purple-700 text-sm mb-3">
+                            How will you address these priority gaps? What specific adaptations will you make? <span className="text-xs text-gray-500">(describe in 10+ words)</span>
+                        </p>
+                        
+                        <textarea
+                            value={adaptationNotes}
+                            onChange={(e) => setAdaptationNotes(e.target.value)}
+                            placeholder="e.g., For customer behavior gaps: Implement longer evaluation processes, build consensus-building tools, establish partner network for warm introductions..."
+                            className="w-full laptop-textarea p-3 border border-purple-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-sm placeholder-gray-400"
+                            style={{ minHeight: '120px' }}
+                        />
+                        <div className="flex justify-between items-center mt-1">
+                            <span className="text-xs text-gray-500"></span>
+                            <span className={`text-sm flex items-center gap-1 ${
+                                adaptationNotes.trim().length >= 50 ? 'text-green-600' : 'text-gray-500'
+                            }`}>
+                                {adaptationNotes.trim().split(/\s+/).filter(w => w.length > 0).length} words
+                                {adaptationNotes.trim().length >= 50 && <CheckCircle size={16} />}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-between">
+                        <button
+                            onClick={() => setCurrentStep(1)}
+                            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+                        >
+                            ← Back to Comparison
+                        </button>
+                        
+                        <button
+                            onClick={() => setCurrentStep(3)}
+                            disabled={!isStep2Complete()}
+                            className={`px-6 py-2 rounded-lg text-white font-medium transition-colors ${
+                                isStep2Complete() 
+                                    ? 'bg-orange-500 hover:bg-orange-600' 
+                                    : 'bg-gray-300 cursor-not-allowed'
+                            }`}
+                        >
+                            Complete Activity →
+                        </button>
+                    </div>
+                </div>
+            );
+
+            const renderStep3 = () => (
+                <div className="space-y-4">
+                    <div className="text-center mb-4">
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">
+                            Market Reality Check Complete
+                        </h3>
+                        <p className="text-gray-600 text-sm">
+                            You've analyzed key market factors and identified priority adaptation areas
+                        </p>
+                    </div>
+
+                    <div className="bg-green-50 border border-green-300 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-800 mb-3 flex items-center">
+                            <CheckCircle className="mr-2" size={20} />
+                            Market Analysis Complete!
+                        </h4>
+                        
+                        <div className="space-y-3">
+                            <div>
+                                <h5 className="font-medium text-green-700 mb-1">Market Factors Analyzed:</h5>
+                                <p className="text-sm text-gray-700">
+                                    {getCompletedFactors()}/5 factors completed with Japan vs US comparison (5+ words each)
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <h5 className="font-medium text-green-700 mb-1">Priority Gaps Identified:</h5>
+                                <div className="text-sm text-gray-700">
+                                    {priorities.map((priorityId, index) => {
+                                        const factor = marketFactors.find(f => f.id === priorityId);
+                                        return (
+                                            <span key={priorityId} className="inline-block bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs mr-2 mb-1">
+                                                #{index + 1} {factor?.title}
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h5 className="font-medium text-green-700 mb-1">Adaptation Strategy:</h5>
+                                <p className="text-sm text-gray-700">
+                                    {adaptationNotes.substring(0, 150)}{adaptationNotes.length > 150 ? '...' : ''}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                        <h4 className="text-md font-bold text-orange-800 mb-2">🎯 Next: Entry Strategy Planning</h4>
+                        <p className="text-orange-700 text-sm mb-2">
+                            In Activity 3, you'll create your detailed market entry strategy and timeline.
+                        </p>
+                        <div className="text-sm text-orange-700">
+                            <p className="mb-1"><strong>Coming up:</strong></p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
+                                <div>• Entry approach selection</div>
+                                <div>• Resource allocation planning</div>
+                                <div>• Timeline and milestones</div>
+                                <div>• Risk mitigation strategies</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Export Section */}
+                    <ExportSection workshopData={workshopData} />
+
+                    <div className="text-center space-x-4 mt-6">
+                        <button
+                            onClick={() => setCurrentStep(2)}
+                            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+                        >
+                            ← Back to Edit
+                        </button>
+                        <button
+                            onClick={() => window.location.href = 'market-entry-activity-3.html'}
+                            className="bg-orange-500 text-white px-8 py-3 rounded-lg hover:bg-orange-600 transition-colors font-semibold"
+                        >
+                            Continue to Activity 3
+                        </button>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="max-w-[900px] mx-auto p-4 bg-gradient-to-br from-orange-100 to-orange-200 min-h-screen">
+                    {/* Header */}
+                    <div className="bg-white rounded-lg shadow-lg p-4 mb-4 sticky top-0 z-50">
+                        <div className="flex justify-between items-center w-full mb-2">
+                            <a 
+                                href="index.html" 
+                                className="inline-flex items-center text-orange-600 hover:text-orange-700 transition-colors text-sm font-medium"
+                            >
+                                <span className="mr-1">←</span> Back to Workshop
+                            </a>
+                            <a 
+                                href="../" 
+                                className="inline-flex items-center text-gray-600 hover:text-orange-700 transition-colors text-sm font-medium"
+                            >
+                                All GTM Workshops <span className="ml-1">↑</span>
+                            </a>
+                        </div>
+                        <div className="flex items-center justify-between mb-2">
+                            <h1 className="text-xl font-bold text-gray-800">
+                                Activity 2: Market Reality Check
+                            </h1>
+                            <div className="text-sm text-gray-600">
+                                Activity 2 of 3
+                            </div>
+                        </div>
+                        
+                        {/* Progress indicator */}
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div className={`bg-orange-500 h-2 rounded-full transition-all duration-300 ${
+                                currentStep === 1 ? 'w-1/3' : currentStep === 2 ? 'w-2/3' : 'w-full'
+                            }`}></div>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-600 mt-1">
+                            <span>Compare</span>
+                            <span>Prioritize</span>
+                            <span>Complete</span>
+                        </div>
+                    </div>
+
+                    {/* Import Section */}
+                    {currentStep < 3 && (
+                        <ImportSection 
+                            onImport={handleImport}
+                            isVisible={showImportSection}
+                        />
+                    )}
+
+                    {/* Main Content */}
+                    <div className="bg-white rounded-lg shadow-lg p-6 relative">
+                        <button
+                            onClick={resetActivity}
+                            className="absolute -top-2 -right-2 w-8 h-8 bg-gray-200 hover:bg-orange-500 hover:text-white rounded-full flex items-center justify-center transition-all duration-200 text-gray-600"
+                            title="Reset Activity"
+                        >
+                            <span className="text-lg font-bold">↻</span>
+                        </button>
+                        
+                        {currentStep === 1 && renderStep1()}
+                        {currentStep === 2 && renderStep2()}
+                        {currentStep === 3 && renderStep3()}
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<MarketEntryActivity2 />, document.getElementById('root'));
+    </script>
+</body>
+</html>
