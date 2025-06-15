@@ -19,6 +19,7 @@ export const ActivitySummary: React.FC<ActivitySummaryProps> = ({
   userKey
 }) => {
   const [copied, setCopied] = useState(false);
+  const [showResetTooltip, setShowResetTooltip] = useState(false);
 
   const handleCopyKey = async () => {
     try {
@@ -164,22 +165,53 @@ export const ActivitySummary: React.FC<ActivitySummaryProps> = ({
 
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200">
-        <button
-          onClick={onReset}
-          className="px-6 py-3 rounded-lg transition-colors font-medium"
-          style={{
-            backgroundColor: '#8A8A8A',
-            color: '#FFFFFF'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#666666';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#8A8A8A';
-          }}
-        >
-          Reset Activity
-        </button>
+        <div className="relative">
+          <button
+            onClick={onReset}
+            className="px-6 py-3 rounded-lg transition-colors font-medium"
+            style={{
+              backgroundColor: '#8A8A8A',
+              color: '#FFFFFF'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#666666';
+              setShowResetTooltip(true);
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#8A8A8A';
+              setShowResetTooltip(false);
+            }}
+            title="Reset Activity - This will restart the activity and clear your responses. Your user ID will stay the same so your progress across other activities won't be lost."
+            aria-describedby="reset-activity-tooltip"
+          >
+            Reset Activity
+          </button>
+          
+          {/* Custom Tooltip */}
+          {showResetTooltip && (
+            <div
+              id="reset-activity-tooltip"
+              className="absolute bottom-full left-0 mb-2 w-64 p-3 text-sm rounded-lg shadow-lg z-10 pointer-events-none"
+              style={{
+                backgroundColor: '#1f2937',
+                color: '#ffffff'
+              }}
+            >
+              <div className="relative">
+                This will restart the activity and clear your responses. Your user ID will stay the same so your progress across other activities won't be lost.
+                {/* Tooltip arrow */}
+                <div
+                  className="absolute top-full left-4 w-0 h-0"
+                  style={{
+                    borderLeft: '6px solid transparent',
+                    borderRight: '6px solid transparent',
+                    borderTop: '6px solid #1f2937'
+                  }}
+                ></div>
+              </div>
+            </div>
+          )}
+        </div>
         
         <div className="flex-1"></div>
         
