@@ -837,3 +837,71 @@ import { ActivityShell } from './layout';
 ```
 
 ---
+
+## 🌐 9. Inter-Activity Navigation & Routing Standards
+
+### Overview
+This section defines how users navigate between activities and how routing should be structured across the GTM Workshop app.
+
+### Core Navigation Patterns
+
+#### 1. Routing Structure
+- Use React Router v6+ for page-based routing.
+- Each activity is accessible via a route of the form:
+  ```
+  /day1/activity1
+  /day1/activity2
+  /day2/activity1
+  ```
+- Dynamic route parameters can be used for workshop step logic if needed:
+  ```
+  /:day/:activity
+  ```
+
+#### 2. Navigation Components
+
+##### Continue to Next Activity
+- A `ContinueToNextActivity` button is shown at the end of each activity.
+- Clicking this routes the user to the next activity using React Router's `navigate()` function.
+- The target route is hardcoded in activity config or passed as a prop.
+- Ensure the `userKey` is preserved during navigation via context or query params.
+
+##### Back to Workshop
+- `BackToWorkshop` button routes users to `/workshop-overview` or the relevant index page.
+- Can be a standard button in the footer or sidebar of each activity.
+- Should not clear or affect user progress data.
+
+#### 3. Route Guarding & Validation
+- Activities should validate required data before allowing forward navigation.
+- If `completedAt` is missing for the previous activity, optionally show a warning modal.
+- Prevent direct access to future activities unless prior steps are complete (optional).
+
+#### 4. Navigation Context
+- A `NavigationProvider` can be used to expose navigation functions and activity metadata.
+- Allows consistent control over:
+  - Current/next activity
+  - Step count and current step
+  - Access rules and redirect logic
+
+```tsx
+// Example usage
+const { goToNextActivity, goToWorkshopHome } = useNavigation();
+```
+
+#### 5. Route Persistence
+- Persist the user's current activity and step in localStorage:
+  ```
+  localStorage.setItem('lastVisitedActivity', '/day1/activity2');
+  ```
+- On app load, route them back to this path if `userKey` is found.
+
+#### 6. Accessibility
+- All navigation buttons must be reachable via keyboard
+- Buttons must include descriptive `aria-labels` like `"Continue to Activity 2"` or `"Back to Workshop Overview"`
+
+### Implementation Benefits
+- Seamless transitions between activities
+- Predictable route structure for developers
+- Improved session continuity with route persistence
+- Flexible guardrails for incomplete activities
+- Supports scalable multi-day, multi-activity workshop flows
