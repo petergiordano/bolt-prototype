@@ -915,3 +915,67 @@ const { goToNextActivity, goToWorkshopHome } = useNavigation();
 - Improved session continuity with route persistence
 - Flexible guardrails for incomplete activities
 - Supports scalable multi-day, multi-activity workshop flows
+
+---
+
+## 🧭 10. Activity Migration Framework
+
+### Purpose
+This section defines the standardized approach to migrate each legacy HTML activity into the modern React + Supabase system. It ensures repeatability, maintainability, and consistent user experience across all activities.
+
+### Migration Inputs
+Each migration is driven by:
+- Legacy source file: e.g., `problems-activity-2.html`
+- Activity context: day number, activity number, step count
+- Expected interaction type(s): reflection, sharing, ranking, etc.
+
+### Migration Checklist
+1. **Define Activity Route**
+   - Use standard path: `/day1/activity2`
+   - Register route in the router config
+2. **Implement ActivityShell Wrapper**
+   - Use the standard `<ActivityShell>` layout (Section 7)
+   - Provide all required props: title, subtitle, steps, userKey, onReset
+3. **Create Step Components**
+   - Each step should be a standalone React component
+   - Follow `StepContainer`, `InstructionCard`, and input patterns
+   - Implement validation, word count, and progression logic
+4. **Wire Navigation Logic**
+   - Use `BackButton`, `ContinueButton`, `ResetButton` from UI library
+   - Enable proper forward/backward movement and reset behavior
+5. **Define Activity Schema**
+   - Add new TypeScript interface to the main schema
+   - Use `stepData` with strongly typed step names
+   - Include `startedAt`, `lastModified`, and `completedAt` metadata
+6. **Implement Validation Rules**
+   - Use the standard `ValidationRule` format
+   - Add logic for `isValid` checks in each step
+   - Add visual feedback (green check, disabled button)
+7. **Connect to Supabase**
+   - Load and save data using `loadUserData` and `saveUserData`
+   - Preserve `userKey` and ensure isolated data per activity
+8. **Ensure UI Standards**
+   - Reuse tooltip/back/reset components (Section 6)
+   - Apply StepHeader and InstructionCard formats (Section 7)
+   - Maintain spacing, font hierarchy, and responsive layout
+9. **Test Accessibility**
+   - All buttons keyboard-accessible
+   - ARIA labels and titles on interactive components
+   - Minimum 44px targets and logical tab order
+10. **Document Migration**
+   - Update `todo.md` and `bolt-migration-standards.md` if needed
+   - Ensure mappings, schema, and route are clearly traceable
+
+### Output Requirements
+- Folder: `src/activities/day1/activity2`
+- Route added to React Router config
+- Schema updated in `WorkshopData`
+- UI verified against Section 7 layout and Section 6 components
+- Activity added to progression logic (e.g. `ContinueToNextActivity`)
+
+### Benefits
+- 🔁 Repeatable activity migration process
+- 🎯 Strong type safety and consistent layout
+- ⚙️ Clean division between layout, data, and navigation
+- 📐 Predictable structure for future contributors
+- 🧪 Easier testing and debugging
