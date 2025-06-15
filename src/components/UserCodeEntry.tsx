@@ -68,20 +68,20 @@ export const UserCodeEntry: React.FC<UserCodeEntryProps> = ({
       borderColor: '#55BFFA'
     }}>
       <div className="flex items-center mb-4">
-        <Key style={{ color: '#55BFFA' }} size={24} className="mr-3" />
-        <h3 className="text-xl font-semibold" style={{ color: '#6E9FBA' }}>
+        <Key style={{ color: '#FFFFFF' }} size={24} className="mr-3" />
+        <h3 className="text-xl font-semibold text-white">
           Continue Your Workshop Journey
         </h3>
       </div>
       
-      <p className="mb-4" style={{ color: '#6E9FBA' }}>
+      <p className="mb-4 text-white">
         Have a user code from previous activities? Enter it below to continue where you left off 
         and access all your saved workshop data.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: '#6E9FBA' }}>
+          <label className="block text-sm font-medium mb-2 text-white">
             Enter your code to continue where you left off:
           </label>
           <input
@@ -91,7 +91,7 @@ export const UserCodeEntry: React.FC<UserCodeEntryProps> = ({
               setCode(e.target.value);
               setError(null);
             }}
-            className="w-full px-4 py-3 border rounded-lg font-mono text-center tracking-wider transition-all duration-200"
+            className="w-full px-4 py-3 border rounded-lg font-mono text-center tracking-wider transition-all duration-200 text-gray-900 placeholder-gray-400"
             style={{
               borderColor: error ? '#DC2626' : '#d1d5db',
               backgroundColor: '#FFFFFF'
@@ -111,7 +111,7 @@ export const UserCodeEntry: React.FC<UserCodeEntryProps> = ({
             disabled={loading}
           />
           {error && (
-            <div className="flex items-center mt-2 text-sm" style={{ color: '#DC2626' }}>
+            <div className="flex items-center mt-2 text-sm text-red-100">
               <AlertCircle size={16} className="mr-1" />
               {error}
             </div>
@@ -124,23 +124,9 @@ export const UserCodeEntry: React.FC<UserCodeEntryProps> = ({
             disabled={loading || !code.trim()}
             className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
               loading || !code.trim()
-                ? 'cursor-not-allowed'
-                : ''
+                ? 'cursor-not-allowed bg-gray-400 text-gray-200'
+                : 'bg-white text-blue-600 hover:bg-gray-50'
             }`}
-            style={{
-              backgroundColor: (loading || !code.trim()) ? '#d1d5db' : '#55BFFA',
-              color: (loading || !code.trim()) ? '#8A8A8A' : '#FFFFFF'
-            }}
-            onMouseEnter={(e) => {
-              if (!loading && code.trim()) {
-                e.currentTarget.style.backgroundColor = '#3B9AE1';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!loading && code.trim()) {
-                e.currentTarget.style.backgroundColor = '#55BFFA';
-              }
-            }}
           >
             {loading ? 'Validating...' : 'Continue with Code'}
           </button>
@@ -149,31 +135,17 @@ export const UserCodeEntry: React.FC<UserCodeEntryProps> = ({
             type="button"
             onClick={handleSkip}
             disabled={loading}
-            className="px-6 py-3 rounded-lg font-medium transition-colors"
-            style={{
-              backgroundColor: '#8A8A8A',
-              color: '#FFFFFF'
-            }}
-            onMouseEnter={(e) => {
-              if (!loading) {
-                e.currentTarget.style.backgroundColor = '#666666';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!loading) {
-                e.currentTarget.style.backgroundColor = '#8A8A8A';
-              }
-            }}
+            className="px-6 py-3 rounded-lg font-medium transition-colors bg-gray-600 text-white hover:bg-gray-700 disabled:bg-gray-400 disabled:text-gray-200"
           >
             Start Fresh
           </button>
         </div>
       </form>
 
-      <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)' }}>
-        <p className="text-sm" style={{ color: '#6E9FBA' }}>
-          <strong>Why enter a code?</strong> Your user code connects you to all your workshop progress 
-          across multiple activities. Without it, you'll start fresh and won\'t have access to your 
+      <div className="mt-4 p-3 rounded-lg bg-white bg-opacity-20">
+        <p className="text-sm text-white">
+          <strong className="text-white">Why enter a code?</strong> Your user code connects you to all your workshop progress 
+          across multiple activities. Without it, you'll start fresh and won't have access to your 
           previous insights and responses.
         </p>
       </div>
