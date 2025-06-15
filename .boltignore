@@ -5,6 +5,7 @@ supabase/
 public/
 .vscode/
 .bolt/
+logs/
 
 # Ignore generated files and maps
 *.map
