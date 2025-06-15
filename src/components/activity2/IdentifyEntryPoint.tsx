@@ -73,29 +73,29 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
         </div>
         <p className="mb-2 text-white">Based on your market landscape:</p>
         <ol className="list-decimal list-inside space-y-1 ml-2 text-white">
-          <li>Click to place your strategic entry point marker</li>
+          <li>Click to place your 📍 strategic entry point marker</li>
           <li>Explain why this is the best landing zone for your solution</li>
         </ol>
       </div>
 
-      {/* Interactive Grid with Previous Markers */}
+      {/* Interactive Venn Diagram with Previous Markers */}
       <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
-              <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: '#DC2626' }}></div>
+              <span className="mr-2 text-lg">🚩</span>
               <span className="text-sm font-medium text-gray-800">
                 Competitors ({competitorMarkers.length})
               </span>
             </div>
             <div className="flex items-center">
-              <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: '#2563EB' }}></div>
+              <span className="mr-2 text-lg">💡</span>
               <span className="text-sm font-medium text-gray-800">
                 Underserved ({underservedMarkers.length})
               </span>
             </div>
             <div className="flex items-center">
-              <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: '#22C55E' }}></div>
+              <span className="mr-2 text-lg">📍</span>
               <span className="text-sm font-medium text-gray-800">
                 Strategic Entry ({strategicMarker ? 1 : 0})
               </span>
@@ -119,33 +119,63 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
             </defs>
             <rect width="100%" height="100%" fill="url(#grid)" />
             
-            {/* Zone divider */}
-            <line x1="50%" y1="0" x2="50%" y2="100%" stroke="#9ca3af" strokeWidth="2" strokeDasharray="5,5" />
+            {/* Three overlapping circles for Venn diagram */}
+            <circle
+              cx="30%"
+              cy="50%"
+              r="80"
+              fill="rgba(59, 130, 246, 0.1)"
+              stroke="#3B82F6"
+              strokeWidth="2"
+              strokeDasharray="5,5"
+            />
             
-            {/* Zone labels */}
-            <text x="25%" y="30" textAnchor="middle" className="text-sm font-medium" fill="#374151">
-              Competitor Focus Zone
+            <circle
+              cx="70%"
+              cy="35%"
+              r="80"
+              fill="rgba(34, 197, 94, 0.1)"
+              stroke="#22C55E"
+              strokeWidth="2"
+              strokeDasharray="5,5"
+            />
+            
+            <circle
+              cx="70%"
+              cy="65%"
+              r="80"
+              fill="rgba(168, 85, 247, 0.1)"
+              stroke="#A855F7"
+              strokeWidth="2"
+              strokeDasharray="5,5"
+            />
+            
+            {/* Circle labels */}
+            <text x="20%" y="30%" textAnchor="middle" className="text-sm font-medium" fill="#3B82F6">
+              Mainstream Market
             </text>
-            <text x="75%" y="30" textAnchor="middle" className="text-sm font-medium" fill="#374151">
-              Underserved Segments Zone
+            <text x="80%" y="20%" textAnchor="middle" className="text-sm font-medium" fill="#22C55E">
+              Low-end Market
+            </text>
+            <text x="80%" y="80%" textAnchor="middle" className="text-sm font-medium" fill="#A855F7">
+              New/Overlooked Segments
             </text>
             
             {/* Competitor markers (read-only) */}
             {competitorMarkers.map((marker) => (
               <g key={marker.id}>
-                <circle
-                  cx={`${marker.x}%`}
-                  cy={`${marker.y}%`}
-                  r="6"
-                  fill="#DC2626"
-                  stroke="#FFFFFF"
-                  strokeWidth="2"
-                  opacity="0.7"
-                />
+                <text
+                  x={`${marker.x}%`}
+                  y={`${marker.y}%`}
+                  textAnchor="middle"
+                  className="text-lg opacity-70"
+                >
+                  🚩
+                </text>
                 {marker.label && (
                   <text
                     x={`${marker.x}%`}
-                    y={`${marker.y + 6}%`}
+                    y={`${marker.y + 8}%`}
                     textAnchor="middle"
                     className="text-xs pointer-events-none"
                     fill="#374151"
@@ -160,19 +190,18 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
             {/* Underserved markers (read-only) */}
             {underservedMarkers.map((marker) => (
               <g key={marker.id}>
-                <circle
-                  cx={`${marker.x}%`}
-                  cy={`${marker.y}%`}
-                  r="6"
-                  fill="#2563EB"
-                  stroke="#FFFFFF"
-                  strokeWidth="2"
-                  opacity="0.7"
-                />
+                <text
+                  x={`${marker.x}%`}
+                  y={`${marker.y}%`}
+                  textAnchor="middle"
+                  className="text-lg opacity-70"
+                >
+                  💡
+                </text>
                 {marker.label && (
                   <text
                     x={`${marker.x}%`}
-                    y={`${marker.y + 6}%`}
+                    y={`${marker.y + 8}%`}
                     textAnchor="middle"
                     className="text-xs pointer-events-none"
                     fill="#374151"
@@ -187,24 +216,14 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
             {/* Strategic marker */}
             {strategicMarker && (
               <g>
-                <circle
-                  cx={`${strategicMarker.x}%`}
-                  cy={`${strategicMarker.y}%`}
-                  r="10"
-                  fill="#22C55E"
-                  stroke="#FFFFFF"
-                  strokeWidth="3"
-                  className="cursor-pointer hover:opacity-80"
-                  onClick={handleStrategicMarkerClick}
-                />
                 <text
                   x={`${strategicMarker.x}%`}
-                  y={`${strategicMarker.y + 4}%`}
+                  y={`${strategicMarker.y}%`}
                   textAnchor="middle"
-                  className="text-xs font-bold pointer-events-none"
-                  fill="#FFFFFF"
+                  className="text-2xl cursor-pointer hover:opacity-80"
+                  onClick={handleStrategicMarkerClick}
                 >
-                  ★
+                  📍
                 </text>
                 <text
                   x={`${strategicMarker.x}%`}
@@ -221,7 +240,7 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
         </div>
 
         <div className="mt-4 text-sm text-gray-700">
-          <p>Click anywhere on the grid to place your strategic entry point marker. Click the marker to edit your justification.</p>
+          <p>Click anywhere on the Venn diagram to place your 📍 strategic entry point marker. Click the marker to edit your justification.</p>
         </div>
       </div>
 

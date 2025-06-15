@@ -93,32 +93,63 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
               </defs>
               <rect width="100%" height="100%" fill="url(#summary-grid)" />
               
-              {/* Zone divider */}
-              <line x1="50%" y1="0" x2="50%" y2="100%" stroke="#9ca3af" strokeWidth="2" strokeDasharray="5,5" />
+              {/* Three overlapping circles for Venn diagram */}
+              <circle
+                cx="30%"
+                cy="50%"
+                r="60"
+                fill="rgba(59, 130, 246, 0.1)"
+                stroke="#3B82F6"
+                strokeWidth="2"
+                strokeDasharray="5,5"
+              />
               
-              {/* Zone labels */}
-              <text x="25%" y="25" textAnchor="middle" className="text-sm font-medium" fill="#374151">
-                Competitors
+              <circle
+                cx="70%"
+                cy="35%"
+                r="60"
+                fill="rgba(34, 197, 94, 0.1)"
+                stroke="#22C55E"
+                strokeWidth="2"
+                strokeDasharray="5,5"
+              />
+              
+              <circle
+                cx="70%"
+                cy="65%"
+                r="60"
+                fill="rgba(168, 85, 247, 0.1)"
+                stroke="#A855F7"
+                strokeWidth="2"
+                strokeDasharray="5,5"
+              />
+              
+              {/* Circle labels */}
+              <text x="20%" y="25%" textAnchor="middle" className="text-xs font-medium" fill="#3B82F6">
+                Mainstream
               </text>
-              <text x="75%" y="25" textAnchor="middle" className="text-sm font-medium" fill="#374151">
-                Underserved Segments
+              <text x="80%" y="15%" textAnchor="middle" className="text-xs font-medium" fill="#22C55E">
+                Low-end
+              </text>
+              <text x="80%" y="85%" textAnchor="middle" className="text-xs font-medium" fill="#A855F7">
+                New/Overlooked
               </text>
               
               {/* Competitor markers */}
               {responses.competitorMarkers.map((marker) => (
                 <g key={marker.id}>
-                  <circle
-                    cx={`${marker.x}%`}
-                    cy={`${marker.y}%`}
-                    r="6"
-                    fill="#DC2626"
-                    stroke="#FFFFFF"
-                    strokeWidth="2"
-                  />
+                  <text
+                    x={`${marker.x}%`}
+                    y={`${marker.y}%`}
+                    textAnchor="middle"
+                    className="text-sm"
+                  >
+                    🚩
+                  </text>
                   {marker.label && (
                     <text
                       x={`${marker.x}%`}
-                      y={`${marker.y + 8}%`}
+                      y={`${marker.y + 6}%`}
                       textAnchor="middle"
                       className="text-xs font-medium"
                       fill="#374151"
@@ -132,18 +163,18 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
               {/* Underserved markers */}
               {responses.underservedMarkers.map((marker) => (
                 <g key={marker.id}>
-                  <circle
-                    cx={`${marker.x}%`}
-                    cy={`${marker.y}%`}
-                    r="6"
-                    fill="#2563EB"
-                    stroke="#FFFFFF"
-                    strokeWidth="2"
-                  />
+                  <text
+                    x={`${marker.x}%`}
+                    y={`${marker.y}%`}
+                    textAnchor="middle"
+                    className="text-sm"
+                  >
+                    💡
+                  </text>
                   {marker.label && (
                     <text
                       x={`${marker.x}%`}
-                      y={`${marker.y + 8}%`}
+                      y={`${marker.y + 6}%`}
                       textAnchor="middle"
                       className="text-xs font-medium"
                       fill="#374151"
@@ -157,26 +188,17 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
               {/* Strategic marker */}
               {responses.strategicMarker && (
                 <g>
-                  <circle
-                    cx={`${responses.strategicMarker.x}%`}
-                    cy={`${responses.strategicMarker.y}%`}
-                    r="10"
-                    fill="#22C55E"
-                    stroke="#FFFFFF"
-                    strokeWidth="3"
-                  />
                   <text
                     x={`${responses.strategicMarker.x}%`}
-                    y={`${responses.strategicMarker.y + 4}%`}
+                    y={`${responses.strategicMarker.y}%`}
                     textAnchor="middle"
-                    className="text-xs font-bold"
-                    fill="#FFFFFF"
+                    className="text-lg"
                   >
-                    ★
+                    📍
                   </text>
                   <text
                     x={`${responses.strategicMarker.x}%`}
-                    y={`${responses.strategicMarker.y + 18}%`}
+                    y={`${responses.strategicMarker.y + 12}%`}
                     textAnchor="middle"
                     className="text-xs font-medium"
                     fill="#374151"
@@ -191,15 +213,15 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
 
         <div className="grid md:grid-cols-3 gap-4 text-white">
           <div className="bg-white bg-opacity-20 rounded-lg p-3">
-            <h5 className="font-semibold mb-1">Competitors</h5>
+            <h5 className="font-semibold mb-1">🚩 Competitors</h5>
             <p className="text-sm">{responses.competitorMarkers.length} markers placed</p>
           </div>
           <div className="bg-white bg-opacity-20 rounded-lg p-3">
-            <h5 className="font-semibold mb-1">Underserved Segments</h5>
+            <h5 className="font-semibold mb-1">💡 Underserved Segments</h5>
             <p className="text-sm">{responses.underservedMarkers.length} markers placed</p>
           </div>
           <div className="bg-white bg-opacity-20 rounded-lg p-3">
-            <h5 className="font-semibold mb-1">Strategic Entry</h5>
+            <h5 className="font-semibold mb-1">📍 Strategic Entry</h5>
             <p className="text-sm">{responses.strategicMarker ? '1 marker placed' : 'Not placed'}</p>
           </div>
         </div>

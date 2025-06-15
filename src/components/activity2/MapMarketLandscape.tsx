@@ -22,20 +22,28 @@ export const MapMarketLandscape: React.FC<MapMarketLandscapeProps> = ({
   const [editingLabel, setEditingLabel] = useState('');
   const [showLabelModal, setShowLabelModal] = useState(false);
 
-  const handleGridClick = (event: React.MouseEvent<SVGElement>, zone: 'competitor' | 'underserved') => {
+  const handleGridClick = (event: React.MouseEvent<SVGElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
 
+    // Determine marker type based on click position within Venn diagram zones
+    let markerType: 'competitor' | 'underserved' = 'competitor';
+    
+    // Simple zone detection - can be refined based on actual circle overlaps
+    if (x > 60) {
+      markerType = 'underserved';
+    }
+
     const newMarker: MarkerData = {
-      id: `${zone}-${Date.now()}`,
-      type: zone,
+      id: `${markerType}-${Date.now()}`,
+      type: markerType,
       x,
       y,
       label: ''
     };
 
-    if (zone === 'competitor') {
+    if (markerType === 'competitor') {
       onMarkersChange('competitorMarkers', [...competitorMarkers, newMarker]);
     } else {
       onMarkersChange('underservedMarkers', [...underservedMarkers, newMarker]);
@@ -106,28 +114,30 @@ export const MapMarketLandscape: React.FC<MapMarketLandscapeProps> = ({
           <Target className="mr-2 text-white" size={24} />
           <h4 className="text-lg font-semibold text-white">Market Mapping Instructions</h4>
         </div>
-        <p className="mb-2 text-white">Click on the grid to place markers:</p>
+        <p className="mb-2 text-white">Click on the Venn diagram to place markers:</p>
         <ol className="list-decimal list-inside space-y-1 ml-2 text-white">
-          <li>Place competitor markers on the LEFT side (existing solutions)</li>
-          <li>Place underserved segment markers on the RIGHT side (gaps in market)</li>
+          <li>🚩 Flag markers = Competitor Focus (existing solutions)</li>
+          <li>💡 Lightbulb markers = Underserved Segments (market gaps)</li>
           <li>Add optional labels to describe each marker</li>
         </ol>
       </div>
 
-      {/* Interactive Grid */}
+      {/* Three-Circle Venn Diagram */}
       <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
         <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center">
-            <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: '#DC2626' }}></div>
-            <span className="text-sm font-medium text-gray-800">
-              Competitors ({competitorMarkers.length})
-            </span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: '#2563EB' }}></div>
-            <span className="text-sm font-medium text-gray-800">
-              Underserved Segments ({underservedMarkers.length})
-            </span>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center">
+              <span className="mr-2 text-lg">🚩</span>
+              <span className="text-sm font-medium text-gray-800">
+                Competitor Focus ({competitorMarkers.length})
+              </span>
+            </div>
+            <div className="flex items-center">
+              <span className="mr-2 text-lg">💡</span>
+              <span className="text-sm font-medium text-gray-800">
+                Underserved Segments ({underservedMarkers.length})
+              </span>
+            </div>
           </div>
         </div>
 
@@ -137,8 +147,9 @@ export const MapMarketLandscape: React.FC<MapMarketLandscapeProps> = ({
             height="400"
             className="border border-gray-200 rounded cursor-crosshair"
             style={{ backgroundColor: '#f8f9fa' }}
+            onClick={handleGridClick}
           >
-            {/* Grid lines */}
+            {/* Three overlapping circles for Venn diagram */}
             <defs>
               <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
                 <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e5e7eb" strokeWidth="1"/>
@@ -146,52 +157,62 @@ export const MapMarketLandscape: React.FC<MapMarketLandscapeProps> = ({
             </defs>
             <rect width="100%" height="100%" fill="url(#grid)" />
             
-            {/* Zone divider */}
-            <line x1="50%" y1="0" x2="50%" y2="100%" stroke="#9ca3af" strokeWidth="2" strokeDasharray="5,5" />
-            
-            {/* Zone labels */}
-            <text x="25%" y="30" textAnchor="middle" className="text-sm font-medium" fill="#374151">
-              Competitor Focus Zone
-            </text>
-            <text x="75%" y="30" textAnchor="middle" className="text-sm font-medium" fill="#374151">
-              Underserved Segments Zone
-            </text>
-            
-            {/* Left zone (competitors) - clickable */}
-            <rect
-              x="0"
-              y="0"
-              width="50%"
-              height="100%"
-              fill="transparent"
-              onClick={(e) => handleGridClick(e, 'competitor')}
-              className="cursor-pointer"
+            {/* Mainstream Market Circle */}
+            <circle
+              cx="30%"
+              cy="50%"
+              r="80"
+              fill="rgba(59, 130, 246, 0.1)"
+              stroke="#3B82F6"
+              strokeWidth="2"
+              strokeDasharray="5,5"
             />
             
-            {/* Right zone (underserved) - clickable */}
-            <rect
-              x="50%"
-              y="0"
-              width="50%"
-              height="100%"
-              fill="transparent"
-              onClick={(e) => handleGridClick(e, 'underserved')}
-              className="cursor-pointer"
+            {/* Low-end Market Circle */}
+            <circle
+              cx="70%"
+              cy="35%"
+              r="80"
+              fill="rgba(34, 197, 94, 0.1)"
+              stroke="#22C55E"
+              strokeWidth="2"
+              strokeDasharray="5,5"
             />
             
-            {/* Competitor markers */}
+            {/* New/Overlooked Segments Circle */}
+            <circle
+              cx="70%"
+              cy="65%"
+              r="80"
+              fill="rgba(168, 85, 247, 0.1)"
+              stroke="#A855F7"
+              strokeWidth="2"
+              strokeDasharray="5,5"
+            />
+            
+            {/* Circle labels */}
+            <text x="20%" y="30%" textAnchor="middle" className="text-sm font-medium" fill="#3B82F6">
+              Mainstream Market
+            </text>
+            <text x="80%" y="20%" textAnchor="middle" className="text-sm font-medium" fill="#22C55E">
+              Low-end Market
+            </text>
+            <text x="80%" y="80%" textAnchor="middle" className="text-sm font-medium" fill="#A855F7">
+              New/Overlooked Segments
+            </text>
+            
+            {/* Competitor markers (flags) */}
             {competitorMarkers.map((marker) => (
               <g key={marker.id}>
-                <circle
-                  cx={`${marker.x}%`}
-                  cy={`${marker.y}%`}
-                  r="8"
-                  fill="#DC2626"
-                  stroke="#FFFFFF"
-                  strokeWidth="2"
-                  className="cursor-pointer hover:opacity-80"
+                <text
+                  x={`${marker.x}%`}
+                  y={`${marker.y}%`}
+                  textAnchor="middle"
+                  className="text-lg cursor-pointer hover:opacity-80"
                   onClick={(e) => handleMarkerClick(marker, e)}
-                />
+                >
+                  🚩
+                </text>
                 {marker.label && (
                   <text
                     x={`${marker.x}%`}
@@ -206,19 +227,18 @@ export const MapMarketLandscape: React.FC<MapMarketLandscapeProps> = ({
               </g>
             ))}
             
-            {/* Underserved markers */}
+            {/* Underserved markers (lightbulbs) */}
             {underservedMarkers.map((marker) => (
               <g key={marker.id}>
-                <circle
-                  cx={`${marker.x}%`}
-                  cy={`${marker.y}%`}
-                  r="8"
-                  fill="#2563EB"
-                  stroke="#FFFFFF"
-                  strokeWidth="2"
-                  className="cursor-pointer hover:opacity-80"
+                <text
+                  x={`${marker.x}%`}
+                  y={`${marker.y}%`}
+                  textAnchor="middle"
+                  className="text-lg cursor-pointer hover:opacity-80"
                   onClick={(e) => handleMarkerClick(marker, e)}
-                />
+                >
+                  💡
+                </text>
                 {marker.label && (
                   <text
                     x={`${marker.x}%`}
@@ -236,7 +256,7 @@ export const MapMarketLandscape: React.FC<MapMarketLandscapeProps> = ({
         </div>
 
         <div className="mt-4 text-sm text-gray-700">
-          <p>Click on the left side to add competitor markers, right side for underserved segments. Click existing markers to edit or delete them.</p>
+          <p>Click anywhere on the Venn diagram to place markers. 🚩 = Competitor Focus, 💡 = Underserved Segments. Click existing markers to edit or delete them.</p>
         </div>
       </div>
 
@@ -289,7 +309,7 @@ export const MapMarketLandscape: React.FC<MapMarketLandscapeProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-lg font-semibold mb-4 text-gray-800">
-              {selectedMarker.type === 'competitor' ? 'Competitor' : 'Underserved Segment'} Marker
+              {selectedMarker.type === 'competitor' ? 'Competitor Focus' : 'Underserved Segment'} Marker
             </h3>
             
             <div className="mb-4">
