@@ -173,7 +173,7 @@ export const UserCodeEntry: React.FC<UserCodeEntryProps> = ({
       <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)' }}>
         <p className="text-sm" style={{ color: '#6E9FBA' }}>
           <strong>Why enter a code?</strong> Your user code connects you to all your workshop progress 
-          across multiple activities. Without it, you'll start fresh and won't have access to your 
+          across multiple activities. Without it, you'll start fresh and won\'t have access to your 
           previous insights and responses.
         </p>
       </div>
