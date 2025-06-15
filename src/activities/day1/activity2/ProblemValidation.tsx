@@ -2,14 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { LoadingSpinner } from '../../../components/LoadingSpinner';
 import { ErrorMessage } from '../../../components/ErrorMessage';
 import { ActivityShell } from '../../../components/layout/ActivityShell';
-import { getWordCount } from '../../../components/WordCountFeedback';
-
-// Placeholder components - will be implemented based on reference HTML
-const HypothesisFormation: React.FC<any> = () => <div>Step 1: Hypothesis Formation</div>;
-const EvidenceGathering: React.FC<any> = () => <div>Step 2: Evidence Gathering</div>;
-const ValidationSummary: React.FC<any> = () => <div>Step 3: Validation Summary</div>;
+import { MapMarketLandscape } from '../../../components/activity2/MapMarketLandscape';
+import { IdentifyEntryPoint } from '../../../components/activity2/IdentifyEntryPoint';
+import { JustifyChoice } from '../../../components/activity2/JustifyChoice';
+import { ValidationSummary } from '../../../components/activity2/ValidationSummary';
+import { UserCodeEntry } from '../../../components/UserCodeEntry';
 
 // Simple local storage functions (matching Activity 1 pattern)
+const generateUserKey = (): string => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < 12; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
+
 const loadUserData = async (key: string) => {
   try {
     const data = localStorage.getItem(`workshop_data_${key}`);
@@ -30,19 +38,27 @@ const saveUserData = async (key: string, data: any) => {
   }
 };
 
+export interface MarkerData {
+  id: string;
+  type: 'competitor' | 'underserved' | 'strategic';
+  x: number;
+  y: number;
+  label: string;
+}
+
 export const ProblemValidation: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userKey, setUserKey] = useState<string>('');
+  const [showUserCodeEntry, setShowUserCodeEntry] = useState(false);
   const [responses, setResponses] = useState({
-    // Will be defined based on reference HTML structure
-    problemStatement: '',
-    targetAudience: '',
-    assumptions: '',
-    researchMethods: '',
-    findings: '',
-    validation: ''
+    competitorMarkers: [] as MarkerData[],
+    underservedMarkers: [] as MarkerData[],
+    strategicMarker: null as MarkerData | null,
+    strategicJustification: '',
+    landingZoneChoice: '',
+    evidenceSupport: ''
   });
 
   // Load user data on component mount
@@ -52,9 +68,11 @@ export const ProblemValidation: React.FC = () => {
         console.log('🚀 Initializing Problem Validation activity...');
         
         const existingKey = localStorage.getItem('workshop_user_key');
+        console.log('🔍 Checking for existing key:', existingKey);
         
         if (!existingKey) {
-          setError('No user key found. Please complete Activity 1 first.');
+          console.log('🔑 No existing user key found, showing code entry');
+          setShowUserCodeEntry(true);
           setLoading(false);
           return;
         }
@@ -68,18 +86,20 @@ export const ProblemValidation: React.FC = () => {
         if (userData?.day1?.activity2) {
           const activity2Data = userData.day1.activity2;
           setResponses({
-            problemStatement: activity2Data.problemStatement || '',
-            targetAudience: activity2Data.targetAudience || '',
-            assumptions: activity2Data.assumptions || '',
-            researchMethods: activity2Data.researchMethods || '',
-            findings: activity2Data.findings || '',
-            validation: activity2Data.validation || ''
+            competitorMarkers: activity2Data.competitorMarkers || [],
+            underservedMarkers: activity2Data.underservedMarkers || [],
+            strategicMarker: activity2Data.strategicMarker || null,
+            strategicJustification: activity2Data.strategicJustification || '',
+            landingZoneChoice: activity2Data.landingZoneChoice || '',
+            evidenceSupport: activity2Data.evidenceSupport || ''
           });
           
           // Set appropriate step based on completed data
           if (activity2Data.completedAt) {
+            setCurrentStep(4);
+          } else if (activity2Data.landingZoneChoice || activity2Data.evidenceSupport) {
             setCurrentStep(3);
-          } else if (activity2Data.findings || activity2Data.validation) {
+          } else if (activity2Data.strategicMarker || activity2Data.strategicJustification) {
             setCurrentStep(2);
           }
         }
@@ -87,7 +107,7 @@ export const ProblemValidation: React.FC = () => {
         console.log('✅ Problem Validation activity initialized successfully');
       } catch (err) {
         console.error('❌ Error initializing activity:', err);
-        setError('Failed to load your progress. Please try again.');
+        setError('Failed to load your progress. Starting fresh.');
       } finally {
         setLoading(false);
       }
@@ -98,7 +118,7 @@ export const ProblemValidation: React.FC = () => {
 
   // Auto-save responses when they change
   useEffect(() => {
-    if (!loading && userKey) {
+    if (!loading && userKey && !showUserCodeEntry) {
       const saveData = async () => {
         try {
           const existingData = await loadUserData(userKey);
@@ -110,7 +130,7 @@ export const ProblemValidation: React.FC = () => {
               ...existingData?.day1,
               activity2: {
                 ...responses,
-                completedAt: currentStep === 3 ? new Date().toISOString() : undefined
+                completedAt: currentStep === 4 ? new Date().toISOString() : undefined
               }
             }
           };
@@ -125,7 +145,66 @@ export const ProblemValidation: React.FC = () => {
       const timeoutId = setTimeout(saveData, 1000);
       return () => clearTimeout(timeoutId);
     }
-  }, [responses, currentStep, userKey, loading]);
+  }, [responses, currentStep, userKey, loading, showUserCodeEntry]);
+
+  const handleUserCodeSubmit = async (code: string): Promise<boolean> => {
+    try {
+      console.log('🔍 Validating user code:', code);
+      
+      const userData = await loadUserData(code);
+      
+      if (userData) {
+        console.log('✅ Valid user code found');
+        
+        setUserKey(code);
+        localStorage.setItem('workshop_user_key', code);
+        
+        if (userData.day1?.activity2) {
+          const activity2Data = userData.day1.activity2;
+          setResponses({
+            competitorMarkers: activity2Data.competitorMarkers || [],
+            underservedMarkers: activity2Data.underservedMarkers || [],
+            strategicMarker: activity2Data.strategicMarker || null,
+            strategicJustification: activity2Data.strategicJustification || '',
+            landingZoneChoice: activity2Data.landingZoneChoice || '',
+            evidenceSupport: activity2Data.evidenceSupport || ''
+          });
+          
+          if (activity2Data.completedAt) {
+            setCurrentStep(4);
+          } else if (activity2Data.landingZoneChoice || activity2Data.evidenceSupport) {
+            setCurrentStep(3);
+          } else if (activity2Data.strategicMarker || activity2Data.strategicJustification) {
+            setCurrentStep(2);
+          }
+        }
+        
+        setShowUserCodeEntry(false);
+        return true;
+      } else {
+        console.log('❌ Invalid user code');
+        return false;
+      }
+    } catch (error) {
+      console.error('❌ Error validating user code:', error);
+      return false;
+    }
+  };
+
+  const handleUserCodeSkip = () => {
+    console.log('⏭️ User chose to start fresh');
+    const newKey = generateUserKey();
+    setUserKey(newKey);
+    localStorage.setItem('workshop_user_key', newKey);
+    setShowUserCodeEntry(false);
+  };
+
+  const handleMarkersChange = (field: string, value: any) => {
+    setResponses(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setResponses(prev => ({
@@ -145,12 +224,12 @@ export const ProblemValidation: React.FC = () => {
   const resetActivity = () => {
     setCurrentStep(1);
     setResponses({
-      problemStatement: '',
-      targetAudience: '',
-      assumptions: '',
-      researchMethods: '',
-      findings: '',
-      validation: ''
+      competitorMarkers: [],
+      underservedMarkers: [],
+      strategicMarker: null,
+      strategicJustification: '',
+      landingZoneChoice: '',
+      evidenceSupport: ''
     });
     
     if (userKey) {
@@ -163,12 +242,12 @@ export const ProblemValidation: React.FC = () => {
           day1: {
             ...existingData?.day1,
             activity2: {
-              problemStatement: '',
-              targetAudience: '',
-              assumptions: '',
-              researchMethods: '',
-              findings: '',
-              validation: ''
+              competitorMarkers: [],
+              underservedMarkers: [],
+              strategicMarker: null,
+              strategicJustification: '',
+              landingZoneChoice: '',
+              evidenceSupport: ''
             }
           }
         };
@@ -178,14 +257,18 @@ export const ProblemValidation: React.FC = () => {
     }
   };
 
-  // Validation functions - will be refined based on reference HTML requirements
+  // Validation functions
   const isStep1Valid = () => {
-    return getWordCount(responses.problemStatement) >= 10 && 
-           getWordCount(responses.targetAudience) >= 5;
+    return responses.competitorMarkers.length >= 1 && responses.underservedMarkers.length >= 1;
   };
 
   const isStep2Valid = () => {
-    return getWordCount(responses.findings) >= 10;
+    return responses.strategicMarker !== null && responses.strategicJustification.trim().length > 0;
+  };
+
+  const isStep3Valid = () => {
+    const wordCount = responses.evidenceSupport.trim().split(/\s+/).filter(w => w.length > 0).length;
+    return responses.landingZoneChoice.trim().length > 0 && wordCount >= 20;
   };
 
   if (loading) {
@@ -198,12 +281,34 @@ export const ProblemValidation: React.FC = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen" style={{
-        background: 'linear-gradient(135deg, #FFE599 0%, #FF9000 100%)'
-      }}>
-        <div className="max-w-5xl mx-auto p-4 sm:p-6">
+  return (
+    <div className="min-h-screen" style={{
+      background: 'linear-gradient(135deg, #FFE599 0%, #FF9000 100%)'
+    }}>
+      <div className="max-w-5xl mx-auto p-4 sm:p-6">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
+                Problem Validation
+              </h1>
+              <p className="text-gray-600" style={{ color: '#666666' }}>
+                Activity 2: Market Landing Zone Analysis
+              </p>
+            </div>
+            {userKey && (
+              <div className="text-sm bg-gray-50 px-3 py-2 rounded-lg" style={{ 
+                color: '#8A8A8A',
+                backgroundColor: '#f8f9fa'
+              }}>
+                User ID: {userKey.substring(0, 6)}...
+              </div>
+            )}
+          </div>
+        </div>
+
+        {error && (
           <ErrorMessage 
             message={error} 
             onRetry={() => {
@@ -211,47 +316,79 @@ export const ProblemValidation: React.FC = () => {
               window.location.reload();
             }} 
           />
+        )}
+
+        {/* User Code Entry */}
+        {showUserCodeEntry && (
+          <UserCodeEntry
+            onCodeSubmit={handleUserCodeSubmit}
+            onSkip={handleUserCodeSkip}
+          />
+        )}
+
+        {/* Main Content */}
+        {!showUserCodeEntry && (
+          <ActivityShell
+            title="Problem Validation"
+            subtitle="Activity 2: Market Landing Zone Analysis"
+            currentStep={currentStep}
+            totalSteps={4}
+            userKey={userKey}
+            onReset={resetActivity}
+          >
+            {currentStep === 1 && (
+              <MapMarketLandscape
+                competitorMarkers={responses.competitorMarkers}
+                underservedMarkers={responses.underservedMarkers}
+                onMarkersChange={handleMarkersChange}
+                onContinue={() => handleStepComplete(1)}
+                isValid={isStep1Valid()}
+              />
+            )}
+
+            {currentStep === 2 && (
+              <IdentifyEntryPoint
+                competitorMarkers={responses.competitorMarkers}
+                underservedMarkers={responses.underservedMarkers}
+                strategicMarker={responses.strategicMarker}
+                strategicJustification={responses.strategicJustification}
+                onMarkersChange={handleMarkersChange}
+                onInputChange={handleInputChange}
+                onContinue={() => handleStepComplete(2)}
+                onBack={() => handleStepBack(1)}
+                isValid={isStep2Valid()}
+              />
+            )}
+
+            {currentStep === 3 && (
+              <JustifyChoice
+                landingZoneChoice={responses.landingZoneChoice}
+                evidenceSupport={responses.evidenceSupport}
+                onInputChange={handleInputChange}
+                onContinue={() => handleStepComplete(3)}
+                onBack={() => handleStepBack(2)}
+                isValid={isStep3Valid()}
+              />
+            )}
+
+            {currentStep === 4 && (
+              <ValidationSummary
+                responses={responses}
+                onReset={resetActivity}
+                onBack={() => handleStepBack(3)}
+                userKey={userKey}
+              />
+            )}
+          </ActivityShell>
+        )}
+
+        {/* Footer */}
+        <div className="mt-6 text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-white bg-opacity-30 rounded-full">
+            <div className="w-6 h-6 border-2 border-white border-opacity-60 rounded-full"></div>
+          </div>
         </div>
       </div>
-    );
-  }
-
-  return (
-    <ActivityShell
-      title="Problem Validation"
-      subtitle="Activity 2: Validating your problem hypothesis"
-      currentStep={currentStep}
-      totalSteps={3}
-      userKey={userKey}
-      onReset={resetActivity}
-    >
-      {currentStep === 1 && (
-        <HypothesisFormation
-          responses={responses}
-          onInputChange={handleInputChange}
-          onContinue={() => handleStepComplete(1)}
-          isValid={isStep1Valid()}
-        />
-      )}
-
-      {currentStep === 2 && (
-        <EvidenceGathering
-          responses={responses}
-          onInputChange={handleInputChange}
-          onContinue={() => handleStepComplete(2)}
-          onBack={() => handleStepBack(1)}
-          isValid={isStep2Valid()}
-        />
-      )}
-
-      {currentStep === 3 && (
-        <ValidationSummary
-          responses={responses}
-          onReset={resetActivity}
-          onBack={() => handleStepBack(2)}
-          userKey={userKey}
-        />
-      )}
-    </ActivityShell>
+    </div>
   );
 };

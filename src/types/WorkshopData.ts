@@ -63,6 +63,14 @@ export interface RankingStep {
   lastModified: string;
 }
 
+export interface MarkerData {
+  id: string;
+  type: 'competitor' | 'underserved' | 'strategic';
+  x: number;
+  y: number;
+  label: string;
+}
+
 // Day 1, Activity 1: Problem Origin Story
 export interface ProblemOriginStoryData extends ActivityData {
   stepData: {
@@ -82,22 +90,24 @@ export interface ProblemOriginStoryData extends ActivityData {
   };
 }
 
-// Day 1, Activity 2: Problem Validation
+// Day 1, Activity 2: Problem Validation (Market Landing Zone Analysis)
 export interface ProblemValidationData extends ActivityData {
   stepData: {
-    hypothesisFormation: {
-      problemStatement: TextResponseStep;
-      targetAudience: TextResponseStep;
-      assumptions: TextResponseStep[];
+    mapMarketLandscape: {
+      competitorMarkers: MarkerData[];
+      underservedMarkers: MarkerData[];
     };
-    evidenceGathering: {
-      researchMethods: MultipleChoiceStep[];
-      findings: TextResponseStep[];
+    identifyEntryPoint: {
+      strategicMarker: MarkerData | null;
+      strategicJustification: TextResponseStep;
     };
-    validation: {
-      isValidated: boolean;
-      confidence: number;
-      nextActions: string[];
+    justifyChoice: {
+      landingZoneChoice: MultipleChoiceStep;
+      evidenceSupport: TextResponseStep;
+    };
+    summary: {
+      marketAnalysis: string;
+      strategicRecommendations: string[];
     };
   };
 }
