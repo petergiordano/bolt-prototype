@@ -5,6 +5,7 @@ import { ProgressIndicator } from './components/ProgressIndicator';
 import { IndividualReflection } from './components/IndividualReflection';
 import { PartnerSharing } from './components/PartnerSharing';
 import { ActivitySummary } from './components/ActivitySummary';
+import { UserCodeEntry } from './components/UserCodeEntry';
 import { getWordCount } from './components/WordCountFeedback';
 
 // Simple local storage functions to replace Supabase for now
@@ -51,6 +52,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userKey, setUserKey] = useState<string>('');
+  const [showUserCodeEntry, setShowUserCodeEntry] = useState(false);
   const [responses, setResponses] = useState({
     momentOfRealization: '',
     whoExperienced: '',
@@ -64,11 +66,21 @@ function App() {
     const initializeApp = async () => {
       try {
         console.log('🚀 Initializing app...');
-        const key = getUserKey();
-        console.log('🔑 User key:', key);
-        setUserKey(key);
         
-        const userData = await loadUserData(key);
+        // Check if user key exists in localStorage
+        const existingKey = localStorage.getItem('workshop_user_key');
+        
+        if (!existingKey) {
+          console.log('🔑 No existing user key found, showing code entry');
+          setShowUserCodeEntry(true);
+          setLoading(false);
+          return;
+        }
+
+        console.log('🔑 Found existing user key:', existingKey);
+        setUserKey(existingKey);
+        
+        const userData = await loadUserData(existingKey);
         console.log('📊 Loaded user data:', userData);
         
         if (userData?.day1?.activity1) {
@@ -102,7 +114,7 @@ function App() {
 
   // Auto-save responses when they change
   useEffect(() => {
-    if (!loading && userKey) {
+    if (!loading && userKey && !showUserCodeEntry) {
       const saveData = async () => {
         try {
           const userData = {
@@ -128,7 +140,58 @@ function App() {
       const timeoutId = setTimeout(saveData, 1000);
       return () => clearTimeout(timeoutId);
     }
-  }, [responses, currentStep, userKey, loading]);
+  }, [responses, currentStep, userKey, loading, showUserCodeEntry]);
+
+  const handleUserCodeSubmit = async (code: string): Promise<boolean> => {
+    try {
+      console.log('🔍 Validating user code:', code);
+      
+      // Try to load data for this code
+      const userData = await loadUserData(code);
+      
+      if (userData && userData.day1?.activity1) {
+        console.log('✅ Valid user code found with activity data');
+        
+        // Set the user key and save to localStorage
+        setUserKey(code);
+        localStorage.setItem('workshop_user_key', code);
+        
+        // Load the responses
+        const activity1Data = userData.day1.activity1;
+        setResponses({
+          momentOfRealization: activity1Data.momentOfRealization || '',
+          whoExperienced: activity1Data.whoExperienced || '',
+          whyMatters: activity1Data.whyMatters || '',
+          whatSurprised: activity1Data.whatSurprised || '',
+          howRealProblem: activity1Data.howRealProblem || ''
+        });
+        
+        // Set appropriate step based on completed data
+        if (activity1Data.completedAt) {
+          setCurrentStep(3);
+        } else if (activity1Data.whatSurprised || activity1Data.howRealProblem) {
+          setCurrentStep(2);
+        }
+        
+        setShowUserCodeEntry(false);
+        return true;
+      } else {
+        console.log('❌ Invalid user code or no activity data found');
+        return false;
+      }
+    } catch (error) {
+      console.error('❌ Error validating user code:', error);
+      return false;
+    }
+  };
+
+  const handleUserCodeSkip = () => {
+    console.log('⏭️ User chose to start fresh');
+    const newKey = generateUserKey();
+    setUserKey(newKey);
+    localStorage.setItem('workshop_user_key', newKey);
+    setShowUserCodeEntry(false);
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setResponses(prev => ({
@@ -142,6 +205,7 @@ function App() {
   };
 
   const resetActivity = () => {
+    // Only reset the current activity's responses, not the user key
     setCurrentStep(1);
     setResponses({
       momentOfRealization: '',
@@ -150,6 +214,25 @@ function App() {
       whatSurprised: '',
       howRealProblem: ''
     });
+    
+    // Save the reset state
+    if (userKey) {
+      const userData = {
+        version: "1.0",
+        createdAt: new Date().toISOString(),
+        lastUpdated: new Date().toISOString(),
+        day1: {
+          activity1: {
+            momentOfRealization: '',
+            whoExperienced: '',
+            whyMatters: '',
+            whatSurprised: '',
+            howRealProblem: ''
+          }
+        }
+      };
+      saveUserData(userKey, userData);
+    }
   };
 
   const isStep1Valid = () => {
@@ -169,7 +252,7 @@ function App() {
     { number: 3, label: 'Summary' }
   ];
 
-  console.log('🎨 Rendering App - Step:', currentStep, 'Loading:', loading, 'Error:', error);
+  console.log('🎨 Rendering App - Step:', currentStep, 'Loading:', loading, 'Error:', error, 'ShowCodeEntry:', showUserCodeEntry);
 
   if (loading) {
     return (
@@ -197,15 +280,19 @@ function App() {
                 Activity 1: Understanding the roots of your problem
               </p>
             </div>
-            <div className="text-sm bg-gray-50 px-3 py-2 rounded-lg" style={{ 
-              color: '#8A8A8A',
-              backgroundColor: '#f8f9fa'
-            }}>
-              User ID: {userKey.substring(0, 6)}...
-            </div>
+            {userKey && (
+              <div className="text-sm bg-gray-50 px-3 py-2 rounded-lg" style={{ 
+                color: '#8A8A8A',
+                backgroundColor: '#f8f9fa'
+              }}>
+                User ID: {userKey.substring(0, 6)}...
+              </div>
+            )}
           </div>
           
-          <ProgressIndicator currentStep={currentStep} steps={steps} />
+          {!showUserCodeEntry && (
+            <ProgressIndicator currentStep={currentStep} steps={steps} />
+          )}
         </div>
 
         {error && (
@@ -218,62 +305,72 @@ function App() {
           />
         )}
 
+        {/* User Code Entry */}
+        {showUserCodeEntry && (
+          <UserCodeEntry
+            onCodeSubmit={handleUserCodeSubmit}
+            onSkip={handleUserCodeSkip}
+          />
+        )}
+
         {/* Main Content */}
-        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 relative">
-          {/* Reset Button */}
-          <button
-            onClick={resetActivity}
-            className="absolute top-4 right-4 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center transition-all duration-200 group"
-            style={{
-              backgroundColor: '#f5f5f5',
-              color: '#8A8A8A'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#FFE599';
-              e.currentTarget.style.color = '#FF9000';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#f5f5f5';
-              e.currentTarget.style.color = '#8A8A8A';
-            }}
-            title="Reset Activity"
-          >
-            <svg 
-              className="w-5 h-5 transform group-hover:rotate-180 transition-transform duration-300" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
+        {!showUserCodeEntry && (
+          <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 relative">
+            {/* Reset Button */}
+            <button
+              onClick={resetActivity}
+              className="absolute top-4 right-4 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center transition-all duration-200 group"
+              style={{
+                backgroundColor: '#f5f5f5',
+                color: '#8A8A8A'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#FFE599';
+                e.currentTarget.style.color = '#FF9000';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#f5f5f5';
+                e.currentTarget.style.color = '#8A8A8A';
+              }}
+              title="Reset Activity"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-          </button>
+              <svg 
+                className="w-5 h-5 transform group-hover:rotate-180 transition-transform duration-300" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
 
-          {currentStep === 1 && (
-            <IndividualReflection
-              responses={responses}
-              onInputChange={handleInputChange}
-              onContinue={() => handleStepComplete(1)}
-              isValid={isStep1Valid()}
-            />
-          )}
+            {currentStep === 1 && (
+              <IndividualReflection
+                responses={responses}
+                onInputChange={handleInputChange}
+                onContinue={() => handleStepComplete(1)}
+                isValid={isStep1Valid()}
+              />
+            )}
 
-          {currentStep === 2 && (
-            <PartnerSharing
-              responses={responses}
-              onInputChange={handleInputChange}
-              onContinue={() => handleStepComplete(2)}
-              isValid={isStep2Valid()}
-            />
-          )}
+            {currentStep === 2 && (
+              <PartnerSharing
+                responses={responses}
+                onInputChange={handleInputChange}
+                onContinue={() => handleStepComplete(2)}
+                isValid={isStep2Valid()}
+              />
+            )}
 
-          {currentStep === 3 && (
-            <ActivitySummary
-              responses={responses}
-              onReset={resetActivity}
-              userKey={userKey}
-            />
-          )}
-        </div>
+            {currentStep === 3 && (
+              <ActivitySummary
+                responses={responses}
+                onReset={resetActivity}
+                userKey={userKey}
+              />
+            )}
+          </div>
+        )}
 
         {/* Footer */}
         <div className="mt-6 text-center">
