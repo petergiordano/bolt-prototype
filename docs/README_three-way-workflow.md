@@ -1,4 +1,4 @@
-# 🔁 Three-Way Workflow: Bolt + GitHub + Local VS Code
+# 🧠 Workflow & Collaboration Guide: Multi-Agent Dev System
 
 This file documents the operating model for managing code contributions and project updates between Bolt.new, GitHub, and your local VS Code development environment.
 
@@ -14,6 +14,30 @@ The **GitHub repo is the single source of truth** for this project.
 - The local GitHub repo is preferred for editing `.md` files and AI-assisted workflows, since it enables sharing and collaboration via ChatGPT.
 
 ---
+
+## 🤖 Multi-Agent Development Workflow
+
+This project is developed using a multi-agent collaboration system consisting of four actors:
+
+1. **User** – Project architect and product owner, guiding standards and vision.
+2. **ChatGPT** – Long-term memory assistant for structure, standards, documentation, and task sequencing.
+3. **Claude Code (in VS Code Terminal)** – File-aware assistant with full-project visibility, useful for synthesis, refactoring, and full-repo reasoning.
+4. **Bolt.new** – Live frontend builder used for rapid prototyping, UI development, and pushing working code directly to GitHub.
+
+### Roles
+
+- ChatGPT manages standards (e.g. bolt-migration-standards.md), guides workshop flow, and tracks todos.
+- Claude answers project-wide questions, audits code, and helps align component integration.
+- Bolt implements code based on specs from documentation and ChatGPT instructions.
+- User coordinates across agents, verifies output, and owns architectural decisions.
+
+### Source of Truth & Coordination
+
+- GitHub remains the single source of truth.
+- `docs/todo.md` and `docs/bolt-migration-standards.md` serve as coordination anchors.
+- ChatGPT and Claude refer to these files to drive implementation and instruction.
+
+This structure enables scalable, low-friction implementation with minimal ambiguity and strong alignment between strategy and execution.
 
 ## 🛠️ Local VS Code Workflow
 
