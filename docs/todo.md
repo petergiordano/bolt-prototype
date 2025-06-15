@@ -2,16 +2,37 @@
 
 ## UI Functionality Todos
 
-- [ ] Add tooltip with the following message to both Reset buttons:
+- [x] Add tooltip with the following message to both Reset buttons:
       "This will restart the activity and clear your responses. Your user ID will stay the same so your progress across other activities won't be lost."
       - This includes the circular reset icon in the top right of each step AND the full "Reset Activity" button on the summary screen.
 - [x] Add a Back button to steps 2 and 3 that decrements currentStep by 1 and allows the user to edit earlier inputs
 - [x] Do not show Back button on step 1
-- [ ] Once tooltip and Back button are implemented, instruct Bolt to add these UI patterns as codified standards in the project documentation (e.g. bolt-migration-standards.md)
+- [x] Instruct Bolt to codify tooltip and Back button patterns as reusable UI standards in bolt-migration-standards.md
 - [ ] Plan for a system-wide tooltip pattern (to be implemented after core flows are complete)
 
-- [ ] Improve font color contrast in the ActivitySummary component to enhance readability, especially on orange and blue background blocks
-- [ ] Improve font color contrast in the ActivitySummary component summary blocks for readability (gray text on blue and orange backgrounds)
+- [ ] Define a standard activity shell layout component or pattern to wrap all activity steps (Step 1 → N → Summary)
+      - Include standard structure: StepWrapper, ActivityContainer, ProgressTracker, Navigation Buttons
+      - Add this as Section 7 in bolt-migration-standards.md
+- [ ] Codify how each activity’s data is structured and passed across steps and to summaries
+      - Include standard field names and where to store them
+      - Add this as Section 8 in bolt-migration-standards.md
+- [ ] Define inter-activity navigation standards
+      - How “Continue to Next Activity” and “Back to Workshop” behave
+      - Route structure for activities (e.g. /workshop-1/activity-2)
+      - Add this as Section 9 in bolt-migration-standards.md
+
+### 🔮 Longer-Term Refinements
+
+- [ ] Move inline onMouseEnter/onMouseLeave logic into Tailwind via hover: classes (keeps styles declarative)
+- [ ] Add support for tooltips on disabled buttons (via wrapper div if needed)
+- [ ] Add keyboard accessibility: currently only works via mouse. To fully support accessibility:
+      - Add support for onFocus / onBlur events (keyboard focus)
+      - Consider aria-describedby with id-linked tooltips
+- [ ] Consider using Tailwind for arrow styles instead of inline borderWidth
+- [ ] Debounce tooltip entry/exit logic if flicker becomes an issue on tight spacing
+
+- [x] Improve font color contrast in the ActivitySummary component to enhance readability, especially on orange and blue background blocks
+- [x] Improve font color contrast in the ActivitySummary component summary blocks for readability (gray text on blue and orange backgrounds)
 
 
 
