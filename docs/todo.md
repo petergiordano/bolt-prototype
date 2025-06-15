@@ -10,16 +10,24 @@
 - [x] Instruct Bolt to codify tooltip and Back button patterns as reusable UI standards in bolt-migration-standards.md
 - [ ] Plan for a system-wide tooltip pattern (to be implemented after core flows are complete)
 
-- [ ] Define a standard activity shell layout component or pattern to wrap all activity steps (Step 1 → N → Summary)
+- [x] Define a standard activity shell layout component or pattern to wrap all activity steps (Step 1 → N → Summary)
       - Include standard structure: StepWrapper, ActivityContainer, ProgressTracker, Navigation Buttons
       - Add this as Section 7 in bolt-migration-standards.md
-- [ ] Codify how each activity’s data is structured and passed across steps and to summaries
+- [x] Codify how each activity’s data is structured and passed across steps and to summaries
       - Include standard field names and where to store them
       - Add this as Section 8 in bolt-migration-standards.md
-- [ ] Define inter-activity navigation standards
+- [x] Define inter-activity navigation standards
       - How “Continue to Next Activity” and “Back to Workshop” behave
       - Route structure for activities (e.g. /workshop-1/activity-2)
       - Add this as Section 9 in bolt-migration-standards.md
+
+## 🧱 Step 3 – Prep for Smooth Migration of Activity 2 and Beyond
+
+- [x] Finalize and document Activity-to-Activity Mapping Framework (added as Section 10 in bolt-migration-standards.md)
+- [ ] Ensure activity-level routing patterns are repeatable and referenceable
+- [ ] Confirm that reusable components and layout shells are generalizable to any activity
+- [ ] Validate that WorkshopData schema supports easy expansion per activity
+- [ ] Create an activity manifest or config map to define routes, step counts, themes, and titles per activity (optional but recommended)
 
 ### 🔮 Longer-Term Refinements
 
