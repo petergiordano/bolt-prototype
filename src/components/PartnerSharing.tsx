@@ -1,7 +1,8 @@
 import React from 'react';
-import { Share, ArrowLeft } from 'lucide-react';
+import { Share } from 'lucide-react';
 import { WordCountFeedback } from './WordCountFeedback';
 import { Timer } from './Timer';
+import { BackButton } from './ui';
 
 interface PartnerSharingProps {
   responses: {
@@ -125,23 +126,10 @@ export const PartnerSharing: React.FC<PartnerSharingProps> = ({
         />
         
         <div className="flex flex-col sm:flex-row gap-3">
-          <button
+          <BackButton
             onClick={onBack}
-            className="px-6 py-2 rounded-lg transition-colors font-medium min-h-[44px] flex items-center justify-center"
-            style={{
-              backgroundColor: '#8A8A8A',
-              color: '#FFFFFF'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#666666';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#8A8A8A';
-            }}
-          >
-            <ArrowLeft size={16} className="mr-2" />
-            Back to Step 1
-          </button>
+            label="Back to Step 1"
+          />
           
           <button
             onClick={onContinue}

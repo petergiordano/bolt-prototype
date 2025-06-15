@@ -6,6 +6,7 @@ import { IndividualReflection } from './components/IndividualReflection';
 import { PartnerSharing } from './components/PartnerSharing';
 import { ActivitySummary } from './components/ActivitySummary';
 import { UserCodeEntry } from './components/UserCodeEntry';
+import { ResetButton } from './components/ui';
 import { getWordCount } from './components/WordCountFeedback';
 
 // Simple local storage functions to replace Supabase for now
@@ -44,7 +45,6 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [userKey, setUserKey] = useState<string>('');
   const [showUserCodeEntry, setShowUserCodeEntry] = useState(false);
-  const [showResetTooltip, setShowResetTooltip] = useState(false);
   const [responses, setResponses] = useState({
     momentOfRealization: '',
     whoExperienced: '',
@@ -315,60 +315,7 @@ function App() {
           <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 relative">
             {/* Reset Button with Tooltip */}
             <div className="absolute top-4 right-4">
-              <button
-                onClick={resetActivity}
-                className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center transition-all duration-200 group relative"
-                style={{
-                  backgroundColor: '#f5f5f5',
-                  color: '#8A8A8A'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#FFE599';
-                  e.currentTarget.style.color = '#FF9000';
-                  setShowResetTooltip(true);
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f5f5f5';
-                  e.currentTarget.style.color = '#8A8A8A';
-                  setShowResetTooltip(false);
-                }}
-                title="Reset Activity - This will restart the activity and clear your responses. Your user ID will stay the same so your progress across other activities won't be lost."
-                aria-describedby="reset-tooltip"
-              >
-                <svg 
-                  className="w-5 h-5 transform group-hover:rotate-180 transition-transform duration-300" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                
-                {/* Custom Tooltip */}
-                {showResetTooltip && (
-                  <div
-                    id="reset-tooltip"
-                    className="absolute bottom-full right-0 mb-2 w-64 p-3 text-sm rounded-lg shadow-lg z-10 pointer-events-none"
-                    style={{
-                      backgroundColor: '#1f2937',
-                      color: '#ffffff'
-                    }}
-                  >
-                    <div className="relative">
-                      This will restart the activity and clear your responses. Your user ID will stay the same so your progress across other activities won't be lost.
-                      {/* Tooltip arrow */}
-                      <div
-                        className="absolute top-full right-4 w-0 h-0"
-                        style={{
-                          borderLeft: '6px solid transparent',
-                          borderRight: '6px solid transparent',
-                          borderTop: '6px solid #1f2937'
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-                )}
-              </button>
+              <ResetButton onClick={resetActivity} variant="icon" />
             </div>
 
             {currentStep === 1 && (

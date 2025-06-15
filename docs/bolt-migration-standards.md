@@ -93,44 +93,61 @@ This doc defines the distilled tech, data, and UI standards for migrating the GT
   - Live word count display
   - Green check icon on valid input (≈10–20 words or ~50–100 chars)
 
+---
 
-### Tooltip Standard (🔍 NEW)
-- Use tooltips to clarify non-obvious or potentially destructive actions.
-- Trigger: hover on desktop, tap-hold on mobile (via `title` tag or custom behavior).
-- Tooltip design:
+## 🔧 6. Reusable UI Components
+
+### Tooltip Standard (🔍 REUSABLE)
+- **Component**: `src/components/ui/Tooltip.tsx`
+- **Usage**: Wrap any element that needs explanatory text
+- **Trigger**: Hover on desktop, includes `title` attribute for accessibility
+- **Design**:
   - Dark background: `#1F2937`
   - White text
-  - Arrow pointing to the target element
-  - Max-width: 64 characters (~300px)
+  - Arrow pointing to target element
+  - Max-width: 16rem (256px / ~64 characters)
   - Spacing: 8–12px from target
-  - Uses safe z-index
-  - Smooth fade-in/out transitions
-- Accessibility:
+  - Safe z-index (z-50)
+  - Smooth fade-in/out transitions (200ms)
+- **Accessibility**:
   - Must include `aria-describedby` and `title` attributes
-  - Tooltip content should be accessible via keyboard if custom components are used
-- Standard tooltip text for Reset buttons:
-  ```
-  This will restart the activity and clear your responses. Your user ID will stay the same so your progress across other activities won’t be lost.
+  - Keyboard accessible via `title` attribute
+- **Standard Messages**:
+  ```ts
+  TOOLTIP_MESSAGES.RESET_ACTIVITY = "This will restart the activity and clear your responses. Your user ID will stay the same so your progress across other activities won't be lost."
   ```
 
-⸻
+### Back Button Standard (🔙 REUSABLE)
+- **Component**: `src/components/ui/BackButton.tsx`
+- **Usage**: Navigation between steps in multi-step flows
+- **Behavior**:
+  - On click: Navigate to previous step
+  - Maintains current inputs/state
+  - Preserves user data
+- **Placement**: Bottom-left of step container, below main content
+- **Style**:
+  - Gray background (`#8A8A8A`)
+  - White text
+  - Left arrow icon (Lucide `ArrowLeft`)
+  - Min height: 44px (touch target)
+  - Hover state: darker gray (`#666666`)
+- **Conditional Rendering**: Only appears on steps beyond Step 1
 
-### Back Button Standard (🔙 NEW)
-- Back button should appear on all steps beyond Step 1
-- Behavior:
-  - On click: `setCurrentStep(currentStep - 1)`
-  - Maintains current inputs
-  - Navigates back to the previous step with data preserved
-- Placement:
-  - Bottom-left of the step container
-  - Always below the main content/input area
-- Style:
-  - Tailwind: `btn btn-secondary`
-  - Should not appear on Step 1
+### Reset Button Standard (🔄 REUSABLE)
+- **Component**: `src/components/ui/ResetButton.tsx`
+- **Variants**:
+  - `icon`: Circular icon button (top-right of containers)
+  - `full`: Full button with text (action bars)
+- **Behavior**: Clears current activity data, preserves user key
+- **Tooltip**: Always includes standard reset tooltip
+- **Style**:
+  - Icon variant: Circular, gray background, rotate animation on hover
+  - Full variant: Standard button styling with tooltip
+- **Accessibility**: Includes `aria-label` and `title` attributes
 
 ---
 
-## 🧪 6. Validation & Resilience
+## 🧪 7. Validation & Resilience
 
 - Required fields must be valid before marking `completedAt`
 - No lockouts — user can revise answers any time
@@ -141,7 +158,7 @@ This doc defines the distilled tech, data, and UI standards for migrating the GT
 
 ---
 
-## 💡 7. Auto-Population (Future Activities)
+## 💡 8. Auto-Population (Future Activities)
 
 - Auto-fill fields using earlier activity data
 - Users can edit these pre-filled values
@@ -151,7 +168,7 @@ This doc defines the distilled tech, data, and UI standards for migrating the GT
 
 ---
 
-## 🚫 8. Remove Legacy Logic
+## 🚫 9. Remove Legacy Logic
 
 Do **not** include:
 - Base64 encoding or decoding
@@ -163,7 +180,7 @@ Supabase fully replaces this.
 
 ---
 
-## ✅ 9. Implementation Order
+## ✅ 10. Implementation Order
 
 Start here:
 ```
@@ -178,5 +195,39 @@ Steps:
 4. Confirm full flow works with generated key
 
 Then replicate for all other activities.
+
+---
+
+## 📚 11. Component Usage Examples
+
+### Using Tooltip Component
+```tsx
+import { Tooltip, TOOLTIP_MESSAGES } from './ui';
+
+<Tooltip content={TOOLTIP_MESSAGES.RESET_ACTIVITY}>
+  <button onClick={handleReset}>Reset</button>
+</Tooltip>
+```
+
+### Using Back Button Component
+```tsx
+import { BackButton } from './ui';
+
+<BackButton
+  onClick={() => setCurrentStep(currentStep - 1)}
+  label="Back to Step 1"
+/>
+```
+
+### Using Reset Button Component
+```tsx
+import { ResetButton } from './ui';
+
+// Icon variant (top-right of containers)
+<ResetButton onClick={handleReset} variant="icon" />
+
+// Full variant (action bars)
+<ResetButton onClick={handleReset} variant="full" />
+```
 
 ---
