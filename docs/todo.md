@@ -20,6 +20,11 @@
       - How “Continue to Next Activity” and “Back to Workshop” behave
       - Route structure for activities (e.g. /workshop-1/activity-2)
       - Add this as Section 9 in bolt-migration-standards.md
+- [ ] Enforce WCAG AA contrast standards across all UI components
+      - Use text-white or text-gray-900 on colored backgrounds
+      - Avoid text-gray-500 on anything but white/very light backgrounds
+      - For disabled states, use text-gray-600 minimum on light gray backgrounds
+      - Validate contrast before pushing new UI
 
 ## 🧱 Step 3 – Prep for Smooth Migration of Activity 2 and Beyond
 

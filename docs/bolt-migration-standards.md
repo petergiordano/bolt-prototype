@@ -143,7 +143,7 @@ This doc defines the distilled tech, data, and UI standards for migrating the GT
   - Hover state: darker gray (`#666666`)
 - **Conditional Rendering**: Only appears on steps beyond Step 1
 
-### Reset Button Standard (🔄 REUSABLE)
+-### Reset Button Standard (🔄 REUSABLE)
 - **Component**: `src/components/ui/ResetButton.tsx`
 - **Variants**:
   - `icon`: Circular icon button (top-right of containers)
@@ -154,6 +154,24 @@ This doc defines the distilled tech, data, and UI standards for migrating the GT
   - Icon variant: Circular, gray background, rotate animation on hover
   - Full variant: Standard button styling with tooltip
 - **Accessibility**: Includes `aria-label` and `title` attributes
+
+### ♿ Contrast & Accessibility Guidelines
+
+All UI elements must meet minimum accessibility contrast standards (WCAG AA):
+
+- Use `text-white` or `text-gray-900` on colored backgrounds
+- Avoid `text-gray-500` unless on white or very light backgrounds
+- Use `text-gray-600` or darker for disabled states
+- All body text must meet 4.5:1 contrast ratio (3:1 for large text)
+- Avoid blue-on-orange combinations such as `#A5B6EF` on `#FF9000`
+- Use Tailwind’s built-in contrast utilities (`text-white`, `bg-gray-900`, etc.)
+
+✅ Examples:
+- Progress indicators: darker orange (`#E67300`) with white text
+- Disabled buttons: gray text `#666666` minimum on light backgrounds
+- Instruction blocks: always use `text-white` on gradient backgrounds
+
+These rules are binding for all current and future activities. Bolt must validate contrast before pushing any activity UI.
 
 ---
 
