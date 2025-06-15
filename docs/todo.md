@@ -24,10 +24,18 @@
 ## 🧱 Step 3 – Prep for Smooth Migration of Activity 2 and Beyond
 
 - [x] Finalize and document Activity-to-Activity Mapping Framework (added as Section 10 in bolt-migration-standards.md)
-- [ ] Ensure activity-level routing patterns are repeatable and referenceable
+- [x] Ensure activity-level routing patterns are repeatable and referenceable
+- [x] Reference original HTML activities in /reference-html folder as canonical source for all migrations
 - [ ] Confirm that reusable components and layout shells are generalizable to any activity
 - [ ] Validate that WorkshopData schema supports easy expansion per activity
 - [ ] Create an activity manifest or config map to define routes, step counts, themes, and titles per activity (optional but recommended)
+- [ ] Remove any in-progress Activity 2 implementation from src that was not based on the reference HTML
+
+### 📁 Reference HTML Directory
+
+- Mirror original workshop structure inside /reference-html
+- Organize HTML files by workshop and activity (e.g. problems_worth_solving/problems-activity-2.html)
+- Ensure Claude Code can scan and interpret structure/content
 
 ### 🔮 Longer-Term Refinements
 
