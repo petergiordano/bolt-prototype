@@ -1,4 +1,3 @@
-
 # 🔁 Three-Way Workflow: Bolt + GitHub + Local VS Code
 
 This file documents the operating model for managing code contributions and project updates between Bolt.new, GitHub, and your local VS Code development environment.
@@ -40,4 +39,41 @@ This keeps both your local project and the Bolt interface in sync with the GitHu
 
 ⸻
 
+---
 
+## 🧩 Visual Workflow Diagram
+
+Below is a diagram showing the three-way workflow between Bolt, GitHub, and your local VS Code environment:
+
+```mermaid
+graph TD
+    A[Bolt.new] -->|Commits code| B[GitHub Repo]
+    C[Local VS Code] -->|Pull latest| B
+    B -->|Push updated code| C
+    C -->|Push changes| B
+```
+
+This diagram illustrates the cyclic workflow:
+- Bolt pushes directly to GitHub.
+- Local VS Code pulls from GitHub to stay in sync.
+- Local changes are committed and pushed back to GitHub.
+- GitHub remains the single source of truth for both environments.
+
+---
+
+## 🗺️ Workflow Summary Diagram
+
+Below is a visual representation of how code moves across environments:
+
+```mermaid
+graph LR
+    B[Bolt.new] -->|Commits| G[GitHub (Main Repo)]
+    L[Local VS Code] -->|Pull latest| G
+    L -->|Push updates| G
+    G -->|Reflected in| B
+```
+
+- **Bolt.new** pushes directly to GitHub.
+- **Local VS Code** pulls from GitHub to stay updated.
+- Local commits are **pushed back** to GitHub to reflect changes.
+- GitHub acts as the **central source of truth**.
