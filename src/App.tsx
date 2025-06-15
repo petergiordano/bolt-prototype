@@ -197,6 +197,10 @@ function App() {
     setCurrentStep(step + 1);
   };
 
+  const handleStepBack = (step: number) => {
+    setCurrentStep(step);
+  };
+
   const resetActivity = () => {
     // Only reset the current activity's responses, not the user key
     setCurrentStep(1);
@@ -381,6 +385,7 @@ function App() {
                 responses={responses}
                 onInputChange={handleInputChange}
                 onContinue={() => handleStepComplete(2)}
+                onBack={() => handleStepBack(1)}
                 isValid={isStep2Valid()}
               />
             )}
@@ -389,6 +394,7 @@ function App() {
               <ActivitySummary
                 responses={responses}
                 onReset={resetActivity}
+                onBack={() => handleStepBack(2)}
                 userKey={userKey}
               />
             )}

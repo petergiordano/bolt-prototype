@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle, Download, Copy, ExternalLink } from 'lucide-react';
+import { CheckCircle, Download, Copy, ExternalLink, ArrowLeft } from 'lucide-react';
 
 interface ActivitySummaryProps {
   responses: {
@@ -10,12 +10,14 @@ interface ActivitySummaryProps {
     howRealProblem: string;
   };
   onReset: () => void;
+  onBack: () => void;
   userKey: string;
 }
 
 export const ActivitySummary: React.FC<ActivitySummaryProps> = ({
   responses,
   onReset,
+  onBack,
   userKey
 }) => {
   const [copied, setCopied] = useState(false);
@@ -165,6 +167,24 @@ export const ActivitySummary: React.FC<ActivitySummaryProps> = ({
 
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200">
+        <button
+          onClick={onBack}
+          className="px-6 py-3 rounded-lg transition-colors font-medium flex items-center justify-center"
+          style={{
+            backgroundColor: '#8A8A8A',
+            color: '#FFFFFF'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#666666';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#8A8A8A';
+          }}
+        >
+          <ArrowLeft size={18} className="mr-2" />
+          Back to Step 2
+        </button>
+        
         <div className="relative">
           <button
             onClick={onReset}

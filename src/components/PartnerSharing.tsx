@@ -1,5 +1,5 @@
 import React from 'react';
-import { Share } from 'lucide-react';
+import { Share, ArrowLeft } from 'lucide-react';
 import { WordCountFeedback } from './WordCountFeedback';
 import { Timer } from './Timer';
 
@@ -13,6 +13,7 @@ interface PartnerSharingProps {
   };
   onInputChange: (field: string, value: string) => void;
   onContinue: () => void;
+  onBack: () => void;
   isValid: boolean;
 }
 
@@ -20,6 +21,7 @@ export const PartnerSharing: React.FC<PartnerSharingProps> = ({
   responses,
   onInputChange,
   onContinue,
+  onBack,
   isValid
 }) => {
   return (
@@ -122,21 +124,41 @@ export const PartnerSharing: React.FC<PartnerSharingProps> = ({
           onComplete={() => {}}
         />
         
-        <button
-          onClick={onContinue}
-          disabled={!isValid}
-          className={`px-6 py-2 rounded-lg transition-colors font-medium min-h-[44px] ${
-            isValid
-              ? 'text-white hover:opacity-90'
-              : 'cursor-not-allowed'
-          }`}
-          style={{
-            backgroundColor: isValid ? '#FF9000' : '#d1d5db',
-            color: isValid ? '#FFFFFF' : '#8A8A8A'
-          }}
-        >
-          Continue to Summary
-        </button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={onBack}
+            className="px-6 py-2 rounded-lg transition-colors font-medium min-h-[44px] flex items-center justify-center"
+            style={{
+              backgroundColor: '#8A8A8A',
+              color: '#FFFFFF'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#666666';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#8A8A8A';
+            }}
+          >
+            <ArrowLeft size={16} className="mr-2" />
+            Back to Step 1
+          </button>
+          
+          <button
+            onClick={onContinue}
+            disabled={!isValid}
+            className={`px-6 py-2 rounded-lg transition-colors font-medium min-h-[44px] ${
+              isValid
+                ? 'text-white hover:opacity-90'
+                : 'cursor-not-allowed'
+            }`}
+            style={{
+              backgroundColor: isValid ? '#FF9000' : '#d1d5db',
+              color: isValid ? '#FFFFFF' : '#8A8A8A'
+            }}
+          >
+            Continue to Summary
+          </button>
+        </div>
       </div>
     </div>
   );
