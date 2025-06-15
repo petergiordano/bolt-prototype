@@ -15,7 +15,7 @@ export interface UserProfile {
 
 export interface Day1Data {
   activity1?: ProblemOriginStoryData;
-  activity2?: ProblemValidationData;
+  // activity2 will be added when properly migrated from reference HTML
 }
 
 export interface Day2Data {
@@ -82,22 +82,4 @@ export interface ProblemOriginStoryData extends ActivityData {
   };
 }
 
-// Day 1, Activity 2: Problem Validation
-export interface ProblemValidationData extends ActivityData {
-  stepData: {
-    hypothesisFormation: {
-      problemStatement: TextResponseStep;
-      targetAudience: TextResponseStep;
-      assumptions: TextResponseStep[];
-    };
-    evidenceGathering: {
-      researchMethods: MultipleChoiceStep[];
-      findings: TextResponseStep[];
-    };
-    validation: {
-      isValidated: boolean;
-      confidence: number; // 1-10 scale
-      nextActions: string[];
-    };
-  };
-}
+// Additional activity interfaces will be added as they are properly migrated from reference HTML
