@@ -7,7 +7,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/day1/activity1" replace />} />
+        <Route path="/" element={<Navigate to="/day1/activity2" replace />} />
         <Route path="/day1/activity1" element={<ProblemOriginStory />} />
         <Route path="/day1/activity2" element={<ProblemValidation />} />
       </Routes>
