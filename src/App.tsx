@@ -18,15 +18,6 @@ const generateUserKey = (): string => {
   return result;
 };
 
-const getUserKey = (): string => {
-  let key = localStorage.getItem('workshop_user_key');
-  if (!key) {
-    key = generateUserKey();
-    localStorage.setItem('workshop_user_key', key);
-  }
-  return key;
-};
-
 const loadUserData = async (key: string) => {
   try {
     const data = localStorage.getItem(`workshop_data_${key}`);
@@ -69,6 +60,7 @@ function App() {
         
         // Check if user key exists in localStorage
         const existingKey = localStorage.getItem('workshop_user_key');
+        console.log('🔍 Checking for existing key:', existingKey);
         
         if (!existingKey) {
           console.log('🔑 No existing user key found, showing code entry');
@@ -252,7 +244,7 @@ function App() {
     { number: 3, label: 'Summary' }
   ];
 
-  console.log('🎨 Rendering App - Step:', currentStep, 'Loading:', loading, 'Error:', error, 'ShowCodeEntry:', showUserCodeEntry);
+  console.log('🎨 Rendering App - Step:', currentStep, 'Loading:', loading, 'Error:', error, 'ShowCodeEntry:', showUserCodeEntry, 'UserKey:', userKey);
 
   if (loading) {
     return (
