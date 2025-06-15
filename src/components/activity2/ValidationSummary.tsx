@@ -58,10 +58,10 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
         }}>
           <CheckCircle style={{ color: '#22C55E' }} size={32} />
         </div>
-        <h3 className="text-2xl font-bold mb-2" style={{ color: '#666666' }}>
+        <h3 className="text-2xl font-bold mb-2 text-gray-800">
           Market Analysis Complete!
         </h3>
-        <p className="max-w-2xl mx-auto" style={{ color: '#8A8A8A' }}>
+        <p className="max-w-2xl mx-auto text-gray-700">
           You've successfully mapped your market landscape and identified your strategic entry point. 
           Here's a summary of your market positioning analysis.
         </p>
@@ -97,10 +97,10 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
               <line x1="50%" y1="0" x2="50%" y2="100%" stroke="#9ca3af" strokeWidth="2" strokeDasharray="5,5" />
               
               {/* Zone labels */}
-              <text x="25%" y="25" textAnchor="middle" className="text-sm font-medium" fill="#666666">
+              <text x="25%" y="25" textAnchor="middle" className="text-sm font-medium" fill="#374151">
                 Competitors
               </text>
-              <text x="75%" y="25" textAnchor="middle" className="text-sm font-medium" fill="#666666">
+              <text x="75%" y="25" textAnchor="middle" className="text-sm font-medium" fill="#374151">
                 Underserved Segments
               </text>
               
@@ -245,8 +245,8 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
             <CheckCircle style={{ color: '#22C55E' }} size={20} />
           </div>
           <div className="ml-4">
-            <h3 className="text-lg font-semibold mb-2" style={{ color: '#15803D' }}>Key Takeaway</h3>
-            <p className="leading-relaxed" style={{ color: '#166534' }}>
+            <h3 className="text-lg font-semibold mb-2 text-green-800">Key Takeaway</h3>
+            <p className="leading-relaxed text-green-700">
               You've successfully mapped your competitive landscape and identified your strategic market entry point. 
               This analysis provides a clear foundation for positioning your solution and avoiding direct competition 
               while maximizing market opportunity. Use these insights to guide your go-to-market strategy.
@@ -308,10 +308,9 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
         
         <button
           onClick={() => window.open('https://github.com/your-repo', '_blank')}
-          className="px-6 py-3 rounded-lg transition-colors font-medium flex items-center justify-center"
+          className="px-6 py-3 rounded-lg transition-colors font-medium flex items-center justify-center text-white"
           style={{
-            backgroundColor: '#55BFFA',
-            color: '#FFFFFF'
+            backgroundColor: '#55BFFA'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = '#3B9AE1';
@@ -326,10 +325,9 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
         
         <button
           onClick={handleNextActivity}
-          className="px-8 py-3 rounded-lg transition-colors font-medium flex items-center justify-center"
+          className="px-8 py-3 rounded-lg transition-colors font-medium flex items-center justify-center text-white"
           style={{
-            backgroundColor: '#FF9000',
-            color: '#FFFFFF'
+            backgroundColor: '#FF9000'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = '#E6800A';

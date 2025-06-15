@@ -21,7 +21,7 @@ export const WordCountFeedback: React.FC<WordCountFeedbackProps> = ({
   
   return (
     <div className={`flex justify-between items-center mt-2 text-sm ${className}`}>
-      <span style={{ color: '#8A8A8A' }}>
+      <span className="text-gray-600">
         (describe in {minWords}+ words)
       </span>
       {isValid ? (
@@ -30,7 +30,7 @@ export const WordCountFeedback: React.FC<WordCountFeedbackProps> = ({
           <span>{wordCount} words</span>
         </div>
       ) : (
-        <span style={{ color: '#8A8A8A' }}>
+        <span className="text-gray-600">
           {wordCount} words
         </span>
       )}

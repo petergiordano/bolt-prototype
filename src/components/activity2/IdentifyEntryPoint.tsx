@@ -55,10 +55,10 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
-        <h3 className="text-xl font-bold mb-2" style={{ color: '#666666' }}>
+        <h3 className="text-xl font-bold mb-2 text-gray-800">
           Step 2: Identify Your Strategic Entry Point (4 minutes)
         </h3>
-        <p style={{ color: '#8A8A8A' }}>
+        <p className="text-gray-700">
           Place your strategic marker and justify your landing zone choice
         </p>
       </div>
@@ -68,11 +68,11 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
         borderColor: '#55BFFA'
       }}>
         <div className="flex items-center mb-3">
-          <MapPin className="mr-2" size={24} style={{ color: '#55BFFA' }} />
-          <h4 className="text-lg font-semibold" style={{ color: '#55BFFA' }}>Strategic Positioning</h4>
+          <MapPin className="mr-2 text-white" size={24} />
+          <h4 className="text-lg font-semibold text-white">Strategic Positioning</h4>
         </div>
-        <p className="mb-2" style={{ color: '#6E9FBA' }}>Based on your market landscape:</p>
-        <ol className="list-decimal list-inside space-y-1 ml-2" style={{ color: '#6E9FBA' }}>
+        <p className="mb-2 text-white">Based on your market landscape:</p>
+        <ol className="list-decimal list-inside space-y-1 ml-2 text-white">
           <li>Click to place your strategic entry point marker</li>
           <li>Explain why this is the best landing zone for your solution</li>
         </ol>
@@ -84,19 +84,19 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
               <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: '#DC2626' }}></div>
-              <span className="text-sm font-medium" style={{ color: '#666666' }}>
+              <span className="text-sm font-medium text-gray-800">
                 Competitors ({competitorMarkers.length})
               </span>
             </div>
             <div className="flex items-center">
               <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: '#2563EB' }}></div>
-              <span className="text-sm font-medium" style={{ color: '#666666' }}>
+              <span className="text-sm font-medium text-gray-800">
                 Underserved ({underservedMarkers.length})
               </span>
             </div>
             <div className="flex items-center">
               <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: '#22C55E' }}></div>
-              <span className="text-sm font-medium" style={{ color: '#666666' }}>
+              <span className="text-sm font-medium text-gray-800">
                 Strategic Entry ({strategicMarker ? 1 : 0})
               </span>
             </div>
@@ -123,10 +123,10 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
             <line x1="50%" y1="0" x2="50%" y2="100%" stroke="#9ca3af" strokeWidth="2" strokeDasharray="5,5" />
             
             {/* Zone labels */}
-            <text x="25%" y="30" textAnchor="middle" className="text-sm font-medium" fill="#666666">
+            <text x="25%" y="30" textAnchor="middle" className="text-sm font-medium" fill="#374151">
               Competitor Focus Zone
             </text>
-            <text x="75%" y="30" textAnchor="middle" className="text-sm font-medium" fill="#666666">
+            <text x="75%" y="30" textAnchor="middle" className="text-sm font-medium" fill="#374151">
               Underserved Segments Zone
             </text>
             
@@ -220,7 +220,7 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
           </svg>
         </div>
 
-        <div className="mt-4 text-sm" style={{ color: '#8A8A8A' }}>
+        <div className="mt-4 text-sm text-gray-700">
           <p>Click anywhere on the grid to place your strategic entry point marker. Click the marker to edit your justification.</p>
         </div>
       </div>
@@ -228,13 +228,13 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
       {/* Strategic Justification */}
       {strategicMarker && (
         <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: '#666666' }}>
+          <label className="block text-sm font-medium mb-2 text-gray-800">
             Why is this the best landing zone for your solution?
           </label>
           <textarea
             value={strategicJustification}
             onChange={(e) => onInputChange('strategicJustification', e.target.value)}
-            className="w-full min-h-[120px] p-3 border rounded-lg resize-none transition-all duration-200"
+            className="w-full min-h-[120px] p-3 border rounded-lg resize-none transition-all duration-200 text-gray-900"
             style={{
               borderColor: '#d1d5db',
               lineHeight: '1.5'
@@ -255,17 +255,17 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
 
       {/* Validation Status */}
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-        <h4 className="font-medium mb-2" style={{ color: '#666666' }}>Progress Status:</h4>
+        <h4 className="font-medium mb-2 text-gray-800">Progress Status:</h4>
         <div className="space-y-2">
           <div className="flex items-center">
             <div className={`w-4 h-4 rounded-full mr-2 ${strategicMarker ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-            <span className="text-sm" style={{ color: strategicMarker ? '#22C55E' : '#8A8A8A' }}>
+            <span className="text-sm" style={{ color: strategicMarker ? '#22C55E' : '#6B7280' }}>
               Strategic entry point placed
             </span>
           </div>
           <div className="flex items-center">
             <div className={`w-4 h-4 rounded-full mr-2 ${strategicJustification.trim().length > 0 ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-            <span className="text-sm" style={{ color: strategicJustification.trim().length > 0 ? '#22C55E' : '#8A8A8A' }}>
+            <span className="text-sm" style={{ color: strategicJustification.trim().length > 0 ? '#22C55E' : '#6B7280' }}>
               Strategic justification provided
             </span>
           </div>
@@ -296,7 +296,7 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
             }`}
             style={{
               backgroundColor: isValid ? '#FF9000' : '#d1d5db',
-              color: isValid ? '#FFFFFF' : '#8A8A8A'
+              color: isValid ? '#FFFFFF' : '#6B7280'
             }}
           >
             Continue to Justification
@@ -308,18 +308,18 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
       {showJustificationModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4" style={{ color: '#666666' }}>
+            <h3 className="text-lg font-semibold mb-4 text-gray-800">
               Strategic Entry Point Justification
             </h3>
             
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-2" style={{ color: '#666666' }}>
+              <label className="block text-sm font-medium mb-2 text-gray-800">
                 Why is this the best landing zone for your solution?
               </label>
               <textarea
                 value={strategicJustification}
                 onChange={(e) => onInputChange('strategicJustification', e.target.value)}
-                className="w-full min-h-[120px] p-3 border rounded-lg resize-none"
+                className="w-full min-h-[120px] p-3 border rounded-lg resize-none text-gray-900"
                 style={{ borderColor: '#d1d5db' }}
                 placeholder="Explain your strategic reasoning..."
               />
@@ -335,8 +335,8 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
               </button>
               <button
                 onClick={() => setShowJustificationModal(false)}
-                className="px-4 py-2 rounded-lg font-medium"
-                style={{ backgroundColor: '#e5e7eb', color: '#374151' }}
+                className="px-4 py-2 rounded-lg font-medium text-gray-800"
+                style={{ backgroundColor: '#e5e7eb' }}
               >
                 Cancel
               </button>

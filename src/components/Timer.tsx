@@ -44,8 +44,8 @@ export const Timer: React.FC<TimerProps> = ({
   return (
     <div className="flex items-center space-x-4">
       <div className="flex items-center">
-        <Clock className="mr-2" size={20} style={{ color: '#8A8A8A' }} />
-        <span className="font-medium" style={{ color: '#666666' }}>
+        <Clock className="mr-2 text-gray-600" size={20} />
+        <span className="font-medium text-gray-800">
           {hasStarted ? `Time remaining: ${formatTime(timeLeft)}` : `${label}: ${formatTime(duration)}`}
         </span>
       </div>
@@ -53,16 +53,15 @@ export const Timer: React.FC<TimerProps> = ({
       {!hasStarted && (
         <button
           onClick={startTimer}
-          className="px-4 py-2 rounded-lg transition-colors"
+          className="px-4 py-2 rounded-lg transition-colors text-white"
           style={{
-            backgroundColor: '#8A8A8A',
-            color: '#FFFFFF'
+            backgroundColor: '#6B7280'
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#666666';
+            e.currentTarget.style.backgroundColor = '#4B5563';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#8A8A8A';
+            e.currentTarget.style.backgroundColor = '#6B7280';
           }}
         >
           Start Timer (Optional)

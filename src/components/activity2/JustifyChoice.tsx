@@ -32,10 +32,10 @@ export const JustifyChoice: React.FC<JustifyChoiceProps> = ({
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
-        <h3 className="text-xl font-bold mb-2" style={{ color: '#666666' }}>
+        <h3 className="text-xl font-bold mb-2 text-gray-800">
           Step 3: Justify Your Strategic Choice (3 minutes)
         </h3>
-        <p style={{ color: '#8A8A8A' }}>
+        <p className="text-gray-700">
           Provide evidence and reasoning for your landing zone selection
         </p>
       </div>
@@ -45,11 +45,11 @@ export const JustifyChoice: React.FC<JustifyChoiceProps> = ({
         borderColor: '#22C55E'
       }}>
         <div className="flex items-center mb-3">
-          <CheckSquare className="mr-2" size={24} style={{ color: '#22C55E' }} />
-          <h4 className="text-lg font-semibold" style={{ color: '#22C55E' }}>Strategic Validation</h4>
+          <CheckSquare className="mr-2 text-white" size={24} />
+          <h4 className="text-lg font-semibold text-white">Strategic Validation</h4>
         </div>
-        <p className="mb-2" style={{ color: '#166534' }}>Complete your strategic analysis:</p>
-        <ol className="list-decimal list-inside space-y-1 ml-2" style={{ color: '#166534' }}>
+        <p className="mb-2 text-white">Complete your strategic analysis:</p>
+        <ol className="list-decimal list-inside space-y-1 ml-2 text-white">
           <li>Select which landing zone category best describes your choice</li>
           <li>Provide detailed evidence supporting your strategic decision</li>
         </ol>
@@ -58,13 +58,13 @@ export const JustifyChoice: React.FC<JustifyChoiceProps> = ({
       <div className="grid grid-cols-1 gap-6">
         {/* Landing Zone Selection */}
         <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: '#666666' }}>
+          <label className="block text-sm font-medium mb-2 text-gray-800">
             Which landing zone did you choose?
           </label>
           <select
             value={landingZoneChoice}
             onChange={(e) => onInputChange('landingZoneChoice', e.target.value)}
-            className="w-full p-3 border rounded-lg transition-all duration-200"
+            className="w-full p-3 border rounded-lg transition-all duration-200 text-gray-900"
             style={{
               borderColor: '#d1d5db',
               backgroundColor: '#FFFFFF'
@@ -88,13 +88,13 @@ export const JustifyChoice: React.FC<JustifyChoiceProps> = ({
 
         {/* Evidence Support */}
         <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: '#666666' }}>
+          <label className="block text-sm font-medium mb-2 text-gray-800">
             What evidence supports your choice?
           </label>
           <textarea
             value={evidenceSupport}
             onChange={(e) => onInputChange('evidenceSupport', e.target.value)}
-            className="w-full min-h-[150px] p-3 border rounded-lg resize-none transition-all duration-200"
+            className="w-full min-h-[150px] p-3 border rounded-lg resize-none transition-all duration-200 text-gray-900"
             style={{
               borderColor: '#d1d5db',
               lineHeight: '1.5'
@@ -116,10 +116,10 @@ export const JustifyChoice: React.FC<JustifyChoiceProps> = ({
       {/* Landing Zone Descriptions */}
       {landingZoneChoice && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="font-medium mb-2" style={{ color: '#1E40AF' }}>
+          <h4 className="font-medium mb-2 text-blue-900">
             About {landingZoneOptions.find(opt => opt.value === landingZoneChoice)?.label}:
           </h4>
-          <p className="text-sm" style={{ color: '#1E3A8A' }}>
+          <p className="text-sm text-blue-800">
             {landingZoneChoice === 'mainstream-market' && 
               'Competing directly in established markets with well-defined customer needs and existing solutions.'}
             {landingZoneChoice === 'low-end-market' && 
@@ -134,17 +134,17 @@ export const JustifyChoice: React.FC<JustifyChoiceProps> = ({
 
       {/* Validation Status */}
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-        <h4 className="font-medium mb-2" style={{ color: '#666666' }}>Progress Status:</h4>
+        <h4 className="font-medium mb-2 text-gray-800">Progress Status:</h4>
         <div className="space-y-2">
           <div className="flex items-center">
             <div className={`w-4 h-4 rounded-full mr-2 ${landingZoneChoice.trim().length > 0 ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-            <span className="text-sm" style={{ color: landingZoneChoice.trim().length > 0 ? '#22C55E' : '#8A8A8A' }}>
+            <span className="text-sm" style={{ color: landingZoneChoice.trim().length > 0 ? '#22C55E' : '#6B7280' }}>
               Landing zone selected
             </span>
           </div>
           <div className="flex items-center">
             <div className={`w-4 h-4 rounded-full mr-2 ${evidenceSupport.trim().split(/\s+/).filter(w => w.length > 0).length >= 20 ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-            <span className="text-sm" style={{ color: evidenceSupport.trim().split(/\s+/).filter(w => w.length > 0).length >= 20 ? '#22C55E' : '#8A8A8A' }}>
+            <span className="text-sm" style={{ color: evidenceSupport.trim().split(/\s+/).filter(w => w.length > 0).length >= 20 ? '#22C55E' : '#6B7280' }}>
               Evidence provided (minimum 20 words)
             </span>
           </div>
@@ -175,7 +175,7 @@ export const JustifyChoice: React.FC<JustifyChoiceProps> = ({
             }`}
             style={{
               backgroundColor: isValid ? '#FF9000' : '#d1d5db',
-              color: isValid ? '#FFFFFF' : '#8A8A8A'
+              color: isValid ? '#FFFFFF' : '#6B7280'
             }}
           >
             Continue to Summary
