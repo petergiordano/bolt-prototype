@@ -60,26 +60,26 @@ export const ActivitySummary: React.FC<ActivitySummaryProps> = ({
         background: 'linear-gradient(135deg, #FFE599 0%, #FF9000 20%)',
         borderColor: '#F1C232'
       }}>
-        <h4 className="text-lg font-semibold mb-4 flex items-center" style={{ color: '#A58E6F' }}>
-          <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: '#FF9000' }}></div>
+        <h4 className="text-lg font-semibold mb-4 flex items-center text-white">
+          <div className="w-2 h-2 rounded-full mr-3 bg-white"></div>
           Problem Discovery
         </h4>
         
         <div className="space-y-4">
           <div className="bg-white border rounded-lg p-4" style={{ borderColor: '#F1C232' }}>
-            <h5 className="font-medium mb-2" style={{ color: '#A58E6F' }}>Moment of Realization</h5>
-            <p className="text-sm leading-relaxed" style={{ color: '#666666' }}>{responses.momentOfRealization}</p>
+            <h5 className="font-semibold mb-2 text-gray-800">Moment of Realization</h5>
+            <p className="text-sm leading-relaxed text-gray-700">{responses.momentOfRealization}</p>
           </div>
           
           <div className="grid md:grid-cols-2 gap-4">
             <div className="bg-white border rounded-lg p-4" style={{ borderColor: '#F1C232' }}>
-              <h5 className="font-medium mb-2" style={{ color: '#A58E6F' }}>Who Experienced It</h5>
-              <p className="text-sm leading-relaxed" style={{ color: '#666666' }}>{responses.whoExperienced}</p>
+              <h5 className="font-semibold mb-2 text-gray-800">Who Experienced It</h5>
+              <p className="text-sm leading-relaxed text-gray-700">{responses.whoExperienced}</p>
             </div>
             
             <div className="bg-white border rounded-lg p-4" style={{ borderColor: '#F1C232' }}>
-              <h5 className="font-medium mb-2" style={{ color: '#A58E6F' }}>Why It Mattered</h5>
-              <p className="text-sm leading-relaxed" style={{ color: '#666666' }}>{responses.whyMatters}</p>
+              <h5 className="font-semibold mb-2 text-gray-800">Why It Mattered</h5>
+              <p className="text-sm leading-relaxed text-gray-700">{responses.whyMatters}</p>
             </div>
           </div>
         </div>
@@ -90,20 +90,20 @@ export const ActivitySummary: React.FC<ActivitySummaryProps> = ({
         background: 'linear-gradient(135deg, #E6F3FF 0%, #55BFFA 20%)',
         borderColor: '#55BFFA'
       }}>
-        <h4 className="text-lg font-semibold mb-4 flex items-center" style={{ color: '#6E9FBA' }}>
-          <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: '#55BFFA' }}></div>
+        <h4 className="text-lg font-semibold mb-4 flex items-center text-white">
+          <div className="w-2 h-2 rounded-full mr-3 bg-white"></div>
           Problem Validation
         </h4>
         
         <div className="grid md:grid-cols-2 gap-4">
           <div className="bg-white border rounded-lg p-4" style={{ borderColor: '#55BFFA' }}>
-            <h5 className="font-medium mb-2" style={{ color: '#6E9FBA' }}>What Surprised You</h5>
-            <p className="text-sm leading-relaxed" style={{ color: '#666666' }}>{responses.whatSurprised}</p>
+            <h5 className="font-semibold mb-2 text-gray-800">What Surprised You</h5>
+            <p className="text-sm leading-relaxed text-gray-700">{responses.whatSurprised}</p>
           </div>
           
           <div className="bg-white border rounded-lg p-4" style={{ borderColor: '#55BFFA' }}>
-            <h5 className="font-medium mb-2" style={{ color: '#6E9FBA' }}>How You Know It's Real</h5>
-            <p className="text-sm leading-relaxed" style={{ color: '#666666' }}>{responses.howRealProblem}</p>
+            <h5 className="font-semibold mb-2 text-gray-800">How You Know It's Real</h5>
+            <p className="text-sm leading-relaxed text-gray-700">{responses.howRealProblem}</p>
           </div>
         </div>
       </div>
@@ -130,15 +130,15 @@ export const ActivitySummary: React.FC<ActivitySummaryProps> = ({
 
       {/* Progress Sharing */}
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-        <h4 className="font-medium mb-3 flex items-center" style={{ color: '#666666' }}>
+        <h4 className="font-semibold mb-3 flex items-center text-gray-800">
           <Download className="mr-2" size={18} />
           Save Your Progress
         </h4>
-        <p className="text-sm mb-3" style={{ color: '#8A8A8A' }}>
+        <p className="text-sm mb-3 text-gray-700">
           Your unique user key allows you to continue with the next activities. Keep it safe!
         </p>
         <div className="flex items-center gap-2">
-          <div className="flex-1 bg-white border border-gray-300 rounded px-3 py-2 font-mono text-sm">
+          <div className="flex-1 bg-white border border-gray-300 rounded px-3 py-2 font-mono text-sm text-gray-800">
             {userKey}
           </div>
           <button
@@ -146,7 +146,7 @@ export const ActivitySummary: React.FC<ActivitySummaryProps> = ({
             className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center font-medium`}
             style={{
               backgroundColor: copied ? '#22C55E' : '#e5e7eb',
-              color: copied ? '#FFFFFF' : '#666666'
+              color: copied ? '#FFFFFF' : '#374151'
             }}
             onMouseEnter={(e) => {
               if (!copied) {
