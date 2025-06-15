@@ -95,34 +95,38 @@ This doc defines the distilled tech, data, and UI standards for migrating the GT
 
 
 ### Tooltip Standard (🔍 NEW)
-	•	Use tooltips to clarify non-obvious or potentially destructive actions
-	•	Trigger: hover on desktop, tap-hold on mobile (via title tag or custom behavior)
-	•	Tooltip behavior:
-	•	Dark background (#1F2937) with white text
-	•	Arrow pointing to the button
-	•	Max-width: 64 characters (~300px)
-	•	Spacing: 8–12px from target, z-index safe
-	•	Smooth fade-in/out transitions
-	•	Accessibility:
-	•	Tooltip must use aria-describedby and a title attribute (if applicable)
-	•	Tooltip text should be keyboard-reachable if using custom components
-	•	Example use: Reset buttons
-Message for both Reset buttons:
-“This will restart the activity and clear your responses. Your user ID will stay the same so your progress across other activities won’t be lost.”
+- Use tooltips to clarify non-obvious or potentially destructive actions.
+- Trigger: hover on desktop, tap-hold on mobile (via `title` tag or custom behavior).
+- Tooltip design:
+  - Dark background: `#1F2937`
+  - White text
+  - Arrow pointing to the target element
+  - Max-width: 64 characters (~300px)
+  - Spacing: 8–12px from target
+  - Uses safe z-index
+  - Smooth fade-in/out transitions
+- Accessibility:
+  - Must include `aria-describedby` and `title` attributes
+  - Tooltip content should be accessible via keyboard if custom components are used
+- Standard tooltip text for Reset buttons:
+  ```
+  This will restart the activity and clear your responses. Your user ID will stay the same so your progress across other activities won’t be lost.
+  ```
 
 ⸻
 
 ### Back Button Standard (🔙 NEW)
-	•	Add Back buttons on steps 2 and beyond within an activity
-	•	Behavior:
-	•	On click: setCurrentStep(currentStep - 1)
-	•	Does not reset or clear inputs
-	•	Returns user to prior step with preserved data
-	•	Visual placement:
-	•	Bottom-left of each step panel, below input content
-	•	Style:
-	•	Tailwind class: btn btn-secondary
-	•	Do not show on step 1
+- Back button should appear on all steps beyond Step 1
+- Behavior:
+  - On click: `setCurrentStep(currentStep - 1)`
+  - Maintains current inputs
+  - Navigates back to the previous step with data preserved
+- Placement:
+  - Bottom-left of the step container
+  - Always below the main content/input area
+- Style:
+  - Tailwind: `btn btn-secondary`
+  - Should not appear on Step 1
 
 ---
 
