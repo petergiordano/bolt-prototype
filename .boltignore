@@ -1,0 +1,19 @@
+# Ignore heavy directories not needed for Bolt agent context
+node_modules/
+reference-html/
+supabase/
+public/
+.vscode/
+.bolt/
+
+# Ignore generated files and maps
+*.map
+*.log
+
+# Ignore test files
+*.test.ts
+*.spec.ts
+
+# Optional: ignore local dev config files
+.env
+.env.local
