@@ -29,13 +29,16 @@
 - [ ] Confirm that reusable components and layout shells are generalizable to any activity
 - [ ] Validate that WorkshopData schema supports easy expansion per activity
 - [ ] Create an activity manifest or config map to define routes, step counts, themes, and titles per activity (optional but recommended)
-- [ ] Remove any in-progress Activity 2 implementation from src that was not based on the reference HTML
+ - [ ] Remove any in-progress Activity 2 implementation from src that was not based on the reference HTML
+       - Delete src/activities/day1/activity2/ if present
 
 ### 📁 Reference HTML Directory
 
 - Mirror original workshop structure inside /reference-html
 - Organize HTML files by workshop and activity (e.g. problems_worth_solving/problems-activity-2.html)
 - Ensure Claude Code can scan and interpret structure/content
+
+- [ ] Remove original non-prefixed reference folders (e.g. problems_worth_solving/, positioning_basics/, etc.)
 
 ### 🔮 Longer-Term Refinements
 
