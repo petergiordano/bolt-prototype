@@ -21,19 +21,16 @@ export const MapMarketLandscape: React.FC<MapMarketLandscapeProps> = ({
   const [selectedMarker, setSelectedMarker] = useState<MarkerData | null>(null);
   const [editingLabel, setEditingLabel] = useState('');
   const [showLabelModal, setShowLabelModal] = useState(false);
+  const [selectedType, setSelectedType] = useState<'competitor' | 'underserved'>('competitor');
 
   const handleGridClick = (event: React.MouseEvent<SVGElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
 
-    // Determine marker type based on click position within Venn diagram zones
-    let markerType: 'competitor' | 'underserved' = 'competitor';
-    
-    // Simple zone detection - can be refined based on actual circle overlaps
-    if (x > 60) {
-      markerType = 'underserved';
-    }
+    // Use selectedType to determine marker type
+    let markerType: 'competitor' | 'underserved' = selectedType;
+    // (Old x > 60 detection removed)
 
     const newMarker: MarkerData = {
       id: `${markerType}-${Date.now()}`,
@@ -124,6 +121,21 @@ export const MapMarketLandscape: React.FC<MapMarketLandscapeProps> = ({
 
       {/* Three-Circle Venn Diagram - Matching Reference Image */}
       <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
+        {/* Toggle UI for marker type selection */}
+        <div className="flex space-x-4 mb-4">
+          <button
+            onClick={() => setSelectedType('competitor')}
+            className={`px-4 py-2 rounded-lg font-medium ${selectedType === 'competitor' ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-800'}`}
+          >
+            Competitor Focus (X)
+          </button>
+          <button
+            onClick={() => setSelectedType('underserved')}
+            className={`px-4 py-2 rounded-lg font-medium ${selectedType === 'underserved' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+          >
+            Underserved Segment (O)
+          </button>
+        </div>
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
