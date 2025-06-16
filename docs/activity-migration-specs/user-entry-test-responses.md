@@ -1,5 +1,5 @@
 
-# Day 1 - Problems worth solving
+# Workshop 1 - Problems worth solving
 ## Activity 1: Problem Origin Story, File: problems-activity-1.html
 ### Step 1: Individual Reflection
 
@@ -64,7 +64,7 @@
 
 ---
 
-# Day 2-1 - Finding your early customers
+# Workshop 2-1 - Finding your early customers
 ## Activity 1: Identify Early Market Customers, File: ecp-activity-1.html
 ### Step 1: Identify Early Market Customers
 
@@ -123,7 +123,7 @@
 
 ---
 
-# Day 2-2 - Positioning and Value Proposition Basics
+# Workshop 2-2 - Positioning and Value Proposition Basics
 ## Activity 1: Confirm Early Customer Profile & Competitive Alternative, File: positioning-activity-1.html
 ### Step 1: Confirm Your Early Customer Profile
 
@@ -188,7 +188,7 @@
 
 ---
 
-# Day 3 - Market Entry Readiness
+# Workshop 3 - Market Entry Readiness
 ## Activity 1: Current Position & Success Metrics, File: market-entry-activity-1.html
 ### Step 1: Current Position Assessment
 
@@ -210,7 +210,7 @@
 | :------------------- | :------- |
 | No user entry - This is a summary screen. The user can continue to the next activity or save their progress. | No user entry - This step summarizes the current position assessment and success metrics, allowing the user to review or proceed. |
 
-# Day 3 - Market Entry Readiness
+# Workshop 3 - Market Entry Readiness
 ## Activity 2: Global Market Strategy Assessment, File: market-entry-activity-2.html
 ### Step 1: Global Market Strategy Assessment
 
@@ -235,7 +235,7 @@
 | :------------------- | :------- |
 | No user entry - This is a summary of the market analysis and priority gaps. The user can continue to the next activity or save their progress. | No user entry - This step provides a summary of the global market analysis and the prioritized gaps, along with their respective adaptation strategies. |
 
-# Day 3 - Market Entry Readiness
+# Workshop 3 - Market Entry Readiness
 ## Activity 3: Strategic Planning Framework & Timeline, File: market-entry-activity-3.html
 ### Step 1: Strategic Planning Framework
 

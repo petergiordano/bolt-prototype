@@ -1,4 +1,4 @@
-# Day 1 - Problems worth solving
+# Workshop 1 - Problems worth solving
 ## Activity 1 - problems-activity-1.html (Problem Origin Story Activity)
 
 **Step 1 - Individual Reflection**
@@ -55,7 +55,7 @@ For each of 5 criteria (Urgency, Importance, Value, Market Gap, Accessibility):
 
 ---
 
-# Day 2-1 - Finding your early customers
+# Workshop 2-1 - Finding your early customers
 
 ## Activity 1 - **ecp-activity-1.html**
 
@@ -98,7 +98,7 @@ For each of 5 criteria (Urgency, Importance, Value, Market Gap, Accessibility):
 * No user entry - This section provides a guide for presenting the ECP. The user can finalize the activity and generate a progress code.
 ---
 
-# Day 2-2 - Positioning and Value Proposition Basics
+# Workshop 2-2 - Positioning and Value Proposition Basics
 
 
 ## Activity 1 - **positioning-activity-1.html**
@@ -144,7 +144,7 @@ For each of 5 criteria (Urgency, Importance, Value, Market Gap, Accessibility):
 * No user entry - The activity assembles the user's inputs from this and previous activities into a complete positioning statement. The user can copy the statement, complete the workshop, or save their progress.
 ---
 
-# Day 3 - Market Entry Readiness
+# Workshop 3 - Market Entry Readiness
 
 ## Activity 1 - **market-entry-activity-1.html**
 
