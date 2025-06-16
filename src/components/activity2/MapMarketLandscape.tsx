@@ -157,49 +157,48 @@ export const MapMarketLandscape: React.FC<MapMarketLandscapeProps> = ({
             </defs>
             <rect width="100%" height="100%" fill="url(#grid)" />
             
-            {/* Three overlapping circles - exact geometry from reference image */}
-            
-            {/* Mainstream Market Circle (Left) */}
+            {/* Three overlapping circles - corrected geometry */}
+            {/* Mainstream Market Circle (Top Left) */}
             <circle
-              cx="35%"
-              cy="50%"
-              r="100"
+              cx="40%"
+              cy="42%"
+              r="90"
               fill="rgba(156, 163, 175, 0.15)"
               stroke="#6B7280"
               strokeWidth="2"
               strokeDasharray="8,4"
             />
-            
+
             {/* Low-end Market Circle (Top Right) */}
             <circle
-              cx="65%"
-              cy="35%"
-              r="100"
+              cx="60%"
+              cy="42%"
+              r="90"
               fill="rgba(156, 163, 175, 0.15)"
               stroke="#6B7280"
               strokeWidth="2"
               strokeDasharray="8,4"
             />
-            
-            {/* New/Overlooked Segments Circle (Bottom Right) */}
-            <circle
-              cx="65%"
-              cy="65%"
-              r="100"
-              fill="rgba(156, 163, 175, 0.15)"
-              stroke="#6B7280"
-              strokeWidth="2"
-              strokeDasharray="8,4"
-            />
-            
-            {/* Strategic Market Landing Zone (Center intersection) */}
+
+            {/* New/Overlooked Segments Circle (Bottom Center) */}
             <circle
               cx="50%"
-              cy="50%"
-              r="35"
-              fill="rgba(34, 197, 94, 0.2)"
-              stroke="#22C55E"
+              cy="59.3%"
+              r="90"
+              fill="rgba(156, 163, 175, 0.15)"
+              stroke="#6B7280"
               strokeWidth="2"
+              strokeDasharray="8,4"
+            />
+
+            {/* Strategic Market Landing Zone (True center intersection) */}
+            <circle
+              cx="50%"
+              cy="47.8%"
+              r="25"
+              fill="rgba(34, 197, 94, 0.3)"
+              stroke="#22C55E"
+              strokeWidth="2.5"
             />
             
             {/* Circle labels - positioned exactly as in reference */}
