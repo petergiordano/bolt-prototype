@@ -157,7 +157,6 @@ export const MapMarketLandscape: React.FC<MapMarketLandscapeProps> = ({
             </defs>
             <rect width="100%" height="100%" fill="url(#grid)" />
             
-            {/* Updated Venn diagram geometry and labels */}
             {/* Mainstream Market Circle (Top Left) */}
             <circle
               cx="41%"
@@ -201,34 +200,18 @@ export const MapMarketLandscape: React.FC<MapMarketLandscapeProps> = ({
               strokeWidth="2.5"
             />
 
-            {/* Circle labels - adjusted */}
-            <text x="25%" y="36%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
-              Mainstream
-            </text>
-            <text x="25%" y="39%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
-              Market
-            </text>
+            {/* Updated labels for improved positioning */}
+            <text x="25%" y="36%" textAnchor="middle" className="text-sm font-medium" fill="#374151">Mainstream</text>
+            <text x="25%" y="39%" textAnchor="middle" className="text-sm font-medium" fill="#374151">Market</text>
 
-            <text x="75%" y="36%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
-              Low-end
-            </text>
-            <text x="75%" y="39%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
-              Market
-            </text>
+            <text x="75%" y="36%" textAnchor="middle" className="text-sm font-medium" fill="#374151">Low-end</text>
+            <text x="75%" y="39%" textAnchor="middle" className="text-sm font-medium" fill="#374151">Market</text>
 
-            <text x="50%" y="75%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
-              New/Overlooked
-            </text>
-            <text x="50%" y="78%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
-              Segments
-            </text>
+            <text x="50%" y="75%" textAnchor="middle" className="text-sm font-medium" fill="#374151">New/Overlooked</text>
+            <text x="50%" y="78%" textAnchor="middle" className="text-sm font-medium" fill="#374151">Segments</text>
 
-            <text x="50%" y="46%" textAnchor="middle" className="text-xs font-semibold" fill="#15803D">
-              Strategic Market
-            </text>
-            <text x="50%" y="49%" textAnchor="middle" className="text-xs font-semibold" fill="#15803D">
-              Landing Zone
-            </text>
+            <text x="50%" y="46%" textAnchor="middle" className="text-xs font-semibold" fill="#15803D">Strategic Market</text>
+            <text x="50%" y="49%" textAnchor="middle" className="text-xs font-semibold" fill="#15803D">Landing Zone</text>
             
             {/* Competitor markers (X symbols) */}
             {competitorMarkers.map((marker) => (
