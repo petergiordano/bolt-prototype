@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { ProgressIndicator } from '../ProgressIndicator';
+import { StickyHeader } from './StickyHeader';
 import { ResetButton } from '../ui';
 
 interface ActivityShellProps {
@@ -7,7 +7,7 @@ interface ActivityShellProps {
   subtitle: string;
   currentStep: number;
   totalSteps: number;
-  userKey: string;
+  userKey?: string;
   children: ReactNode;
   onReset: () => void;
 }
@@ -21,41 +21,18 @@ export const ActivityShell: React.FC<ActivityShellProps> = ({
   children,
   onReset
 }) => {
-  const steps = Array.from({ length: totalSteps }, (_, i) => ({
-    number: i + 1,
-    label: `Step ${i + 1}`
-  }));
-
   return (
     <div className="min-h-screen" style={{
       background: 'linear-gradient(135deg, #FFE599 0%, #FF9000 100%)'
     }}>
       <div className="max-w-5xl mx-auto">
-        {/* Sticky Activity Header Card */}
-        <div className="sticky top-0 z-10 p-4 sm:p-6 pb-0">
-          <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
-                  {title}
-                </h1>
-                <p className="text-gray-600" style={{ color: '#666666' }}>
-                  {subtitle}
-                </p>
-              </div>
-              {userKey && (
-                <div className="text-sm bg-gray-50 px-3 py-2 rounded-lg" style={{ 
-                  color: '#8A8A8A',
-                  backgroundColor: '#f8f9fa'
-                }}>
-                  User ID: {userKey.substring(0, 6)}...
-                </div>
-              )}
-            </div>
-            
-            <ProgressIndicator currentStep={currentStep} steps={steps} />
-          </div>
-        </div>
+        <StickyHeader
+          title={title}
+          subtitle={subtitle}
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          userKey={userKey}
+        />
 
         {/* Main Content Card */}
         <div className="p-4 sm:p-6 pt-0">

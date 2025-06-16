@@ -23,6 +23,9 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
+      // TODO: Enable custom rule to disallow sticky headers outside src/components/layout/
+      // This will prevent custom sticky header implementations and enforce use of ActivityShell
+      // 'custom/no-sticky-headers-outside-layout': 'error',
     },
   }
 );

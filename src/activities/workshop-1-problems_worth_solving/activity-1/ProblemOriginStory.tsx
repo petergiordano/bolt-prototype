@@ -266,6 +266,7 @@ export const ProblemOriginStory: React.FC = () => {
       background: 'linear-gradient(135deg, #FFE599 0%, #FF9000 100%)'
     }}>
       <div className="max-w-5xl mx-auto">
+        {/* TODO: Refactor to use ActivityShell component instead of custom sticky header */}
         {/* Sticky Header */}
         <div className="sticky top-0 z-10 p-4 sm:p-6 pb-0">
           <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
