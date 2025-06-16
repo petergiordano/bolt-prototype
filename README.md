@@ -6,10 +6,10 @@
 Brief description of the workshop series
 
 ### Workshop Structure
-- Day 1: Workshop 1 - Problems Worth Solving
-- Day 2-1: Workshop 2 - Finding Your Early Customers
-- Day 2-2: Workshop 3 - Positioning Basics
-- Day 3: Workshop 4 - Market Entry Readiness
+- Workshop 1: Problems Worth Solving
+- Workshop 2: Finding Your Early Customers
+- Workshop 3: Positioning Basics
+- Workshop 4: Market Entry Readiness
 
 ## 📚 Documentation
 

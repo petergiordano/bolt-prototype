@@ -51,7 +51,7 @@ This doc defines the distilled tech, data, and UI standards for migrating the GT
 ```json
 {
   "version": "1.0",
-  "day1": {
+  "workshop1": {
     "activity1": {
       "momentOfRealization": "string",
       "whoExperienced": "string",
@@ -806,7 +806,7 @@ const resolveDataConflict = (localData: WorkshopData, serverData: WorkshopData) 
 - Auto-fill fields using earlier activity data
 - Users can edit these pre-filled values
 - Examples:
-  - `day1.activity3.problemStatement` → Day 2 hypotheses
+  - `workshop1.activity3.problemStatement` → Workshop 2 hypotheses
   - `basic_profile` → `customerProfile`
 
 ---
@@ -827,8 +827,8 @@ Supabase fully replaces this.
 
 Start here:
 ```
-Workshop: day1 – Problems Worth Solving
-Activity: activity1 – Problem Origin Story
+Workshop: workshop-1-problems_worth_solving – Problems Worth Solving
+Activity: activity-1 – Problem Origin Story
 ```
 
 Steps:
@@ -902,13 +902,13 @@ This section defines how users navigate between activities and how routing shoul
 - Use React Router v6+ for page-based routing.
 - Each activity is accessible via a route of the form:
   ```
-  /day1/activity1
-  /day1/activity2
-  /day2/activity1
+  /workshop-1-problems_worth_solving/activity-1
+  /workshop-1-problems_worth_solving/activity-2
+  /workshop-2-finding_your_early_customers/activity-1
   ```
 - Dynamic route parameters can be used for workshop step logic if needed:
   ```
-  /:day/:activity
+  /:workshop/:activity
   ```
 
 #### 2. Navigation Components
@@ -969,12 +969,12 @@ This section defines the standardized approach to migrate each legacy HTML activ
 ### Migration Inputs
 Each migration is driven by:
 - Legacy source file: e.g., `problems-activity-2.html`
-- Activity context: day number, activity number, step count
+- Activity context: workshop number, activity number, step count
 - Expected interaction type(s): reflection, sharing, ranking, etc.
 
 ### Migration Checklist
 1. **Define Activity Route**
-   - Use standard path: `/day1/activity2`
+   - Use standard path: `/workshop-1-problems_worth_solving/activity-2`
    - Register route in the router config
 2. **Implement ActivityShell Wrapper**
    - Use the standard `<ActivityShell>` layout (Section 7)
@@ -1010,7 +1010,7 @@ Each migration is driven by:
    - Ensure mappings, schema, and route are clearly traceable
 
 ### Output Requirements
-- Folder: `src/activities/day1/activity2`
+- Folder: `src/activities/workshop-1-problems_worth_solving/activity-2`
 - Route added to React Router config
 - Schema updated in `WorkshopData`
 - UI verified against Section 7 layout and Section 6 components
