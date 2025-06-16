@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Target, Users, Plus, Edit3, Trash2 } from 'lucide-react';
+import { Target, Trash2 } from 'lucide-react';
 import { Timer } from '../Timer';
 import { MarkerData } from '../../activities/day1/activity2/ProblemValidation';
 
