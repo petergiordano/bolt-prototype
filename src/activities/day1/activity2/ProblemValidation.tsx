@@ -281,61 +281,46 @@ export const ProblemValidation: React.FC = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen" style={{
-      background: 'linear-gradient(135deg, #FFE599 0%, #FF9000 100%)'
-    }}>
-      <div className="max-w-5xl mx-auto p-4 sm:p-6">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
-                Problem Validation
-              </h1>
-              <p className="text-gray-600" style={{ color: '#666666' }}>
-                Activity 2: Market Landing Zone Analysis
-              </p>
-            </div>
-            {userKey && (
-              <div className="text-sm bg-gray-50 px-3 py-2 rounded-lg" style={{ 
-                color: '#8A8A8A',
-                backgroundColor: '#f8f9fa'
-              }}>
-                User ID: {userKey.substring(0, 6)}...
-              </div>
-            )}
-          </div>
-        </div>
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-yellow-100 to-orange-100 flex items-center justify-center" style={{
+        background: 'linear-gradient(135deg, #FFE599 0%, #FF9000 100%)'
+      }}>
+        <ErrorMessage 
+          message={error} 
+          onRetry={() => {
+            setError(null);
+            window.location.reload();
+          }} 
+        />
+      </div>
+    );
+  }
 
-        {error && (
-          <ErrorMessage 
-            message={error} 
-            onRetry={() => {
-              setError(null);
-              window.location.reload();
-            }} 
-          />
-        )}
-
-        {/* User Code Entry */}
-        {showUserCodeEntry && (
+  if (showUserCodeEntry) {
+    return (
+      <div className="min-h-screen" style={{
+        background: 'linear-gradient(135deg, #FFE599 0%, #FF9000 100%)'
+      }}>
+        <div className="max-w-5xl mx-auto p-4 sm:p-6">
           <UserCodeEntry
             onCodeSubmit={handleUserCodeSubmit}
             onSkip={handleUserCodeSkip}
           />
-        )}
+        </div>
+      </div>
+    );
+  }
 
-        {/* Main Content */}
-        {!showUserCodeEntry && (
-          <ActivityShell
-            title="Problem Validation"
-            subtitle="Activity 2: Market Landing Zone Analysis"
-            currentStep={currentStep}
-            totalSteps={4}
-            userKey={userKey}
-            onReset={resetActivity}
-          >
+  return (
+    <ActivityShell
+      title="Problem Validation"
+      subtitle="Activity 2: Market Landing Zone Analysis"
+      currentStep={currentStep}
+      totalSteps={4}
+      userKey={userKey}
+      onReset={resetActivity}
+    >
             {currentStep === 1 && (
               <MapMarketLandscape
                 competitorMarkers={responses.competitorMarkers}
@@ -379,16 +364,6 @@ export const ProblemValidation: React.FC = () => {
                 userKey={userKey}
               />
             )}
-          </ActivityShell>
-        )}
-
-        {/* Footer */}
-        <div className="mt-6 text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-white bg-opacity-30 rounded-full">
-            <div className="w-6 h-6 border-2 border-white border-opacity-60 rounded-full"></div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </ActivityShell>
   );
 };

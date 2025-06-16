@@ -26,6 +26,11 @@
 
 ## UI Functionality Todos
 
+- [ ] Apply sticky header standard across all activity steps
+      - Ensure the step tracker and activity title section remain fixed at the top as users scroll
+      - Implement as a reusable layout pattern if not already handled in `StepWrapper`
+      - Validate consistent behavior across all workshop activity steps
+
 - [x] Add tooltip with the following message to both Reset buttons:
       "This will restart the activity and clear your responses. Your user ID will stay the same so your progress across other activities won't be lost."
       - This includes the circular reset icon in the top right of each step AND the full "Reset Activity" button on the summary screen.
