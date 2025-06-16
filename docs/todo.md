@@ -1,29 +1,3 @@
-## Folder Structure and Naming Todos
-- Refactor all references from "day1", "day2", etc. to use "workshop-1", "workshop-2", etc. in both folder and route naming conventions.
-  - Update /src/activities/day1 → /src/activities/workshop-1-problems_worth_solving
-  - Update import paths and route definitions to match the new folder structure
-  - Rename components folders accordingly:
-      - /activity1 → /activity-1
-      - /activity2 → /activity-2
-      - /activity3 → /activity-3
-  - Final folder structure target:
-      ├── workshop-1-problems_worth_solving
-      │   ├── problems-activity-1.html
-      │   ├── problems-activity-2.html
-      │   └── problems-activity-3.html
-      ├── workshop-2-finding_your_early_customers
-      │   ├── ecp-activity-1.html
-      │   ├── ecp-activity-2.html
-      │   ├── ecp-activity-3.html
-      ├── workshop-3-positioning_basics
-      │   ├── positioning-activity-1.html
-      │   ├── positioning-activity-2.html
-      │   └── positioning-activity-3.html
-      ├── workshop-4-market_entry_readiness
-      │   ├── market-entry-activity-1.html
-      │   ├── market-entry-activity-2.html
-      │   └── market-entry-activity-3.html
-
 ## UI Functionality Todos
 
 - [ ] Apply sticky header standard across all activity steps
@@ -98,3 +72,30 @@
 - [x] Use `btn btn-secondary` for styling
 - [x] Place below existing content
 - [x] Confirm correct conditional rendering per `currentStep`
+
+## ✅ Completed Tasks
+
+- [x] Refactor all references from "day1", "day2", etc. to use "workshop-1", "workshop-2", etc. in both folder and route naming conventions.
+  - Update /src/activities/day1 → /src/activities/workshop-1-problems_worth_solving
+  - Update import paths and route definitions to match the new folder structure
+  - Rename components folders accordingly:
+      - /activity1 → /activity-1
+      - /activity2 → /activity-2
+      - /activity3 → /activity-3
+  - Final folder structure target:
+      ├── workshop-1-problems_worth_solving
+      │   ├── problems-activity-1.html
+      │   ├── problems-activity-2.html
+      │   └── problems-activity-3.html
+      ├── workshop-2-finding_your_early_customers
+      │   ├── ecp-activity-1.html
+      │   ├── ecp-activity-2.html
+      │   ├── ecp-activity-3.html
+      ├── workshop-3-positioning_basics
+      │   ├── positioning-activity-1.html
+      │   ├── positioning-activity-2.html
+      │   └── positioning-activity-3.html
+      ├── workshop-4-market_entry_readiness
+      │   ├── market-entry-activity-1.html
+      │   ├── market-entry-activity-2.html
+      │   └── market-entry-activity-3.html

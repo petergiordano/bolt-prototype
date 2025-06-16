@@ -1,6 +1,20 @@
 # bolt-prototype for GTM Workshops
 
+MIT License
+
+Copyright (c) 2025 [Peter Giordano]
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 This is the main repository for the Bolt Prototype application.
+Interactive workshop modules built in React/TypeScript, used for guided exercises
+on startup go-to-market strategy. Created by Peter Giordano.
+
+This repo is public for demonstration, education, and feedback purposes.
 
 ## GTM Workshop Series
 
@@ -8,10 +22,10 @@ This is the main repository for the Bolt Prototype application.
 Brief description of the workshop series
 
 ### Workshop Structure
-- Day 1: Problems Worth Solving
-- Day 2-1: Finding Your Early Customers
-- Day 2-2: Positioning Basics
-- Day 3: Market Entry Readiness
+- Day 1: Workshop 1 - Problems Worth Solving
+- Day 2-1: Workshop 2 - Finding Your Early Customers
+- Day 2-2: Workshop 3 - Positioning Basics
+- Day 3: Workshop 4 - Market Entry Readiness
 
 ## 📚 Documentation
 
