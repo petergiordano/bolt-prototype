@@ -93,80 +93,63 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
               </defs>
               <rect width="100%" height="100%" fill="url(#summary-grid)" />
               
-              {/* Three overlapping circles - matching reference geometry */}
-              
-              {/* Mainstream Market Circle (Left) */}
+              {/* Three overlapping circles - updated geometry for Venn diagram */}
+
+              {/* Mainstream Market Circle (Top Left) */}
               <circle
-                cx="35%"
-                cy="50%"
-                r="80"
+                cx="41%"
+                cy="44%"
+                r="85"
                 fill="rgba(156, 163, 175, 0.15)"
                 stroke="#6B7280"
                 strokeWidth="2"
-                strokeDasharray="6,3"
+                strokeDasharray="8,4"
               />
-              
+
               {/* Low-end Market Circle (Top Right) */}
               <circle
-                cx="65%"
-                cy="35%"
-                r="80"
+                cx="59%"
+                cy="44%"
+                r="85"
                 fill="rgba(156, 163, 175, 0.15)"
                 stroke="#6B7280"
                 strokeWidth="2"
-                strokeDasharray="6,3"
+                strokeDasharray="8,4"
               />
-              
-              {/* New/Overlooked Segments Circle (Bottom Right) */}
-              <circle
-                cx="65%"
-                cy="65%"
-                r="80"
-                fill="rgba(156, 163, 175, 0.15)"
-                stroke="#6B7280"
-                strokeWidth="2"
-                strokeDasharray="6,3"
-              />
-              
-              {/* Strategic Market Landing Zone (Center intersection) */}
+
+              {/* New/Overlooked Segments Circle (Bottom Center) */}
               <circle
                 cx="50%"
-                cy="50%"
-                r="28"
-                fill="rgba(34, 197, 94, 0.2)"
-                stroke="#22C55E"
+                cy="58%"
+                r="85"
+                fill="rgba(156, 163, 175, 0.15)"
+                stroke="#6B7280"
                 strokeWidth="2"
+                strokeDasharray="8,4"
               />
-              
+
+              {/* Strategic Market Landing Zone (Intersection Center) */}
+              <circle
+                cx="50%"
+                cy="48.7%"
+                r="24"
+                fill="rgba(34, 197, 94, 0.35)"
+                stroke="#22C55E"
+                strokeWidth="2.5"
+              />
+
               {/* Circle labels */}
-              <text x="20%" y="30%" textAnchor="middle" className="text-xs font-medium" fill="#374151">
-                Mainstream
-              </text>
-              <text x="20%" y="33%" textAnchor="middle" className="text-xs font-medium" fill="#374151">
-                Market
-              </text>
-              
-              <text x="80%" y="18%" textAnchor="middle" className="text-xs font-medium" fill="#374151">
-                Low-end
-              </text>
-              <text x="80%" y="21%" textAnchor="middle" className="text-xs font-medium" fill="#374151">
-                Market
-              </text>
-              
-              <text x="80%" y="82%" textAnchor="middle" className="text-xs font-medium" fill="#374151">
-                New/Overlooked
-              </text>
-              <text x="80%" y="85%" textAnchor="middle" className="text-xs font-medium" fill="#374151">
-                Segments
-              </text>
-              
-              {/* Strategic Landing Zone label */}
-              <text x="50%" y="47%" textAnchor="middle" className="text-xs font-semibold" fill="#15803D">
-                Strategic
-              </text>
-              <text x="50%" y="50%" textAnchor="middle" className="text-xs font-semibold" fill="#15803D">
-                Landing Zone
-              </text>
+              <text x="25%" y="36%" textAnchor="middle" className="text-sm font-medium" fill="#374151">Mainstream</text>
+              <text x="25%" y="39%" textAnchor="middle" className="text-sm font-medium" fill="#374151">Market</text>
+
+              <text x="75%" y="36%" textAnchor="middle" className="text-sm font-medium" fill="#374151">Low-end</text>
+              <text x="75%" y="39%" textAnchor="middle" className="text-sm font-medium" fill="#374151">Market</text>
+
+              <text x="50%" y="75%" textAnchor="middle" className="text-sm font-medium" fill="#374151">New/Overlooked</text>
+              <text x="50%" y="78%" textAnchor="middle" className="text-sm font-medium" fill="#374151">Segments</text>
+
+              <text x="50%" y="46%" textAnchor="middle" className="text-xs font-semibold" fill="#15803D">Strategic Market</text>
+              <text x="50%" y="49%" textAnchor="middle" className="text-xs font-semibold" fill="#15803D">Landing Zone</text>
               
               {/* Competitor markers */}
               {responses.competitorMarkers.map((marker) => (

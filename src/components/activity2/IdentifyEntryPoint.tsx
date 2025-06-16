@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Target } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { Timer } from '../Timer';
 import { BackButton } from '../ui';
 import { WordCountFeedback } from '../WordCountFeedback';
