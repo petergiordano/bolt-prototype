@@ -41,6 +41,10 @@
        - Delete src/activities/day1/activity2/ if present
 - [x] Complete full refactor from "dayN" to "workshop-N" naming across all folders, route definitions, import paths, and data schemas
 - [ ] Assign `workshop-1-problems_worth_solving` as the canonical template for AI-based repo analysis and future migrations
+- [ ] Add Gemini as an advanced AI analysis agent in documentation and process standards
+      - Update docs/README_workflow-and-collaboration.md to include Gemini
+      - Ensure bolt-migration-standards.md references Gemini’s role in audit and planning
+      - Note that Gemini has full GitHub Cloud repo access but cannot edit files
 
 ### 📁 Reference HTML Directory
 
@@ -64,6 +68,36 @@
 - [x] Improve font color contrast in the ActivitySummary component summary blocks for readability (gray text on blue and orange backgrounds)
 
 
+
+## 🧹 Recently Completed
+
+- ✅ Workshop Folder Refactor: dayN → workshop-N
+  - Refactor all references from "day1", "day2", etc. to use "workshop-1", "workshop-2", etc. in both folder and route naming conventions.
+  - Update /src/activities/day1 → /src/activities/workshop-1-problems_worth_solving
+  - Update import paths and route definitions to match the new folder structure
+  - Rename components folders accordingly:
+      - /activity1 → /activity-1
+      - /activity2 → /activity-2
+      - /activity3 → /activity-3
+  - Final folder structure target:
+      ├── workshop-1-problems_worth_solving
+      │   ├── problems-activity-1.html
+      │   ├── problems-activity-2.html
+      │   └── problems-activity-3.html
+      ├── workshop-2-finding_your_early_customers
+      │   ├── ecp-activity-1.html
+      │   ├── ecp-activity-2.html
+      │   ├── ecp-activity-3.html
+      ├── workshop-3-positioning_basics
+      │   ├── positioning-activity-1.html
+      │   ├── positioning-activity-2.html
+      │   └── positioning-activity-3.html
+      ├── workshop-4-market_entry_readiness
+      │   ├── market-entry-activity-1.html
+      │   ├── market-entry-activity-2.html
+      │   └── market-entry-activity-3.html
+
+## ✅ Completed Tasks
 
 ## ✅ Add Back Button Functionality to Steps 2 and 3
 

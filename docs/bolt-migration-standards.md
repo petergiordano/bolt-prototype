@@ -1,13 +1,14 @@
 # GTM Workshop – Bolt Migration Standards
 
 > 🧠 **Collaboration Note**:  
-> This project uses a 4-agent development workflow:
+> This project uses a 5-agent development workflow:
 > - **User**: defines vision, directs standards, validates work  
 > - **ChatGPT**: owns standards, todo tracking, and process memory  
 > - **Claude Code** (in VS Code): sees the full codebase, supports synthesis and auditing  
 > - **Bolt.new**: implements frontend components from specs, pushes to GitHub  
+> - **Gemini**: reads full repo context from GitHub Cloud, assists with architectural refactors and multi-file audits
 >
-> GitHub (`main` branch) is the source of truth for all agents.  
+> GitHub (`main` branch) is the source of truth for all agents (including Gemini).  
 > Standards in this doc are binding for Bolt and Claude when building or validating features.
 
 This doc defines the distilled tech, data, and UI standards for migrating the GTM Workshop HTML-based app to a React + Supabase app hosted on bolt.new.

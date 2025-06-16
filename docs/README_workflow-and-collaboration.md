@@ -1,4 +1,4 @@
-# 🧠 Workflow & Collaboration Guide: Multi-Agent Dev System
+# 🧠 Workflow & Collaboration Guide: Multi-Agent Dev System (ChatGPT, Claude, Bolt, Gemini)
 
 This file documents the operating model for managing code contributions and project updates between Bolt.new, GitHub, and your local VS Code development environment.
 
@@ -17,12 +17,13 @@ The **GitHub repo is the single source of truth** for this project.
 
 ## 🤖 Multi-Agent Development Workflow
 
-This project is developed using a multi-agent collaboration system consisting of four actors:
+This project is developed using a multi-agent collaboration system consisting of five actors:
 
 1. **User** – Project architect and product owner, guiding standards and vision.
 2. **ChatGPT** – Long-term memory assistant for structure, standards, documentation, and task sequencing.
 3. **Claude Code (in VS Code Terminal)** – File-aware assistant with full-project visibility, useful for synthesis, refactoring, and full-repo reasoning.
 4. **Bolt.new** – Live frontend builder used for rapid prototyping, UI development, and pushing working code directly to GitHub.
+5. **Gemini** – High-recall static analyzer capable of scanning the entire repo structure to identify legacy naming, inconsistencies, or gaps in refactors.
 
 ### Roles
 
@@ -30,12 +31,13 @@ This project is developed using a multi-agent collaboration system consisting of
 - Claude answers project-wide questions, audits code, and helps align component integration.
 - Bolt implements code based on specs from documentation and ChatGPT instructions.
 - User coordinates across agents, verifies output, and owns architectural decisions.
+- Gemini scans the full repo, identifies structural issues, flags legacy patterns, and complements Claude’s code editing by suggesting full-repo improvements.
 
 ### Source of Truth & Coordination
 
 - GitHub remains the single source of truth.
 - `docs/todo.md` and `docs/bolt-migration-standards.md` serve as coordination anchors.
-- ChatGPT and Claude refer to these files to drive implementation and instruction.
+- ChatGPT, Claude, and Gemini refer to these files to drive implementation, auditing, and instruction.
 
 This structure enables scalable, low-friction implementation with minimal ambiguity and strong alignment between strategy and execution.
 
@@ -71,10 +73,13 @@ Below is a diagram showing the three-way workflow between Bolt, GitHub, and your
 
 ```mermaid
 graph TD
-    A[Bolt.new] -->|Commits code| B[GitHub Repo]
-    C[Local VS Code] -->|Pull latest| B
-    B -->|Push updated code| C
-    C -->|Push changes| B
+    B[Bolt.new] -->|Commits code| G[GitHub Repo]
+    L[Local VS Code] -->|Pull latest| G
+    L -->|Push updates| G
+    G -->|Visible to| B
+    CC[Claude Code] -->|Reads & Edits| L
+    CG[ChatGPT] -->|Sets Standards / Tasks| L
+    GM[Gemini] -->|Scans Repo| G
 ```
 
 This diagram illustrates the cyclic workflow:
@@ -101,3 +106,16 @@ graph LR
 - **Local VS Code** pulls from GitHub to stay updated.
 - Local commits are **pushed back** to GitHub to reflect changes.
 - GitHub acts as the **central source of truth**.
+
+---
+
+## 📎 Gemini Integration Notes
+
+Gemini is integrated as a static analysis assistant that can scan up to 1,000 files at once. Use it for:
+
+- Locating all references to deprecated structures (e.g. `day1`, `activity1`)
+- Validating alignment with naming conventions
+- Summarizing which files need updates
+- Supporting refactors that Claude Code then executes in VS Code
+
+Gemini complements Claude by handling broader searches across the repo where full context is needed.
