@@ -1,6 +1,6 @@
 import React from 'react';
 import { Edit } from 'lucide-react';
-import { WordCountFeedback, getWordCount } from './WordCountFeedback';
+import { WordCountFeedback } from './WordCountFeedback';
 import { Timer } from './Timer';
 
 interface IndividualReflectionProps {

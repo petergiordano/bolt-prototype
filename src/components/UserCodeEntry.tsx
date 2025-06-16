@@ -35,7 +35,7 @@ export const UserCodeEntry: React.FC<UserCodeEntryProps> = ({
       } else {
         setError('Invalid user code. Please check and try again.');
       }
-    } catch (err) {
+    } catch {
       setError('Failed to validate code. Please try again.');
     } finally {
       setLoading(false);

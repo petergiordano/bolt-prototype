@@ -6,7 +6,7 @@ import { MarkerData } from '../../activities/workshop-1-problems_worth_solving/a
 interface MapMarketLandscapeProps {
   competitorMarkers: MarkerData[];
   underservedMarkers: MarkerData[];
-  onMarkersChange: (field: string, value: any) => void;
+  onMarkersChange: (field: string, value: MarkerData[] | MarkerData | null) => void;
   onContinue: () => void;
   isValid: boolean;
 }
@@ -29,7 +29,7 @@ export const MapMarketLandscape: React.FC<MapMarketLandscapeProps> = ({
     const y = ((event.clientY - rect.top) / rect.height) * 100;
 
     // Use selectedType to determine marker type
-    let markerType: 'competitor' | 'underserved' = selectedType;
+    const markerType: 'competitor' | 'underserved' = selectedType;
     // (Old x > 60 detection removed)
 
     const newMarker: MarkerData = {

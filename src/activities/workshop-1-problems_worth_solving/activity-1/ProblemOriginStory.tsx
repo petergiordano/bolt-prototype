@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { LoadingSpinner } from '../../../components/LoadingSpinner';
 import { ErrorMessage } from '../../../components/ErrorMessage';
-import { ProgressIndicator } from '../../../components/ProgressIndicator';
+import { ActivityShell } from '../../../components/layout/ActivityShell';
 import { IndividualReflection } from '../../../components/IndividualReflection';
 import { PartnerSharing } from '../../../components/PartnerSharing';
 import { ActivitySummary } from '../../../components/ActivitySummary';
 import { UserCodeEntry } from '../../../components/UserCodeEntry';
-import { ResetButton } from '../../../components/ui';
 import { getWordCount } from '../../../components/WordCountFeedback';
 
 // Simple local storage functions to replace Supabase for now
@@ -29,7 +28,7 @@ const loadUserData = async (key: string) => {
   }
 };
 
-const saveUserData = async (key: string, data: any) => {
+const saveUserData = async (key: string, data: Record<string, unknown>) => {
   try {
     localStorage.setItem(`workshop_data_${key}`, JSON.stringify(data));
     return true;
@@ -243,124 +242,70 @@ export const ProblemOriginStory: React.FC = () => {
            getWordCount(responses.howRealProblem) >= 10;
   };
 
-  const steps = [
-    { number: 1, label: 'Individual Reflection' },
-    { number: 2, label: 'Partner Sharing' },
-    { number: 3, label: 'Summary' }
-  ];
 
   console.log('🎨 Rendering App - Step:', currentStep, 'Loading:', loading, 'Error:', error, 'ShowCodeEntry:', showUserCodeEntry, 'UserKey:', userKey);
 
   if (loading) {
+    return <LoadingSpinner message="Loading your workshop data..." />;
+  }
+
+  if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-yellow-100 to-orange-100 flex items-center justify-center" style={{
-        background: 'linear-gradient(135deg, #FFE599 0%, #FF9000 100%)'
-      }}>
-        <LoadingSpinner message="Loading your workshop data..." />
-      </div>
+      <ErrorMessage 
+        message={error} 
+        onRetry={() => {
+          setError(null);
+          window.location.reload();
+        }} 
+      />
+    );
+  }
+
+  if (showUserCodeEntry) {
+    return (
+      <UserCodeEntry
+        onCodeSubmit={handleUserCodeSubmit}
+        onSkip={handleUserCodeSkip}
+      />
     );
   }
 
   return (
-    <div className="min-h-screen" style={{
-      background: 'linear-gradient(135deg, #FFE599 0%, #FF9000 100%)'
-    }}>
-      <div className="max-w-5xl mx-auto">
-        {/* TODO: Refactor to use ActivityShell component instead of custom sticky header */}
-        {/* Sticky Header */}
-        <div className="sticky top-0 z-10 p-4 sm:p-6 pb-0">
-          <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
-                  Problem Origin Story
-                </h1>
-                <p className="text-gray-600" style={{ color: '#666666' }}>
-                  Activity 1: Understanding the roots of your problem
-                </p>
-              </div>
-              {userKey && (
-                <div className="text-sm bg-gray-50 px-3 py-2 rounded-lg" style={{ 
-                  color: '#8A8A8A',
-                  backgroundColor: '#f8f9fa'
-                }}>
-                  User ID: {userKey.substring(0, 6)}...
-                </div>
-              )}
-            </div>
-            
-            {!showUserCodeEntry && (
-              <ProgressIndicator currentStep={currentStep} steps={steps} />
-            )}
-          </div>
-        </div>
+    <ActivityShell
+      title="Problem Origin Story"
+      subtitle="Activity 1: Understanding the roots of your problem"
+      currentStep={currentStep}
+      totalSteps={3}
+      userKey={userKey}
+      onReset={resetActivity}
+    >
+      {currentStep === 1 && (
+        <IndividualReflection
+          responses={responses}
+          onInputChange={handleInputChange}
+          onContinue={() => handleStepComplete(1)}
+          isValid={isStep1Valid()}
+        />
+      )}
 
-        {/* Main Content Area */}
-        <div className="p-4 sm:p-6 pt-0">
-          {error && (
-            <ErrorMessage 
-              message={error} 
-              onRetry={() => {
-                setError(null);
-                window.location.reload();
-              }} 
-            />
-          )}
+      {currentStep === 2 && (
+        <PartnerSharing
+          responses={responses}
+          onInputChange={handleInputChange}
+          onContinue={() => handleStepComplete(2)}
+          onBack={() => handleStepBack(1)}
+          isValid={isStep2Valid()}
+        />
+      )}
 
-          {/* User Code Entry */}
-          {showUserCodeEntry && (
-            <UserCodeEntry
-              onCodeSubmit={handleUserCodeSubmit}
-              onSkip={handleUserCodeSkip}
-            />
-          )}
-
-          {/* Main Content */}
-          {!showUserCodeEntry && (
-            <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 relative">
-            {/* Reset Button with Tooltip */}
-            <div className="absolute top-4 right-4">
-              <ResetButton onClick={resetActivity} variant="icon" />
-            </div>
-
-            {currentStep === 1 && (
-              <IndividualReflection
-                responses={responses}
-                onInputChange={handleInputChange}
-                onContinue={() => handleStepComplete(1)}
-                isValid={isStep1Valid()}
-              />
-            )}
-
-            {currentStep === 2 && (
-              <PartnerSharing
-                responses={responses}
-                onInputChange={handleInputChange}
-                onContinue={() => handleStepComplete(2)}
-                onBack={() => handleStepBack(1)}
-                isValid={isStep2Valid()}
-              />
-            )}
-
-            {currentStep === 3 && (
-              <ActivitySummary
-                responses={responses}
-                onReset={resetActivity}
-                onBack={() => handleStepBack(2)}
-                userKey={userKey}
-              />
-            )}
-          </div>
-          )}
-
-          {/* Footer */}
-          <div className="mt-6 text-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-white bg-opacity-30 rounded-full">
-              <div className="w-6 h-6 border-2 border-white border-opacity-60 rounded-full"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      {currentStep === 3 && (
+        <ActivitySummary
+          responses={responses}
+          onReset={resetActivity}
+          onBack={() => handleStepBack(2)}
+          userKey={userKey}
+        />
+      )}
+    </ActivityShell>
   );
 };

@@ -10,7 +10,7 @@ interface IdentifyEntryPointProps {
   underservedMarkers: MarkerData[];
   strategicMarker: MarkerData | null;
   strategicJustification: string;
-  onMarkersChange: (field: string, value: any) => void;
+  onMarkersChange: (field: string, value: MarkerData[] | MarkerData | null) => void;
   onInputChange: (field: string, value: string) => void;
   onContinue: () => void;
   onBack: () => void;

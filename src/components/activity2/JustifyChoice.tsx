@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckSquare, FileText } from 'lucide-react';
+import { CheckSquare } from 'lucide-react';
 import { Timer } from '../Timer';
 import { BackButton } from '../ui';
 import { WordCountFeedback } from '../WordCountFeedback';

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ProblemOriginStory } from './activities/workshop-1-problems_worth_solving/activity-1/ProblemOriginStory';
 import { ProblemValidation } from './activities/workshop-1-problems_worth_solving/activity-2/ProblemValidation';

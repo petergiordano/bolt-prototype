@@ -28,7 +28,7 @@ const loadUserData = async (key: string) => {
   }
 };
 
-const saveUserData = async (key: string, data: any) => {
+const saveUserData = async (key: string, data: Record<string, unknown>) => {
   try {
     localStorage.setItem(`workshop_data_${key}`, JSON.stringify(data));
     return true;
@@ -199,7 +199,7 @@ export const ProblemValidation: React.FC = () => {
     setShowUserCodeEntry(false);
   };
 
-  const handleMarkersChange = (field: string, value: any) => {
+  const handleMarkersChange = (field: string, value: MarkerData[] | MarkerData | null) => {
     setResponses(prev => ({
       ...prev,
       [field]: value
@@ -272,43 +272,27 @@ export const ProblemValidation: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-yellow-100 to-orange-100 flex items-center justify-center" style={{
-        background: 'linear-gradient(135deg, #FFE599 0%, #FF9000 100%)'
-      }}>
-        <LoadingSpinner message="Loading Problem Validation activity..." />
-      </div>
-    );
+    return <LoadingSpinner message="Loading Problem Validation activity..." />;
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-yellow-100 to-orange-100 flex items-center justify-center" style={{
-        background: 'linear-gradient(135deg, #FFE599 0%, #FF9000 100%)'
-      }}>
-        <ErrorMessage 
-          message={error} 
-          onRetry={() => {
-            setError(null);
-            window.location.reload();
-          }} 
-        />
-      </div>
+      <ErrorMessage 
+        message={error} 
+        onRetry={() => {
+          setError(null);
+          window.location.reload();
+        }} 
+      />
     );
   }
 
   if (showUserCodeEntry) {
     return (
-      <div className="min-h-screen" style={{
-        background: 'linear-gradient(135deg, #FFE599 0%, #FF9000 100%)'
-      }}>
-        <div className="max-w-5xl mx-auto p-4 sm:p-6">
-          <UserCodeEntry
-            onCodeSubmit={handleUserCodeSubmit}
-            onSkip={handleUserCodeSkip}
-          />
-        </div>
-      </div>
+      <UserCodeEntry
+        onCodeSubmit={handleUserCodeSubmit}
+        onSkip={handleUserCodeSkip}
+      />
     );
   }
 

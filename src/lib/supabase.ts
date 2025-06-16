@@ -19,9 +19,9 @@ export interface WorkshopData {
       completedAt?: string;
     };
   };
-  workshop2?: Record<string, any>;
-  workshop3?: Record<string, any>;
-  workshop4?: Record<string, any>;
+  workshop2?: Record<string, unknown>;
+  workshop3?: Record<string, unknown>;
+  workshop4?: Record<string, unknown>;
 }
 
 export interface UserRecord {

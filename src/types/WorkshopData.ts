@@ -19,19 +19,19 @@ export interface Workshop1Data {
 }
 
 export interface Workshop2Data {
-  activity1?: any; // To be defined later
-  activity2?: any; // To be defined later
+  activity1?: Record<string, unknown>; // To be defined later
+  activity2?: Record<string, unknown>; // To be defined later
 }
 
 export interface Workshop3Data {
-  activity1?: any; // To be defined later
+  activity1?: Record<string, unknown>; // To be defined later
 }
 
 export interface ActivityData {
   startedAt?: string;
   completedAt?: string;
   lastModified: string;
-  stepData: Record<string, any>;
+  stepData: Record<string, unknown>;
   metadata?: {
     timeSpent?: number;
     revisitCount?: number;
