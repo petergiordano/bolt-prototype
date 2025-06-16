@@ -106,59 +106,92 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
         <div className="relative">
           <svg
             width="100%"
-            height="400"
+            height="450"
             className="border border-gray-200 rounded cursor-crosshair"
             style={{ backgroundColor: '#f8f9fa' }}
             onClick={handleGridClick}
           >
-            {/* Grid lines */}
+            {/* Grid pattern */}
             <defs>
-              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e5e7eb" strokeWidth="1"/>
+              <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+                <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#e5e7eb" strokeWidth="1"/>
               </pattern>
             </defs>
             <rect width="100%" height="100%" fill="url(#grid)" />
             
-            {/* Three overlapping circles for Venn diagram */}
+            {/* Three overlapping circles - matching reference geometry */}
+            
+            {/* Mainstream Market Circle (Left) */}
             <circle
-              cx="30%"
+              cx="35%"
               cy="50%"
-              r="80"
-              fill="rgba(59, 130, 246, 0.1)"
-              stroke="#3B82F6"
+              r="100"
+              fill="rgba(156, 163, 175, 0.15)"
+              stroke="#6B7280"
               strokeWidth="2"
-              strokeDasharray="5,5"
+              strokeDasharray="8,4"
             />
             
+            {/* Low-end Market Circle (Top Right) */}
             <circle
-              cx="70%"
+              cx="65%"
               cy="35%"
-              r="80"
-              fill="rgba(34, 197, 94, 0.1)"
+              r="100"
+              fill="rgba(156, 163, 175, 0.15)"
+              stroke="#6B7280"
+              strokeWidth="2"
+              strokeDasharray="8,4"
+            />
+            
+            {/* New/Overlooked Segments Circle (Bottom Right) */}
+            <circle
+              cx="65%"
+              cy="65%"
+              r="100"
+              fill="rgba(156, 163, 175, 0.15)"
+              stroke="#6B7280"
+              strokeWidth="2"
+              strokeDasharray="8,4"
+            />
+            
+            {/* Strategic Market Landing Zone (Center intersection) */}
+            <circle
+              cx="50%"
+              cy="50%"
+              r="35"
+              fill="rgba(34, 197, 94, 0.2)"
               stroke="#22C55E"
               strokeWidth="2"
-              strokeDasharray="5,5"
-            />
-            
-            <circle
-              cx="70%"
-              cy="65%"
-              r="80"
-              fill="rgba(168, 85, 247, 0.1)"
-              stroke="#A855F7"
-              strokeWidth="2"
-              strokeDasharray="5,5"
             />
             
             {/* Circle labels */}
-            <text x="20%" y="30%" textAnchor="middle" className="text-sm font-medium" fill="#3B82F6">
-              Mainstream Market
+            <text x="20%" y="35%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
+              Mainstream
             </text>
-            <text x="80%" y="20%" textAnchor="middle" className="text-sm font-medium" fill="#22C55E">
-              Low-end Market
+            <text x="20%" y="38%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
+              Market
             </text>
-            <text x="80%" y="80%" textAnchor="middle" className="text-sm font-medium" fill="#A855F7">
-              New/Overlooked Segments
+            
+            <text x="80%" y="20%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
+              Low-end
+            </text>
+            <text x="80%" y="23%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
+              Market
+            </text>
+            
+            <text x="80%" y="80%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
+              New/Overlooked
+            </text>
+            <text x="80%" y="83%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
+              Segments
+            </text>
+            
+            {/* Strategic Landing Zone label */}
+            <text x="50%" y="45%" textAnchor="middle" className="text-xs font-semibold" fill="#15803D">
+              Strategic Market
+            </text>
+            <text x="50%" y="48%" textAnchor="middle" className="text-xs font-semibold" fill="#15803D">
+              Landing Zone
             </text>
             
             {/* Competitor markers (read-only) */}
@@ -242,7 +275,7 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
         </div>
 
         <div className="mt-4 text-sm text-gray-700">
-          <p>Click anywhere on the Venn diagram to place your ⭐ strategic entry point marker. Click the marker to edit your justification.</p>
+          <p>Click anywhere on the Venn diagram to place your ⭐ strategic entry point marker. The green center zone represents the optimal Strategic Market Landing Zone. Click the marker to edit your justification.</p>
         </div>
       </div>
 

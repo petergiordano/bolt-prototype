@@ -81,58 +81,91 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
           <div className="relative">
             <svg
               width="100%"
-              height="300"
+              height="350"
               className="border border-gray-200 rounded"
               style={{ backgroundColor: '#f8f9fa' }}
             >
-              {/* Grid lines */}
+              {/* Grid pattern */}
               <defs>
-                <pattern id="summary-grid" width="30" height="30" patternUnits="userSpaceOnUse">
-                  <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#e5e7eb" strokeWidth="1"/>
+                <pattern id="summary-grid" width="25" height="25" patternUnits="userSpaceOnUse">
+                  <path d="M 25 0 L 0 0 0 25" fill="none" stroke="#e5e7eb" strokeWidth="1"/>
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#summary-grid)" />
               
-              {/* Three overlapping circles for Venn diagram */}
+              {/* Three overlapping circles - matching reference geometry */}
+              
+              {/* Mainstream Market Circle (Left) */}
               <circle
-                cx="30%"
+                cx="35%"
                 cy="50%"
-                r="60"
-                fill="rgba(59, 130, 246, 0.1)"
-                stroke="#3B82F6"
+                r="80"
+                fill="rgba(156, 163, 175, 0.15)"
+                stroke="#6B7280"
                 strokeWidth="2"
-                strokeDasharray="5,5"
+                strokeDasharray="6,3"
               />
               
+              {/* Low-end Market Circle (Top Right) */}
               <circle
-                cx="70%"
+                cx="65%"
                 cy="35%"
-                r="60"
-                fill="rgba(34, 197, 94, 0.1)"
+                r="80"
+                fill="rgba(156, 163, 175, 0.15)"
+                stroke="#6B7280"
+                strokeWidth="2"
+                strokeDasharray="6,3"
+              />
+              
+              {/* New/Overlooked Segments Circle (Bottom Right) */}
+              <circle
+                cx="65%"
+                cy="65%"
+                r="80"
+                fill="rgba(156, 163, 175, 0.15)"
+                stroke="#6B7280"
+                strokeWidth="2"
+                strokeDasharray="6,3"
+              />
+              
+              {/* Strategic Market Landing Zone (Center intersection) */}
+              <circle
+                cx="50%"
+                cy="50%"
+                r="28"
+                fill="rgba(34, 197, 94, 0.2)"
                 stroke="#22C55E"
                 strokeWidth="2"
-                strokeDasharray="5,5"
-              />
-              
-              <circle
-                cx="70%"
-                cy="65%"
-                r="60"
-                fill="rgba(168, 85, 247, 0.1)"
-                stroke="#A855F7"
-                strokeWidth="2"
-                strokeDasharray="5,5"
               />
               
               {/* Circle labels */}
-              <text x="20%" y="25%" textAnchor="middle" className="text-xs font-medium" fill="#3B82F6">
+              <text x="20%" y="30%" textAnchor="middle" className="text-xs font-medium" fill="#374151">
                 Mainstream
               </text>
-              <text x="80%" y="15%" textAnchor="middle" className="text-xs font-medium" fill="#22C55E">
+              <text x="20%" y="33%" textAnchor="middle" className="text-xs font-medium" fill="#374151">
+                Market
+              </text>
+              
+              <text x="80%" y="18%" textAnchor="middle" className="text-xs font-medium" fill="#374151">
                 Low-end
               </text>
-              <text x="80%" y="85%" textAnchor="middle" className="text-xs font-medium" fill="#A855F7">
+              <text x="80%" y="21%" textAnchor="middle" className="text-xs font-medium" fill="#374151">
+                Market
+              </text>
+              
+              <text x="80%" y="82%" textAnchor="middle" className="text-xs font-medium" fill="#374151">
                 New/Overlooked
+              </text>
+              <text x="80%" y="85%" textAnchor="middle" className="text-xs font-medium" fill="#374151">
+                Segments
+              </text>
+              
+              {/* Strategic Landing Zone label */}
+              <text x="50%" y="47%" textAnchor="middle" className="text-xs font-semibold" fill="#15803D">
+                Strategic
+              </text>
+              <text x="50%" y="50%" textAnchor="middle" className="text-xs font-semibold" fill="#15803D">
+                Landing Zone
               </text>
               
               {/* Competitor markers */}
