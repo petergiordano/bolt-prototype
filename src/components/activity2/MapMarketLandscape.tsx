@@ -157,12 +157,12 @@ export const MapMarketLandscape: React.FC<MapMarketLandscapeProps> = ({
             </defs>
             <rect width="100%" height="100%" fill="url(#grid)" />
             
-            {/* Three overlapping circles - corrected geometry */}
+            {/* Updated Venn diagram geometry and labels */}
             {/* Mainstream Market Circle (Top Left) */}
             <circle
-              cx="40%"
-              cy="42%"
-              r="90"
+              cx="41%"
+              cy="44%"
+              r="85"
               fill="rgba(156, 163, 175, 0.15)"
               stroke="#6B7280"
               strokeWidth="2"
@@ -171,9 +171,9 @@ export const MapMarketLandscape: React.FC<MapMarketLandscapeProps> = ({
 
             {/* Low-end Market Circle (Top Right) */}
             <circle
-              cx="60%"
-              cy="42%"
-              r="90"
+              cx="59%"
+              cy="44%"
+              r="85"
               fill="rgba(156, 163, 175, 0.15)"
               stroke="#6B7280"
               strokeWidth="2"
@@ -183,51 +183,50 @@ export const MapMarketLandscape: React.FC<MapMarketLandscapeProps> = ({
             {/* New/Overlooked Segments Circle (Bottom Center) */}
             <circle
               cx="50%"
-              cy="59.3%"
-              r="90"
+              cy="58%"
+              r="85"
               fill="rgba(156, 163, 175, 0.15)"
               stroke="#6B7280"
               strokeWidth="2"
               strokeDasharray="8,4"
             />
 
-            {/* Strategic Market Landing Zone (True center intersection) */}
+            {/* Strategic Market Landing Zone (Perfect center) */}
             <circle
               cx="50%"
-              cy="47.8%"
-              r="25"
-              fill="rgba(34, 197, 94, 0.3)"
+              cy="48.7%"
+              r="24"
+              fill="rgba(34, 197, 94, 0.35)"
               stroke="#22C55E"
               strokeWidth="2.5"
             />
-            
-            {/* Circle labels - positioned exactly as in reference */}
-            <text x="20%" y="35%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
+
+            {/* Circle labels - adjusted */}
+            <text x="25%" y="36%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
               Mainstream
             </text>
-            <text x="20%" y="38%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
+            <text x="25%" y="39%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
               Market
             </text>
-            
-            <text x="80%" y="20%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
+
+            <text x="75%" y="36%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
               Low-end
             </text>
-            <text x="80%" y="23%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
+            <text x="75%" y="39%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
               Market
             </text>
-            
-            <text x="80%" y="80%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
+
+            <text x="50%" y="75%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
               New/Overlooked
             </text>
-            <text x="80%" y="83%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
+            <text x="50%" y="78%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
               Segments
             </text>
-            
-            {/* Strategic Landing Zone label */}
-            <text x="50%" y="45%" textAnchor="middle" className="text-xs font-semibold" fill="#15803D">
+
+            <text x="50%" y="46%" textAnchor="middle" className="text-xs font-semibold" fill="#15803D">
               Strategic Market
             </text>
-            <text x="50%" y="48%" textAnchor="middle" className="text-xs font-semibold" fill="#15803D">
+            <text x="50%" y="49%" textAnchor="middle" className="text-xs font-semibold" fill="#15803D">
               Landing Zone
             </text>
             
