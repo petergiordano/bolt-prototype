@@ -119,78 +119,78 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
             </defs>
             <rect width="100%" height="100%" fill="url(#grid)" />
             
-            {/* Three overlapping circles - matching reference geometry */}
-            
-            {/* Mainstream Market Circle (Left) */}
+            {/* Three overlapping circles - updated geometry for proper Venn alignment */}
+
+            {/* Mainstream Market Circle (Top Left) */}
             <circle
-              cx="35%"
-              cy="50%"
-              r="100"
+              cx="41%"
+              cy="44%"
+              r="85"
               fill="rgba(156, 163, 175, 0.15)"
               stroke="#6B7280"
               strokeWidth="2"
               strokeDasharray="8,4"
             />
-            
+
             {/* Low-end Market Circle (Top Right) */}
             <circle
-              cx="65%"
-              cy="35%"
-              r="100"
+              cx="59%"
+              cy="44%"
+              r="85"
               fill="rgba(156, 163, 175, 0.15)"
               stroke="#6B7280"
               strokeWidth="2"
               strokeDasharray="8,4"
             />
-            
-            {/* New/Overlooked Segments Circle (Bottom Right) */}
-            <circle
-              cx="65%"
-              cy="65%"
-              r="100"
-              fill="rgba(156, 163, 175, 0.15)"
-              stroke="#6B7280"
-              strokeWidth="2"
-              strokeDasharray="8,4"
-            />
-            
-            {/* Strategic Market Landing Zone (Center intersection) */}
+
+            {/* New/Overlooked Segments Circle (Bottom Center) */}
             <circle
               cx="50%"
-              cy="50%"
-              r="35"
-              fill="rgba(34, 197, 94, 0.2)"
-              stroke="#22C55E"
+              cy="58%"
+              r="85"
+              fill="rgba(156, 163, 175, 0.15)"
+              stroke="#6B7280"
               strokeWidth="2"
+              strokeDasharray="8,4"
             />
-            
-            {/* Circle labels */}
-            <text x="20%" y="35%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
+
+            {/* Strategic Market Landing Zone (True center intersection) */}
+            <circle
+              cx="50%"
+              cy="48.7%"
+              r="24"
+              fill="rgba(34, 197, 94, 0.3)"
+              stroke="#22C55E"
+              strokeWidth="2.5"
+            />
+
+            {/* Circle labels - updated positions */}
+            <text x="25%" y="36%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
               Mainstream
             </text>
-            <text x="20%" y="38%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
+            <text x="25%" y="39%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
               Market
             </text>
-            
-            <text x="80%" y="20%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
+
+            <text x="75%" y="36%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
               Low-end
             </text>
-            <text x="80%" y="23%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
+            <text x="75%" y="39%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
               Market
             </text>
-            
-            <text x="80%" y="80%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
+
+            <text x="50%" y="75%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
               New/Overlooked
             </text>
-            <text x="80%" y="83%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
+            <text x="50%" y="78%" textAnchor="middle" className="text-sm font-medium" fill="#374151">
               Segments
             </text>
-            
-            {/* Strategic Landing Zone label */}
-            <text x="50%" y="45%" textAnchor="middle" className="text-xs font-semibold" fill="#15803D">
+
+            {/* Strategic Landing Zone label - updated position */}
+            <text x="50%" y="46%" textAnchor="middle" className="text-xs font-semibold" fill="#15803D">
               Strategic Market
             </text>
-            <text x="50%" y="48%" textAnchor="middle" className="text-xs font-semibold" fill="#15803D">
+            <text x="50%" y="49%" textAnchor="middle" className="text-xs font-semibold" fill="#15803D">
               Landing Zone
             </text>
             
