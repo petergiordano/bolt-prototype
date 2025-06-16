@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Target, Trash2 } from 'lucide-react';
 import { Timer } from '../Timer';
-import { MarkerData } from '../../activities/day1/activity2/ProblemValidation';
+import { MarkerData } from '../../activities/workshop-1-problems_worth_solving/activity-2/ProblemValidation';
 
 interface MapMarketLandscapeProps {
   competitorMarkers: MarkerData[];

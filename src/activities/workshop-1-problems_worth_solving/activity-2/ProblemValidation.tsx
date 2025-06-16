@@ -83,8 +83,8 @@ export const ProblemValidation: React.FC = () => {
         const userData = await loadUserData(existingKey);
         console.log('📊 Loaded user data:', userData);
         
-        if (userData?.day1?.activity2) {
-          const activity2Data = userData.day1.activity2;
+        if (userData?.workshop1?.activity2) {
+          const activity2Data = userData.workshop1.activity2;
           setResponses({
             competitorMarkers: activity2Data.competitorMarkers || [],
             underservedMarkers: activity2Data.underservedMarkers || [],
@@ -126,8 +126,8 @@ export const ProblemValidation: React.FC = () => {
             ...existingData,
             version: "1.0",
             lastUpdated: new Date().toISOString(),
-            day1: {
-              ...existingData?.day1,
+            workshop1: {
+              ...existingData?.workshop1,
               activity2: {
                 ...responses,
                 completedAt: currentStep === 4 ? new Date().toISOString() : undefined
@@ -159,8 +159,8 @@ export const ProblemValidation: React.FC = () => {
         setUserKey(code);
         localStorage.setItem('workshop_user_key', code);
         
-        if (userData.day1?.activity2) {
-          const activity2Data = userData.day1.activity2;
+        if (userData.workshop1?.activity2) {
+          const activity2Data = userData.workshop1.activity2;
           setResponses({
             competitorMarkers: activity2Data.competitorMarkers || [],
             underservedMarkers: activity2Data.underservedMarkers || [],
@@ -239,8 +239,8 @@ export const ProblemValidation: React.FC = () => {
           ...existingData,
           version: "1.0",
           lastUpdated: new Date().toISOString(),
-          day1: {
-            ...existingData?.day1,
+          workshop1: {
+            ...existingData?.workshop1,
             activity2: {
               competitorMarkers: [],
               underservedMarkers: [],

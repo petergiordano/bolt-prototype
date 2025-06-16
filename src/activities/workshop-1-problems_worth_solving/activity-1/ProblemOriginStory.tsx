@@ -76,8 +76,8 @@ export const ProblemOriginStory: React.FC = () => {
         const userData = await loadUserData(existingKey);
         console.log('📊 Loaded user data:', userData);
         
-        if (userData?.day1?.activity1) {
-          const activity1Data = userData.day1.activity1;
+        if (userData?.workshop1?.activity1) {
+          const activity1Data = userData.workshop1.activity1;
           setResponses({
             momentOfRealization: activity1Data.momentOfRealization || '',
             whoExperienced: activity1Data.whoExperienced || '',
@@ -114,7 +114,7 @@ export const ProblemOriginStory: React.FC = () => {
             version: "1.0",
             createdAt: new Date().toISOString(),
             lastUpdated: new Date().toISOString(),
-            day1: {
+            workshop1: {
               activity1: {
                 ...responses,
                 completedAt: currentStep === 3 ? new Date().toISOString() : undefined
@@ -142,7 +142,7 @@ export const ProblemOriginStory: React.FC = () => {
       // Try to load data for this code
       const userData = await loadUserData(code);
       
-      if (userData && userData.day1?.activity1) {
+      if (userData && userData.workshop1?.activity1) {
         console.log('✅ Valid user code found with activity data');
         
         // Set the user key and save to localStorage
@@ -150,7 +150,7 @@ export const ProblemOriginStory: React.FC = () => {
         localStorage.setItem('workshop_user_key', code);
         
         // Load the responses
-        const activity1Data = userData.day1.activity1;
+        const activity1Data = userData.workshop1.activity1;
         setResponses({
           momentOfRealization: activity1Data.momentOfRealization || '',
           whoExperienced: activity1Data.whoExperienced || '',
@@ -218,7 +218,7 @@ export const ProblemOriginStory: React.FC = () => {
         version: "1.0",
         createdAt: new Date().toISOString(),
         lastUpdated: new Date().toISOString(),
-        day1: {
+        workshop1: {
           activity1: {
             momentOfRealization: '',
             whoExperienced: '',

@@ -9,7 +9,7 @@ export interface WorkshopData {
   version: string;
   createdAt: string;
   lastUpdated: string;
-  day1: {
+  workshop1: {
     activity1?: {
       momentOfRealization: string;
       whoExperienced: string;
@@ -19,9 +19,9 @@ export interface WorkshopData {
       completedAt?: string;
     };
   };
-  day2_1?: Record<string, any>;
-  day2_2?: Record<string, any>;
-  day3?: Record<string, any>;
+  workshop2?: Record<string, any>;
+  workshop3?: Record<string, any>;
+  workshop4?: Record<string, any>;
 }
 
 export interface UserRecord {

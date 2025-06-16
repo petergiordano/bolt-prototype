@@ -65,6 +65,8 @@
 - [ ] Create an activity manifest or config map to define routes, step counts, themes, and titles per activity (optional but recommended)
  - [ ] Remove any in-progress Activity 2 implementation from src that was not based on the reference HTML
        - Delete src/activities/day1/activity2/ if present
+- [x] Complete full refactor from "dayN" to "workshop-N" naming across all folders, route definitions, import paths, and data schemas
+- [ ] Assign `workshop-1-problems_worth_solving` as the canonical template for AI-based repo analysis and future migrations
 
 ### 📁 Reference HTML Directory
 

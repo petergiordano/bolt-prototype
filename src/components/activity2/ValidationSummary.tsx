@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CheckCircle, Download, Copy, ExternalLink, Target } from 'lucide-react';
 import { BackButton, ResetButton } from '../ui';
-import { MarkerData } from '../../activities/day1/activity2/ProblemValidation';
+import { MarkerData } from '../../activities/workshop-1-problems_worth_solving/activity-2/ProblemValidation';
 
 interface ValidationSummaryProps {
   responses: {

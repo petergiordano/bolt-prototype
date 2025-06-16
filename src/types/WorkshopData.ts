@@ -3,9 +3,9 @@ export interface WorkshopData {
   createdAt: string;
   lastUpdated: string;
   userProfile?: UserProfile;
-  day1: Day1Data;
-  day2?: Day2Data;
-  day3?: Day3Data;
+  workshop1: Workshop1Data;
+  workshop2?: Workshop2Data;
+  workshop3?: Workshop3Data;
 }
 
 export interface UserProfile {
@@ -13,17 +13,17 @@ export interface UserProfile {
   name?: string;
 }
 
-export interface Day1Data {
+export interface Workshop1Data {
   activity1?: ProblemOriginStoryData;
   activity2?: ProblemValidationData;
 }
 
-export interface Day2Data {
+export interface Workshop2Data {
   activity1?: any; // To be defined later
   activity2?: any; // To be defined later
 }
 
-export interface Day3Data {
+export interface Workshop3Data {
   activity1?: any; // To be defined later
 }
 
@@ -71,7 +71,7 @@ export interface MarkerData {
   label: string;
 }
 
-// Day 1, Activity 1: Problem Origin Story
+// Workshop 1, Activity 1: Problem Origin Story
 export interface ProblemOriginStoryData extends ActivityData {
   stepData: {
     individualReflection: {
@@ -90,7 +90,7 @@ export interface ProblemOriginStoryData extends ActivityData {
   };
 }
 
-// Day 1, Activity 2: Problem Validation (Market Landing Zone Analysis)
+// Workshop 1, Activity 2: Problem Validation (Market Landing Zone Analysis)
 export interface ProblemValidationData extends ActivityData {
   stepData: {
     mapMarketLandscape: {

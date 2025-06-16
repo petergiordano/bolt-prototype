@@ -3,7 +3,7 @@ import { MapPin } from 'lucide-react';
 import { Timer } from '../Timer';
 import { BackButton } from '../ui';
 import { WordCountFeedback } from '../WordCountFeedback';
-import { MarkerData } from '../../activities/day1/activity2/ProblemValidation';
+import { MarkerData } from '../../activities/workshop-1-problems_worth_solving/activity-2/ProblemValidation';
 
 interface IdentifyEntryPointProps {
   competitorMarkers: MarkerData[];
