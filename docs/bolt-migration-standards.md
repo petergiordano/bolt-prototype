@@ -217,8 +217,13 @@ All activities must follow a consistent shell layout pattern to ensure uniform u
 - **Background**: `linear-gradient(135deg, #FFE599 0%, #FF9000 100%)`
 - **Padding**: `max-w-5xl mx-auto p-4 sm:p-6`
 
-#### 2. **Activity Header Card**
-- **Class**: `bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6`
+#### 2. **Activity Header Card (Sticky)**
+- **Container Class**: `sticky top-0 z-10 p-4 sm:p-6 pb-0`
+- **Card Class**: `bg-white rounded-lg shadow-lg p-4 sm:p-6`
+- **Sticky Behavior**:
+  - Sticks to top of viewport when scrolling
+  - Uses `z-10` to ensure it stays above content
+  - Background color ensures content doesn't bleed through
 - **Contains**:
   - Activity title (`text-2xl sm:text-3xl font-bold text-gray-800`)
   - Activity subtitle (`text-gray-600`)
@@ -226,7 +231,8 @@ All activities must follow a consistent shell layout pattern to ensure uniform u
   - Progress indicator component
 
 #### 3. **Main Content Card**
-- **Class**: `bg-white rounded-lg shadow-lg p-4 sm:p-6 relative`
+- **Container Class**: `p-4 sm:p-6 pt-0` (provides padding and separates from sticky header)
+- **Card Class**: `bg-white rounded-lg shadow-lg p-4 sm:p-6 relative`
 - **Contains**:
   - Reset button (top-right, absolute positioned)
   - Dynamic step content
@@ -328,7 +334,7 @@ All activities must follow a consistent shell layout pattern to ensure uniform u
 ### Implementation Example
 
 ```tsx
-// ActivityShell usage
+// ActivityShell usage with sticky header
 <ActivityShell
   title="Problem Origin Story"
   subtitle="Activity 1: Understanding the roots of your problem"
@@ -347,6 +353,24 @@ All activities must follow a consistent shell layout pattern to ensure uniform u
   )}
   {/* Additional steps... */}
 </ActivityShell>
+
+// Internal structure created by ActivityShell:
+<div className="min-h-screen" style={{background: 'linear-gradient(...)'}}>
+  <div className="max-w-5xl mx-auto">
+    {/* Sticky header */}
+    <div className="sticky top-0 z-10 p-4 sm:p-6 pb-0">
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+        {/* Title, subtitle, user ID, progress indicator */}
+      </div>
+    </div>
+    {/* Main content area */}
+    <div className="p-4 sm:p-6 pt-0">
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 relative">
+        {/* Your activity content */}
+      </div>
+    </div>
+  </div>
+</div>
 ```
 
 ### Benefits
@@ -355,6 +379,7 @@ All activities must follow a consistent shell layout pattern to ensure uniform u
 - **Accessibility**: Built-in accessibility features across all activities
 - **Responsive**: Consistent responsive behavior across all activities
 - **Developer Experience**: Clear structure makes it easy to build new activities
+- **User Experience**: Sticky header keeps progress and context visible while scrolling through long content
 
 ---
 
