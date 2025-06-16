@@ -73,7 +73,7 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
         </div>
         <p className="mb-2 text-white">Based on your market landscape:</p>
         <ol className="list-decimal list-inside space-y-1 ml-2 text-white">
-          <li>Click to place your 📍 strategic entry point marker</li>
+          <li>Click to place your ⭐ strategic entry point marker</li>
           <li>Explain why this is the best landing zone for your solution</li>
         </ol>
       </div>
@@ -83,19 +83,19 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
-              <span className="mr-2 text-lg">🚩</span>
+              <span className="mr-2 text-lg font-bold text-red-600">X</span>
               <span className="text-sm font-medium text-gray-800">
                 Competitors ({competitorMarkers.length})
               </span>
             </div>
             <div className="flex items-center">
-              <span className="mr-2 text-lg">💡</span>
+              <span className="mr-2 text-lg font-bold text-blue-600">O</span>
               <span className="text-sm font-medium text-gray-800">
                 Underserved ({underservedMarkers.length})
               </span>
             </div>
             <div className="flex items-center">
-              <span className="mr-2 text-lg">📍</span>
+              <span className="mr-2 text-lg">⭐</span>
               <span className="text-sm font-medium text-gray-800">
                 Strategic Entry ({strategicMarker ? 1 : 0})
               </span>
@@ -168,9 +168,10 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
                   x={`${marker.x}%`}
                   y={`${marker.y}%`}
                   textAnchor="middle"
-                  className="text-lg opacity-70"
+                  className="text-lg font-bold opacity-70"
+                  fill="#DC2626"
                 >
-                  🚩
+                  X
                 </text>
                 {marker.label && (
                   <text
@@ -194,9 +195,10 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
                   x={`${marker.x}%`}
                   y={`${marker.y}%`}
                   textAnchor="middle"
-                  className="text-lg opacity-70"
+                  className="text-lg font-bold opacity-70"
+                  fill="#2563EB"
                 >
-                  💡
+                  O
                 </text>
                 {marker.label && (
                   <text
@@ -223,7 +225,7 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
                   className="text-2xl cursor-pointer hover:opacity-80"
                   onClick={handleStrategicMarkerClick}
                 >
-                  📍
+                  ⭐
                 </text>
                 <text
                   x={`${strategicMarker.x}%`}
@@ -240,7 +242,7 @@ export const IdentifyEntryPoint: React.FC<IdentifyEntryPointProps> = ({
         </div>
 
         <div className="mt-4 text-sm text-gray-700">
-          <p>Click anywhere on the Venn diagram to place your 📍 strategic entry point marker. Click the marker to edit your justification.</p>
+          <p>Click anywhere on the Venn diagram to place your ⭐ strategic entry point marker. Click the marker to edit your justification.</p>
         </div>
       </div>
 

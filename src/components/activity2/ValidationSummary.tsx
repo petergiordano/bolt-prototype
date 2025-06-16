@@ -142,9 +142,10 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
                     x={`${marker.x}%`}
                     y={`${marker.y}%`}
                     textAnchor="middle"
-                    className="text-sm"
+                    className="text-sm font-bold"
+                    fill="#DC2626"
                   >
-                    🚩
+                    X
                   </text>
                   {marker.label && (
                     <text
@@ -167,9 +168,10 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
                     x={`${marker.x}%`}
                     y={`${marker.y}%`}
                     textAnchor="middle"
-                    className="text-sm"
+                    className="text-sm font-bold"
+                    fill="#2563EB"
                   >
-                    💡
+                    O
                   </text>
                   {marker.label && (
                     <text
@@ -194,7 +196,7 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
                     textAnchor="middle"
                     className="text-lg"
                   >
-                    📍
+                    ⭐
                   </text>
                   <text
                     x={`${responses.strategicMarker.x}%`}
@@ -213,15 +215,15 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
 
         <div className="grid md:grid-cols-3 gap-4 text-white">
           <div className="bg-white bg-opacity-20 rounded-lg p-3">
-            <h5 className="font-semibold mb-1">🚩 Competitors</h5>
+            <h5 className="font-semibold mb-1">X Competitors</h5>
             <p className="text-sm">{responses.competitorMarkers.length} markers placed</p>
           </div>
           <div className="bg-white bg-opacity-20 rounded-lg p-3">
-            <h5 className="font-semibold mb-1">💡 Underserved Segments</h5>
+            <h5 className="font-semibold mb-1">O Underserved Segments</h5>
             <p className="text-sm">{responses.underservedMarkers.length} markers placed</p>
           </div>
           <div className="bg-white bg-opacity-20 rounded-lg p-3">
-            <h5 className="font-semibold mb-1">📍 Strategic Entry</h5>
+            <h5 className="font-semibold mb-1">⭐ Strategic Entry</h5>
             <p className="text-sm">{responses.strategicMarker ? '1 marker placed' : 'Not placed'}</p>
           </div>
         </div>

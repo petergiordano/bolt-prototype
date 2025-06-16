@@ -116,8 +116,8 @@ export const MapMarketLandscape: React.FC<MapMarketLandscapeProps> = ({
         </div>
         <p className="mb-2 text-white">Click on the Venn diagram to place markers:</p>
         <ol className="list-decimal list-inside space-y-1 ml-2 text-white">
-          <li>🚩 Flag markers = Competitor Focus (existing solutions)</li>
-          <li>💡 Lightbulb markers = Underserved Segments (market gaps)</li>
+          <li>X markers = Competitor Focus (existing solutions)</li>
+          <li>O markers = Underserved Segments (market gaps)</li>
           <li>Add optional labels to describe each marker</li>
         </ol>
       </div>
@@ -127,13 +127,13 @@ export const MapMarketLandscape: React.FC<MapMarketLandscapeProps> = ({
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
-              <span className="mr-2 text-lg">🚩</span>
+              <span className="mr-2 text-lg font-bold text-red-600">X</span>
               <span className="text-sm font-medium text-gray-800">
                 Competitor Focus ({competitorMarkers.length})
               </span>
             </div>
             <div className="flex items-center">
-              <span className="mr-2 text-lg">💡</span>
+              <span className="mr-2 text-lg font-bold text-blue-600">O</span>
               <span className="text-sm font-medium text-gray-800">
                 Underserved Segments ({underservedMarkers.length})
               </span>
@@ -201,17 +201,18 @@ export const MapMarketLandscape: React.FC<MapMarketLandscapeProps> = ({
               New/Overlooked Segments
             </text>
             
-            {/* Competitor markers (flags) */}
+            {/* Competitor markers (X symbols) */}
             {competitorMarkers.map((marker) => (
               <g key={marker.id}>
                 <text
                   x={`${marker.x}%`}
                   y={`${marker.y}%`}
                   textAnchor="middle"
-                  className="text-lg cursor-pointer hover:opacity-80"
+                  className="text-xl font-bold cursor-pointer hover:opacity-80"
+                  fill="#DC2626"
                   onClick={(e) => handleMarkerClick(marker, e)}
                 >
-                  🚩
+                  X
                 </text>
                 {marker.label && (
                   <text
@@ -227,17 +228,18 @@ export const MapMarketLandscape: React.FC<MapMarketLandscapeProps> = ({
               </g>
             ))}
             
-            {/* Underserved markers (lightbulbs) */}
+            {/* Underserved markers (O symbols) */}
             {underservedMarkers.map((marker) => (
               <g key={marker.id}>
                 <text
                   x={`${marker.x}%`}
                   y={`${marker.y}%`}
                   textAnchor="middle"
-                  className="text-lg cursor-pointer hover:opacity-80"
+                  className="text-xl font-bold cursor-pointer hover:opacity-80"
+                  fill="#2563EB"
                   onClick={(e) => handleMarkerClick(marker, e)}
                 >
-                  💡
+                  O
                 </text>
                 {marker.label && (
                   <text
@@ -256,7 +258,7 @@ export const MapMarketLandscape: React.FC<MapMarketLandscapeProps> = ({
         </div>
 
         <div className="mt-4 text-sm text-gray-700">
-          <p>Click anywhere on the Venn diagram to place markers. 🚩 = Competitor Focus, 💡 = Underserved Segments. Click existing markers to edit or delete them.</p>
+          <p>Click anywhere on the Venn diagram to place markers. X = Competitor Focus, O = Underserved Segments. Click existing markers to edit or delete them.</p>
         </div>
       </div>
 
